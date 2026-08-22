@@ -98,8 +98,31 @@ its keep on the first run by catching an unquoted comma in a title of mine and
 a tag that had been removed from the vocabulary two versions earlier.
 
 `node scripts/build-activities.mjs --check` rebuilds and compares instead of
-writing, so a CSV edited without a rebuild fails rather than shipping a deck
-that does not match the packs it came from.
+writing, so a CSV edited without a rebuild fails the tests rather than shipping
+a deck that does not match the packs it came from. The Pages workflow does not
+check — it rebuilds and deploys what it built, because that is what makes
+editing a CSV from a phone a complete workflow.
+
+### Three ways to add an activity
+
+All three end in the same place — a row in a CSV in `packs/`, committed. That
+file is the memory: a session that starts tomorrow knows exactly what is in the
+deck because it reads the packs, and nothing else.
+
+1. **Say so.** "Add these five" in a session, and they go into the CSV, get
+   built, tested and committed. Easiest from a phone, and the commit is the
+   record.
+2. **Edit the CSV on github.com.** The deploy builds the packs itself rather
+   than trusting the committed `js/activities.js`, so a row added in the web
+   editor is live as soon as Pages finishes — no machine, no build step. A CSV
+   the build refuses fails the deploy instead of shipping a broken deck. The
+   committed generated file will be stale until somebody rebuilds it; the job
+   log says so, and the next session commits the rebuild.
+3. **Write one in the app, then promote it.** Write your own puts it on that
+   phone and nowhere else. Menu → Packs shows everything you have written as
+   pack rows to copy — the same four columns, the derived tags left out — so it
+   pastes into a CSV or a spreadsheet and builds unedited. Write Your Own asks
+   for exactly what a pack row must have for that reason.
 
 **A spreadsheet is an editing surface, not the source of truth.** If a sheet is
 a nicer place to work than a CSV: File → Share → Publish to web → the tab →

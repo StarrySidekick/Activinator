@@ -182,12 +182,31 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await page.fill('[data-in="t"]', 'Walk the whole canal path');
   await page.click('[data-act="savemine"]'); await page.waitForTimeout(250);
   const refusedBare = await page.evaluate(() => ACT.S.mine.length === 0);
-  for (const v of ['outdoors','solo','long','move']) {
+  for (const v of ['outdoors','solo','engaging','long','move']) {
     await page.click(`[data-act="dtag"][data-v="${v}"]`); await page.waitForTimeout(120);
   }
   await shot('08-add');
   await page.click('[data-act="savemine"]'); await page.waitForTimeout(400);
   const mine = await page.evaluate(() => ACT.S.mine.length === 1 && ACT.pool().some(c => c.src === 'mine'));
+
+  // — and it comes back out as a row a pack would accept —
+  await page.click('[data-act="menu"]'); await page.waitForTimeout(300);
+  await page.click('[data-act="packs"]'); await page.waitForTimeout(400);
+  const mineRow = await page.evaluate(() => {
+    const t = document.querySelector('.pbody textarea');
+    return t ? t.value.trim() : '';
+  });
+  // Pack-shaped means the build would take it: the derived tags left out, and
+  // exactly one place and one how-hard, which is what the build insists on.
+  const rowIsPackShaped = (() => {
+    const m = /^"?Walk the whole canal path"?,(\d+),(free|frugal|costly),(.+)$/.exec(mineRow);
+    if (!m) return false;
+    const tags = m[3].split(' ');
+    const one = (ks) => tags.filter(t => ks.includes(t)).length === 1;
+    return !tags.some(t => ['quick','short','medium','long','allday','free','frugal','costly'].includes(t)) &&
+      one(['anywhere','indoors','outdoors','home']) && one(['casual','engaging','challenging']);
+  })();
+  await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
   // — it survives a reload, and it opens with the network off —
   await page.reload(); await page.waitForTimeout(700);
@@ -202,13 +221,13 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, corners, packs, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
-    refusedBare, mine, persisted, swReady, offline, errors: errs });
+    refusedBare, mine, mineRow, rowIsPackShaped, persisted, swReady, offline, errors: errs });
   await browser.close();
   const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && corners && flipped &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
     mine && persisted && swReady && offline &&
-    packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && !errs.length;
+    packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && rowIsPackShaped && !errs.length;
   process.exit(ok ? 0 : 1);
 })();

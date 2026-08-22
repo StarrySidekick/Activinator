@@ -5,7 +5,7 @@
 import { SEEDS, PACKS, TAGS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 
 const KEY = 'activinator.v1';
-const APP_VERSION = '0.7';
+const APP_VERSION = '0.8';
 const DATA_V = 3;
 
 /* `w` is the taste model: one weight per tag, plus a bias. `seen` is the last

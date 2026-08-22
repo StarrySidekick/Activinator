@@ -81,7 +81,23 @@ const packsPanel = () => openPanel({ key:'packs', title:'Packs', back:'menu', bo
     </div>`).join('')}
   <p class="pnote">Switching a pack off takes its activities out of the deck and leaves
   what you have said about them alone — switch it back on and it picks up where it was.
-  Packs are built into the app, so they work with the aeroplane mode on.</p>` });
+  Packs are built into the app, so they work with the aeroplane mode on.</p>
+  ${S.mine.length ? `<div class="prow"><p class="plabel">Yours, as pack rows</p>
+    <textarea class="field pickme" style="min-height:96px;font-size:11px" readonly>${esc(mineCSV())}</textarea>
+    <p class="pnote">${S.mine.length} written on this device, and they live only on it.
+    Paste these into a pack — a CSV in packs/, or the spreadsheet you build one from —
+    and they ship with the app instead of sitting on one phone.</p></div>` : ''}` });
+
+/* What you have written, in the shape a pack is written in. Duration and cost
+   are columns on the way out because they are columns on the way in — the tags
+   for them are derived, and a row carrying both would be refused by the build. */
+const mineCSV = () => {
+  const q = (v) => /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  return S.mine.map(a => [
+    q(a.t), a.min, COSTS[a.cost] || 'free',
+    q(a.tags.filter(g => !DURATIONS.includes(g) && !COSTS.includes(g)).join(' '))
+  ].join(',')).join('\n');
+};
 
 /* — everything there is, searchable. The deck decides what you see; this is
      for when you want to go and look. — */
@@ -174,14 +190,17 @@ const backupPanel = () => openPanel({ key:'backup', title:'Back it up', back:'me
     <textarea class="field" data-in="restore" placeholder="Paste a copy here"></textarea>
     <button class="pbtn warn" data-act="restore">Replace everything with that</button></div>` });
 
-/* Saving a written activity. It needs a name, somewhere, somebody and a
-   length, because a card with no tags teaches nothing and can never be
-   filtered — and it would be invisible the moment you asked for anything. */
+/* Saving a written activity. It asks for exactly what a pack row has to have,
+   so that what you write on your phone can be pasted into packs/ and build
+   without being edited first. Anything less and it is invisible the moment you
+   ask the deck for something, and teaches nothing either way. */
+const HARD = GROUPS.find(g => g[0] === 'How hard')[1];
 const saveMine = () => {
   if (!DRAFT.t.trim()) return toast('It needs a name');
   const has = keys => keys.some(k => DRAFT.tags.includes(k));
   if (!has(['anywhere','indoors','outdoors','home'])) return toast('Say where');
   if (!has(['solo','partner','friends','newpeople'])) return toast('Say who with');
+  if (!has(HARD)) return toast('Say how hard');
   if (!has(DURATIONS)) return toast('Say how long');
   const tags = DRAFT.tags.slice();
   if (!has(COSTS)) tags.push('free');
