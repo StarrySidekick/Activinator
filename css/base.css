@@ -1,0 +1,81 @@
+/* Activinator — the furniture the deck sits in.
+   Dark room, lit card. Everything that is not the card is deliberately quiet. */
+:root{
+  --ink:#14151c; --ink-2:#1c1e27; --ink-3:#282b37;
+  --paper:#F5F0E4; --paper-2:#E8E1D0; --paper-3:#D8D0BC;
+  --text:#241f18; --text-2:#5c5346; --text-3:#8b8172;
+  --dim:#7b8092; --dim-2:#4a4f5f;
+  --yes:#6F8F5E; --no:#B2564B; --now:#C08A3E;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --top:env(safe-area-inset-top); --bot:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overscroll-behavior:none}
+body{
+  background:var(--ink); color:#e9e6df; font-family:var(--sans);
+  /* A room, not a rectangle: one soft light above the deck. */
+  background-image:radial-gradient(120% 70% at 50% 6%,#22242f 0%,#14151c 62%);
+  background-attachment:fixed;
+}
+/* Nothing on the deck is selectable — a drag that highlights a word is a drag
+   that stopped being a swipe. Fields and prose opt back in. */
+#frame{user-select:none;-webkit-user-select:none}
+input,textarea,.pickme{user-select:text;-webkit-user-select:text}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+
+#frame{
+  height:100dvh; display:flex; flex-direction:column;
+  padding:calc(var(--top) + 10px) 14px calc(var(--bot) + 8px);
+}
+
+/* — the bar — */
+#top{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.ctxbtn{
+  flex:1 1 auto; min-width:0; text-align:left; color:var(--dim);
+  font-size:13px; letter-spacing:.02em; padding:7px 11px;
+  border:1px solid var(--ink-3); border-radius:999px; background:#191b24;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.ctxbtn::after{content:'▾'; margin-left:6px; opacity:.6}
+.topr{display:flex;gap:6px;flex:0 0 auto}
+.chip{
+  font-size:12.5px; color:var(--dim); padding:7px 11px; border-radius:999px;
+  border:1px solid var(--ink-3); background:#191b24;
+}
+.chip em{
+  font-style:normal; margin-left:5px; background:var(--yes); color:#0f1410;
+  border-radius:999px; padding:1px 5px; font-size:11px; font-weight:600;
+}
+.chip em:empty{display:none}
+
+/* — the buttons under the deck. The card is the interface; these are for
+     people who would rather press than swipe, and for the first day. — */
+#acts{
+  flex:0 0 auto; display:grid; grid-template-columns:auto 1fr 1fr 1fr;
+  gap:8px; align-items:center; padding-top:12px;
+}
+.act{
+  border-radius:14px; padding:13px 8px; font-size:13.5px; font-weight:600;
+  letter-spacing:.03em; border:1px solid var(--ink-3); background:#191b24;
+  color:#cfd3de;
+}
+.act:active{transform:translateY(1px)}
+.act.undo{padding:13px 12px;font-weight:500;color:var(--dim-2);font-size:12.5px}
+.act.undo.on{color:var(--dim)}
+.act.no{color:#e0a49c;border-color:#3a2724}
+.act.now{color:#e8c48a;border-color:#3a3122}
+.act.yes{color:#b9d6a8;border-color:#2a3626}
+.act[disabled]{opacity:.35}
+
+#toast{
+  position:fixed; left:50%; bottom:calc(var(--bot) + 92px); transform:translateX(-50%) translateY(8px);
+  background:#e9e6df; color:#14151c; font-size:13px; font-weight:500;
+  padding:9px 15px; border-radius:999px; opacity:0; pointer-events:none;
+  transition:opacity .18s, transform .18s; z-index:80; max-width:80vw; text-align:center;
+}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (min-width:760px){
+  #frame{max-width:520px;margin:0 auto}
+}

@@ -1,0 +1,88 @@
+/* Activinator — panels.
+   One at a time, up from the bottom, over a deck that stays where it was.
+   A panel is never a centred card on a scrim: it comes out of the edge you
+   pressed, and it covers the deck rather than replacing it. */
+#panelhost{position:fixed;inset:0;z-index:60;pointer-events:none}
+#panelhost.on{pointer-events:auto}
+.scrim{
+  position:absolute;inset:0;background:rgba(8,9,13,.55);opacity:0;
+  transition:opacity .24s; backdrop-filter:blur(2px);
+}
+#panelhost.on .scrim{opacity:1}
+
+.panel{
+  position:absolute; left:0; right:0; bottom:0;
+  max-height:88dvh; display:flex; flex-direction:column;
+  background:#1a1c26; border-radius:20px 20px 0 0;
+  border-top:1px solid #2c2f3c;
+  transform:translateY(101%); transition:transform .28s cubic-bezier(.2,.85,.3,1);
+  padding-bottom:var(--bot);
+  box-shadow:0 -20px 50px -20px rgba(0,0,0,.8);
+}
+#panelhost.on .panel{transform:translateY(0)}
+@media (min-width:760px){ .panel{max-width:520px;margin:0 auto} }
+
+.phead{
+  display:flex; align-items:center; gap:10px; padding:16px 18px 12px;
+  border-bottom:1px solid #262936; flex:0 0 auto;
+}
+.phead h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.01em;flex:1}
+.phead .x{color:var(--dim);font-size:20px;line-height:1;padding:4px 6px}
+.phead .grab{
+  position:absolute;top:7px;left:50%;transform:translateX(-50%);
+  width:38px;height:4px;border-radius:2px;background:#333747;
+}
+.pbody{overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 18px 22px}
+
+.prow{padding:12px 0;border-bottom:1px solid #23262f}
+.prow:last-child{border-bottom:0}
+.plabel{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim-2);margin:0 0 9px}
+.pnote{font-size:12.5px;color:var(--dim);line-height:1.5;margin:8px 0 0}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips button{
+  font-size:13px; padding:9px 13px; border-radius:999px;
+  border:1px solid #2e3240; background:#20232e; color:#b8bdcb;
+}
+.chips button.on{background:var(--paper);color:#14151c;border-color:var(--paper);font-weight:600}
+
+.pbtn{
+  display:block;width:100%;text-align:left;padding:13px 14px;border-radius:12px;
+  border:1px solid #2c3040;background:#20232e;color:#cfd3de;font-size:14px;margin-top:8px;
+}
+.pbtn.warn{color:#e0a49c;border-color:#3a2724}
+.pbtn small{display:block;color:var(--dim-2);font-size:12px;margin-top:3px}
+
+/* — the list — */
+.item{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid #23262f}
+.item:last-child{border-bottom:0}
+.tick{
+  flex:0 0 auto;width:23px;height:23px;border-radius:7px;border:1.5px solid #3a3f50;
+  margin-top:2px; display:flex;align-items:center;justify-content:center;color:transparent;
+  font-size:13px;
+}
+.item.done .tick{background:var(--yes);border-color:var(--yes);color:#0f1410}
+.item.done .itxt{color:var(--dim-2);text-decoration:line-through}
+.iwrap{flex:1;min-width:0}
+.itxt{font-family:var(--serif);font-size:16px;line-height:1.3;color:#e9e6df}
+.imeta{font-size:11.5px;color:var(--dim-2);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+.imeta .nowtag{color:var(--now);font-weight:600}
+.item .del{color:var(--dim-2);font-size:17px;padding:2px 4px;flex:0 0 auto}
+
+/* — taste — */
+.bar{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px}
+.bar .bl{flex:0 0 42%;color:#cfd3de;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .bt{flex:1;height:8px;background:#23262f;border-radius:4px;position:relative;overflow:hidden}
+.bar .bt i{position:absolute;top:0;bottom:0;left:50%;background:var(--yes);border-radius:4px}
+.bar.down .bt i{background:var(--no)}
+.bar .bt::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:#31354444}
+.stat{display:flex;gap:18px;font-size:13px;color:var(--dim);margin-bottom:4px}
+.stat b{display:block;font-family:var(--serif);font-size:24px;color:#e9e6df;font-weight:400}
+
+input[type=range]{width:100%;accent-color:var(--yes)}
+.field{
+  width:100%;background:#20232e;border:1px solid #2c3040;border-radius:11px;
+  padding:11px 12px;color:#e9e6df;font-size:15px;font-family:var(--sans);
+}
+.field:focus{outline:none;border-color:#454b5e}
+textarea.field{min-height:74px;resize:vertical;line-height:1.4}
