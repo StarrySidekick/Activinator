@@ -26,15 +26,14 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 #frame{ height:100dvh; position:relative; overflow:hidden }
 
-/* — the dock. Three buttons over a full-screen card: everything else, write
-     one, find one. Undo joins them only when there is something to take back,
-     because a dead button is furniture. — */
-.dock{
-  position:absolute; left:0; right:0; bottom:calc(var(--bot) + 10px);
-  display:flex; justify-content:center; gap:10px; z-index:20; pointer-events:none;
-}
+/* — the dock. One button in each corner of a full-screen card, so that none of
+     them is ever over the middle of it: where you go and what you look for
+     along the top, what you make and what you take back along the bottom.
+     Undo joins them only when there is something to take back, because a dead
+     button is furniture. — */
+.dock{position:absolute; inset:0; z-index:20; pointer-events:none}
 .dock button{
-  pointer-events:auto; width:46px; height:46px; border-radius:50%;
+  position:absolute; pointer-events:auto; width:46px; height:46px; border-radius:50%;
   display:flex; align-items:center; justify-content:center;
   background:rgba(20,21,28,.62); border:1px solid rgba(255,255,255,.14);
   color:#e9e6df; backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px);
@@ -43,6 +42,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .dock button:active{transform:scale(.94)}
 .dock svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;
   stroke-linecap:round;stroke-linejoin:round}
+.dock .menu  {top:calc(var(--top) + 12px); left:14px}
+.dock .browse{top:calc(var(--top) + 12px); right:14px}
+.dock .undo  {bottom:calc(var(--bot) + 14px); left:14px}
+.dock .add   {bottom:calc(var(--bot) + 14px); right:14px}
 .dock .undo{opacity:0;transform:scale(.7);pointer-events:none;transition:opacity .18s,transform .18s}
 .dock .undo.on{opacity:1;transform:scale(1);pointer-events:auto}
 

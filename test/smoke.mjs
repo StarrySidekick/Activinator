@@ -116,6 +116,15 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return ok;
   });
 
+  // — one button per corner, and none of them over the middle of the card —
+  const corners = await page.evaluate(() => {
+    const at = (sel) => { const r = document.querySelector(sel).getBoundingClientRect();
+      return [r.left + r.width/2 < innerWidth/2 ? 'L' : 'R', r.top + r.height/2 < innerHeight/2 ? 'T' : 'B'].join(''); };
+    const seen = { menu:at('.dock .menu'), browse:at('.dock .browse'),
+                   undo:at('.dock .undo'), add:at('.dock .add') };
+    return new Set(Object.values(seen)).size === 4 ? seen : null;
+  });
+
   // — the dock reaches everything —
   await page.click('[data-act="menu"]'); await page.waitForTimeout(400);
   await shot('04-menu');
@@ -171,12 +180,12 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('09-offline');
   await ctx.setOffline(false);
 
-  console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, flipped, frontHidden,
+  console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, corners, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
     refusedBare, mine, persisted, swReady, offline, errors: errs });
   await browser.close();
-  const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && flipped &&
+  const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && corners && flipped &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&

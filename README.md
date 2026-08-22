@@ -26,7 +26,15 @@ and the manifest won't load, so you'd be testing a different app than the one
 that ships.
 
 `test/smoke.mjs` needs Playwright (`npm i playwright` at the repo root, which is
-already a dependency there). It exercises dealing, the full-bleed card, the bare front and its emblems, the
+already a dependency there). `test/upgrade.mjs` is the other half, and the more important one: it boots the
+app from the shapes a phone that has had it installed for a while actually has
+saved. That path only ever runs on somebody's real device, it was not tested,
+and it broke — a `ctx` saved under the old vocabulary said `where:'any'`, the
+new filter had no entry for it, and the throw during the first render left a
+blank screen with the buttons still sitting on it. Add a case to it whenever
+the saved shape changes.
+
+The smoke test exercises dealing, the full-bleed card, the four corners, the bare front and its emblems, the
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
 leaves the pool but "never again" does, the context filter, the dock, search,
 liking from the browser, writing your own, persistence across a reload and an
@@ -127,10 +135,17 @@ there is nothing to deal against, so nothing is labelled.
 
 **The card is the screen.** Full bleed, no radius, no edge. The two behind it
 sit back rather than beside it and step forward as the one above leaves; an
-offset would show as a misaligned edge against the screen itself. Three buttons
-float over the bottom — everything else, write one, find one — and undo joins
-them only when there is something to take back, because a dead button is
-furniture.
+offset would show as a misaligned edge against the screen itself. One button
+sits in each corner so that none of them is ever over the middle of it — where
+you go and what you look for along the top, what you make and what you take
+back along the bottom — and undo appears only when there is something to take
+back, because a dead button is furniture.
+
+**An activity's id comes from its title, never from its place in the list.**
+It was `'s' + index`, which meant inserting one activity silently re-pointed
+every verdict after it at a different thing — a "never again" landing on
+somebody else's card. Retitling one loses its history, which is right: it is a
+different thing now.
 
 **The front is a row of marks and the activity.** No description, no tag names,
 no reason. The marks say what kind of thing it is without spending a line on

@@ -2,7 +2,6 @@
    Everything routes through act(): to add something the app can do, add a
    data-act and a case here. Nothing binds a listener inside a render. */
 import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId, remember } from './state.js';
-import { TAGS } from './data.js';
 import { learn } from './taste.js';
 import { render, reset as redeal, say, takeBack, more, toast, top } from './deck.js';
 import { deal } from './deal.js';
@@ -101,7 +100,7 @@ const wire = () => {
   wireSwipe(document.getElementById('deck'));
 };
 
-load(TAGS);
+load();
 wire();
 redeal();
 

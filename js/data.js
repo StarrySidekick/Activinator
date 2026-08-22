@@ -457,10 +457,21 @@ const durationOf = (min) => min < 5 ? 'quick' : min < 30 ? 'short'
   : min <= 120 ? 'medium' : min < 360 ? 'long' : 'allday';
 const COSTS = ['free','frugal','costly'];
 
-const SEEDS = RAW.map(([t, tg, min, cost], i) => {
+/* An id is derived from the title, never from the position in the list. It was
+   `'s' + index`, which meant inserting one activity silently re-pointed every
+   verdict after it at a different thing — a "never again" landing on somebody
+   else's card. Retitling an activity loses its history, which is right: it is
+   a different thing now. */
+const idOf = (t) => {
+  let h = 2166136261;
+  for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return 'a' + (h >>> 0).toString(36);
+};
+
+const SEEDS = RAW.map(([t, tg, min, cost]) => {
   const tags = tg.split(' ');
   tags.push(durationOf(min), COSTS[cost]);
-  return { id:'s'+i, t, tags:[...new Set(tags)], min, cost, src:'seed' };
+  return { id: idOf(t), t, tags:[...new Set(tags)], min, cost, src:'seed' };
 });
 
-export { TAGS, GROUPS, MARKS, REDS, SEEDS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf };
+export { TAGS, GROUPS, MARKS, REDS, SEEDS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf, idOf };

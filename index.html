@@ -21,13 +21,14 @@
 <body>
 <div id="frame">
   <main id="deck"></main>
-  <!-- Three buttons over a full-screen card: everything else, write one, find
-       one. Undo joins them only when there is something to take back. -->
+  <!-- One button in each corner of a full-screen card, so none of them is ever
+       in the way of the middle of it: where you go and what you look for along
+       the top, what you make and what you take back along the bottom. -->
   <nav class="dock">
-    <button data-act="menu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <button data-act="add" aria-label="Write your own"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-    <button data-act="browse" aria-label="All activities"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
-    <button data-act="undo" class="undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 7H6.5A4.5 4.5 0 1 0 6.5 16H12"/><path d="M12 4L8.5 7L12 10"/></svg></button>
+    <button class="menu" data-act="menu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <button class="browse" data-act="browse" aria-label="All activities"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+    <button class="undo" data-act="undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 7H6.5A4.5 4.5 0 1 0 6.5 16H12"/><path d="M12 4L8.5 7L12 10"/></svg></button>
+    <button class="add" data-act="add" aria-label="Write your own"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
   </nav>
 </div>
 <div id="panelhost"></div>

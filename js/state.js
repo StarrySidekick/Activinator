@@ -2,17 +2,18 @@
    One key in localStorage, one shape, one place that touches it. Everything
    the app knows about you is here: the weights it has learned, what you have
    said about what, and what you have written yourself. */
-import { SEEDS } from './data.js';
+import { SEEDS, TAGS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 
 const KEY = 'activinator.v1';
-const APP_VERSION = '0.5';
+const APP_VERSION = '0.6';
+const DATA_V = 3;
 
 /* `w` is the taste model: one weight per tag, plus a bias. `seen` is the last
    thing you said about each activity — nothing leaves the pool because of it,
    it only changes how often a thing comes round. `recent` is what has been in
    front of you lately, so the deck does not repeat itself. */
 const fresh = () => ({
-  v: 2,
+  v: DATA_V,
   w: {}, bias: 0, swipes: 0,
   seen: {},                    // id -> {v:'like'|'dislike'|'skip'|'never', at:ISO}
   recent: [],                  // ids, most recent first
@@ -24,28 +25,81 @@ const fresh = () => ({
 let S = fresh();
 let undo = null;               // the last swipe, for taking it back
 
-/* Tags were renamed and regrouped, and a weight is keyed on a tag. Left alone,
-   the model would keep an opinion about words that no longer mean anything and
-   lose the one it had about `social` under its new name. */
+/* — migration —
+   This is the half of the app that only ever runs on somebody's real phone,
+   which is exactly why it has to be tested against real old shapes. It was
+   not, and a saved `ctx` of `{where:'any'}` — a value the new vocabulary has
+   no entry for — threw during the first render and left a blank screen with
+   the buttons still on it. */
 const RENAMED = { social:'friends' };
+const ok = (list, v) => list.some(o => o[0] === v);
+
+/* A written activity kept `who` and `where` as fields, and its tags predate
+   the duration and cost bands. Left alone it would never be dealt under any
+   filter and would carry no marks. */
+const fixMine = (m) => {
+  let tags = (m.tags || []).map(t => RENAMED[t] || t).filter(t => t in TAGS);
+  if (m.where === 'home') tags.push('home');
+  else if (m.where === 'out') tags.push(tags.includes('outdoors') ? 'outdoors' : 'indoors');
+  else if (m.where === 'any') tags.push('anywhere');
+  if (m.who === 'solo') tags.push('solo');
+  else if (m.who === 'two') tags.push('partner');
+  else if (m.who === 'group') tags.push('friends');
+  if (!tags.some(t => ['anywhere','indoors','outdoors','home'].includes(t))) tags.push('anywhere');
+  const min = m.min || 60;
+  if (!tags.some(t => DURATIONS.includes(t))) tags.push(durationOf(min));
+  if (!tags.some(t => COSTS.includes(t))) tags.push(COSTS[m.cost || 0]);
+  return { id: m.id, t: m.t, tags: [...new Set(tags)], min, cost: m.cost || 0, src: 'mine' };
+};
+
 const migrate = (o) => {
-  if (o.v >= 2) return o;
+  const from = o.v || 1;
+
+  if (from < 2) {
+    /* Everything before this was a different list of activities under the same
+       positional ids, so a verdict cannot honestly be carried across: `s12`
+       used to be one thing and is now another. Losing them beats re-pointing
+       them at somebody else's card. The weights are keyed on tags, so those
+       do come across. */
+    o.seen = {};
+    delete o.list;             // liking is not a commitment any more
+  } else if (from < 3) {
+    /* Ids used to be the position in the list. The list has not been reordered
+       since, so the old id maps cleanly onto the new one. */
+    const seen = {};
+    for (const [id, v] of Object.entries(o.seen || {})) {
+      const m = /^s(\d+)$/.exec(id);
+      const to = m ? (SEEDS[+m[1]] || {}).id : id;
+      if (to) seen[to] = v;
+    }
+    o.seen = seen;
+  }
+
   const w = {};
   for (const [k, v] of Object.entries(o.w || {})) {
     const k2 = RENAMED[k] || k;
-    if (k2 in TAGSET) w[k2] = (w[k2] || 0) + v;
+    if (k2 in TAGS) w[k2] = (w[k2] || 0) + v;
   }
   o.w = w;
-  o.seen = Object.fromEntries(Object.entries(o.seen || {})
-    .map(([id, s]) => [id, { ...s, v: s.v === 'yes' || s.v === 'now' ? 'like' : s.v === 'no' ? 'dislike' : s.v }]));
-  delete o.list;               // liking is not a commitment any more, so there is no list
-  o.recent = []; o.v = 2;
+
+  o.seen = Object.fromEntries(Object.entries(o.seen || {}).map(([id, s]) =>
+    [id, { ...s, v: s.v === 'yes' || s.v === 'now' ? 'like' : s.v === 'no' ? 'dislike' : s.v }]));
+  o.mine = (o.mine || []).map(fixMine);
+  o.recent = [];               // ids changed shape; what you saw last week is not worth keeping
+
+  /* A filter is ephemeral, and one saved under the old vocabulary means
+     nothing under this one. Anything unrecognised goes back to "no filter"
+     rather than being carried forward as a word the deck cannot answer. */
+  const c = o.ctx || {};
+  o.ctx = { who: ok(WHO, c.who) ? c.who : '',
+            where: ok(WHERE, c.where) ? c.where : '',
+            time: ok(TIME, c.time) ? c.time : '' };
+
+  o.v = DATA_V;
   return o;
 };
-let TAGSET = {};               // filled on load, from the live vocabulary
 
-const load = (tags) => {
-  TAGSET = tags || {};
+const load = () => {
   try {
     const raw = localStorage.getItem(KEY);
     if (raw) S = Object.assign(fresh(), migrate(JSON.parse(raw)));
@@ -80,7 +134,7 @@ const importJSON = (txt) => {
   S = Object.assign(fresh(), migrate(o)); save(); return S;
 };
 
-export { S, KEY, APP_VERSION, RECENT_N, fresh, load, save, pool, byId, remember,
+export { S, KEY, APP_VERSION, DATA_V, RECENT_N, fresh, load, save, pool, byId, remember,
          exportJSON, importJSON };
 export const setUndo = v => { undo = v; };
 export const getUndo = () => undo;

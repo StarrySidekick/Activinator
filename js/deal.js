@@ -31,13 +31,18 @@ const WHO = ['solo','partner','friends','newpeople'];
 /* Who is a constraint rather than a description: a card that names nobody works
    however you like, so it answers to whoever you asked for. */
 const fits = (c) => {
-  const x = S.ctx;
-  if (x.where && !PLACES[x.where].some(t => c.tags.includes(t))) return false;
-  if (x.who) {
+  const x = S.ctx || {};
+  // A filter value the vocabulary does not know is ignored rather than obeyed.
+  // `PLACES[x.where]` on a value saved by an older version was undefined, and
+  // calling `.some` on it threw during boot — which is a blank screen, not a
+  // bad filter. Migration should never let that value through; this is so that
+  // a value that slips past anyway costs a wrong filter and not the app.
+  if (x.where && PLACES[x.where] && !PLACES[x.where].some(t => c.tags.includes(t))) return false;
+  if (x.who && WHO.includes(x.who)) {
     const named = WHO.filter(t => c.tags.includes(t));
     if (named.length && !named.includes(x.who)) return false;
   }
-  if (x.time && rank(durationOfCard(c)) > rank(x.time)) return false;
+  if (x.time && rank(x.time) >= 0 && rank(durationOfCard(c)) > rank(x.time)) return false;
   return true;
 };
 
