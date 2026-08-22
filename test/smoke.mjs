@@ -125,6 +125,25 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return new Set(Object.values(seen)).size === 4 ? seen : null;
   });
 
+  // — a pack switched off leaves the pool; switched back on it returns, and
+  //   what you said about its activities was never touched —
+  const packs = await page.evaluate(() => {
+    const { PACKS } = ACT;
+    const core = PACKS.find(p => p.id === 'core');
+    const before = ACT.pool().length;
+    ACT.S.packs.core = false;
+    const off = ACT.pool().length;
+    ACT.S.packs.core = true;
+    const back = ACT.pool().length;
+    const other = PACKS.find(p => p.id !== 'core');
+    ACT.S.packs[other.id] = true;
+    const withExtra = ACT.pool().length;
+    ACT.S.packs[other.id] = other.on;
+    ACT.redeal();
+    return { shipsMoreThanOne: PACKS.length > 1, off: off === before - core.items.length,
+             back: back === before, adds: withExtra === before + other.items.length };
+  });
+
   // — the dock reaches everything —
   await page.click('[data-act="menu"]'); await page.waitForTimeout(400);
   await shot('04-menu');
@@ -180,7 +199,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('09-offline');
   await ctx.setOffline(false);
 
-  console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, corners, flipped, frontHidden,
+  console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, corners, packs, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
     refusedBare, mine, persisted, swReady, offline, errors: errs });
@@ -189,6 +208,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
-    mine && persisted && swReady && offline && !errs.length;
+    mine && persisted && swReady && offline &&
+    packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && !errs.length;
   process.exit(ok ? 0 : 1);
 })();

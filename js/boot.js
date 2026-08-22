@@ -5,6 +5,7 @@ import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId, re
 import { learn } from './taste.js';
 import { render, reset as redeal, say, takeBack, more, toast, top } from './deck.js';
 import { deal } from './deal.js';
+import { PACKS } from './data.js';
 import { wire as wireSwipe } from './swipe.js';
 import * as P from './panels.js';
 
@@ -14,6 +15,7 @@ const act = (name, el) => {
     case 'menu':   return P.menuPanel();
     case 'ctx':    return P.ctxPanel();
     case 'browse': return P.browsePanel();
+    case 'packs':  return P.packsPanel();
     case 'taste':  return P.tastePanel();
     case 'add':    return P.addPanel();
     case 'backup': return P.backupPanel();
@@ -62,6 +64,8 @@ const act = (name, el) => {
       return;
     }
 
+    case 'togglepack': S.packs[id] = !S.packs[id]; break;
+
     case 'dtag':
       P.DRAFT.tags = P.DRAFT.tags.includes(v) ? P.DRAFT.tags.filter(t => t !== v) : P.DRAFT.tags.concat(v);
       break;
@@ -109,4 +113,4 @@ if ('serviceWorker' in navigator) {
 }
 
 /* One handle for the console and for the smoke test. */
-window.ACT = { S, render, redeal, say, takeBack, pool, deal, panels:P, save };
+window.ACT = { S, render, redeal, say, takeBack, pool, deal, PACKS, panels:P, save };

@@ -2,7 +2,7 @@
    A verdict lands the instant you let go — the state is written, the queue
    moves on — and the card flies off over the top of all that. Nothing waits
    for an animation, ever. */
-import { S, save, setUndo, getUndo, remember } from './state.js';
+import { S, save, setUndo, getUndo, remember, pool } from './state.js';
 import { deal } from './deal.js';
 import { learn, unlearn } from './taste.js';
 import { cardHTML } from './cards.js';
@@ -41,12 +41,21 @@ const place = (els) => {
   });
 };
 
-const emptyHTML = () => `<div class="empty">
-    <h2>Nothing fits what you asked for.</h2>
-    <p>Widen it and there will be plenty — nothing is ever used up, it only
-    sinks for a while.</p>
-    <button data-act="ctx">Change what you asked for</button>
-  </div>`;
+/* An empty deck has two causes and they need different answers: you have asked
+   for something nothing matches, or there is nothing to ask of. Sending you to
+   the filters when every pack is switched off is a dead end. */
+const emptyHTML = () => pool().length === 0
+  ? `<div class="empty">
+      <h2>Nothing to deal.</h2>
+      <p>Every pack is switched off, so the deck has nothing in it.</p>
+      <button data-act="packs">Switch a pack on</button>
+    </div>`
+  : `<div class="empty">
+      <h2>Nothing fits what you asked for.</h2>
+      <p>Widen it and there will be plenty — nothing is ever used up, it only
+      sinks for a while.</p>
+      <button data-act="ctx">Change what you asked for</button>
+    </div>`;
 
 const render = () => {
   const deck = $('#deck');

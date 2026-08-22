@@ -2,10 +2,10 @@
    One key in localStorage, one shape, one place that touches it. Everything
    the app knows about you is here: the weights it has learned, what you have
    said about what, and what you have written yourself. */
-import { SEEDS, TAGS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
+import { SEEDS, PACKS, TAGS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 
 const KEY = 'activinator.v1';
-const APP_VERSION = '0.6';
+const APP_VERSION = '0.7';
 const DATA_V = 3;
 
 /* `w` is the taste model: one weight per tag, plus a bias. `seen` is the last
@@ -19,6 +19,7 @@ const fresh = () => ({
   recent: [],                  // ids, most recent first
   mine: [],                    // activities you wrote yourself
   ctx: { who:'', where:'', time:'' },
+  packs: Object.fromEntries(PACKS.map(p => [p.id, p.on])),
   nerve: 0.3
 });
 
@@ -64,12 +65,15 @@ const migrate = (o) => {
     o.seen = {};
     delete o.list;             // liking is not a commitment any more
   } else if (from < 3) {
-    /* Ids used to be the position in the list. The list has not been reordered
-       since, so the old id maps cleanly onto the new one. */
+    /* Ids used to be the position in the list, and back then there was one
+       list — the one that is now the core pack. Map against that pack rather
+       than against every pack flattened, or adding a pack ahead of it in
+       packs/index.json would silently re-point every one of these. */
+    const was = (PACKS.find(p => p.id === 'core') || PACKS[0] || { items: [] }).items;
     const seen = {};
     for (const [id, v] of Object.entries(o.seen || {})) {
       const m = /^s(\d+)$/.exec(id);
-      const to = m ? (SEEDS[+m[1]] || {}).id : id;
+      const to = m ? (was[+m[1]] || {}).id : id;
       if (to) seen[to] = v;
     }
     o.seen = seen;
@@ -95,6 +99,11 @@ const migrate = (o) => {
             where: ok(WHERE, c.where) ? c.where : '',
             time: ok(TIME, c.time) ? c.time : '' };
 
+  /* A pack the saved state has never heard of takes the default it ships
+     with, and one it has an opinion about keeps it. */
+  o.packs = Object.fromEntries(PACKS.map(p =>
+    [p.id, (o.packs && p.id in o.packs) ? !!o.packs[p.id] : p.on]));
+
   o.v = DATA_V;
   return o;
 };
@@ -116,8 +125,13 @@ const save = () => {
   }, 200);
 };
 
-/* Everything the deck may deal: the library plus whatever you have written. */
-const pool = () => SEEDS.concat(S.mine);
+/* Everything the deck may deal: the packs you have switched on, plus whatever
+   you have written. A pack added by a later version is on or off by whatever
+   it says about itself, so switching one off never gets undone by an update
+   and a new one does not arrive silently disabled. */
+const packOn = (id) => S.packs && id in S.packs ? S.packs[id]
+  : (PACKS.find(p => p.id === id) || {}).on !== false;
+const pool = () => SEEDS.filter(a => packOn(a.pack)).concat(S.mine);
 const byId = id => pool().find(c => c.id === id);
 
 /* What you have been shown lately, so it does not come straight back. Nothing
@@ -134,7 +148,7 @@ const importJSON = (txt) => {
   S = Object.assign(fresh(), migrate(o)); save(); return S;
 };
 
-export { S, KEY, APP_VERSION, DATA_V, RECENT_N, fresh, load, save, pool, byId, remember,
+export { S, KEY, APP_VERSION, DATA_V, RECENT_N, fresh, load, save, pool, packOn, byId, remember,
          exportJSON, importJSON };
 export const setUndo = v => { undo = v; };
 export const getUndo = () => undo;

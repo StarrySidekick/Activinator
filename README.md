@@ -17,8 +17,10 @@ undoing two things: the assemble step in `.github/workflows/pages.yml`, and the
 ## Running it
 
 ```bash
-scripts/serve.sh              # http://localhost:8010
-node test/smoke.mjs           # headless check, needs the server running
+scripts/serve.sh                        # http://localhost:8010
+node scripts/build-activities.mjs       # packs/*.csv → js/activities.js
+node test/smoke.mjs                     # headless check, needs the server running
+node test/upgrade.mjs                   # boots from old saved states
 ```
 
 Open it over http, never as a `file://` URL — the service worker won't register
@@ -72,6 +74,48 @@ app once left Bureau opening into this app whenever it was offline.
 `test/deploy.mjs` at the repository root is the guard on both of those. It is
 the one test that has to run against the assembled site rather than either app
 alone.
+
+## Where the activities live
+
+**The packs are the source of truth, and they are CSVs in `packs/`.** One file
+per pack, plus `packs/index.json` giving each one a name, a note and whether it
+ships switched on. `node scripts/build-activities.mjs` turns them into
+`js/activities.js` — a generated file, never edited by hand — and the app
+imports that.
+
+    title,minutes,cost,tags
+    Walk to the furthest point you can reach in thirty minutes,60,free,travel move outdoors casual
+
+`minutes` is a whole number and the duration band is worked out from it;
+`cost` is free | frugal | costly; `tags` are space-separated, all from the
+vocabulary, and must **not** include a duration or cost tag — those two are
+derived, and saying them twice is how they come to disagree. Every row needs
+exactly one place and exactly one how-hard.
+
+The build refuses anything else, with the file and the line. That is the point
+of it: a bad row that builds is a card that quietly never gets dealt. It earned
+its keep on the first run by catching an unquoted comma in a title of mine and
+a tag that had been removed from the vocabulary two versions earlier.
+
+`node scripts/build-activities.mjs --check` rebuilds and compares instead of
+writing, so a CSV edited without a rebuild fails rather than shipping a deck
+that does not match the packs it came from.
+
+**A spreadsheet is an editing surface, not the source of truth.** If a sheet is
+a nicer place to work than a CSV: File → Share → Publish to web → the tab →
+CSV → Publish, then `scripts/pull-sheet.sh <that-url> <pack-id>`. It writes the
+CSV into `packs/`, rebuilds, and you commit both. No credentials, no API, and
+nothing fetched while the app is running — the deck has to deal on a train, and
+a sheet you can edit from a phone is also a sheet that can be empty at the
+moment somebody opens the app.
+
+**Switching a pack off** takes its activities out of the pool and leaves every
+verdict about them untouched, so switching it back on picks up where it was. A
+pack a saved state has never heard of takes the default it ships with, which is
+what lets a new pack arrive in an update without being silently disabled — and
+lets one you switched off stay off.
+
+`packs/winter.csv` is an example pack, off by default. Delete it or fill it in.
 
 ## How it works
 
@@ -200,7 +244,9 @@ would disagree about what you think.
 
 | Module | What lives there |
 | --- | --- |
-| `data.js` | The 303 activities, the tag vocabulary with its groups and emblems, the three context questions. The substance of the app. |
+| `vocab.js` | The tag vocabulary: tags, groups, marks, the three context questions. Its own module so the build can validate against it. |
+| `activities.js` | **Generated.** Every pack, built from `packs/*.csv`. Never edit it. |
+| `data.js` | Joins the two, so everything else imports one place for both. |
 | `state.js` | The one localStorage key, the shape, export/import. Nothing else touches storage. |
 | `taste.js` | The model: `scoreOf`, `learn`, `unlearn`, `opinions`, `reasons`. |
 | `deal.js` | What gets dealt next — filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |

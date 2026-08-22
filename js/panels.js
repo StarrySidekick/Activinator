@@ -2,8 +2,8 @@
    One panel at a time, up from the bottom, over a deck that stays where it is.
    `body` is a function, not a string, so a panel can redraw itself from state
    after any change — no handler rebuilds a panel by hand. */
-import { S, save, APP_VERSION, pool, exportJSON, importJSON } from './state.js';
-import { TAGS, GROUPS, WHO, WHERE, TIME, DURATIONS, COSTS } from './data.js';
+import { S, save, APP_VERSION, pool, packOn, exportJSON, importJSON } from './state.js';
+import { TAGS, GROUPS, PACKS, WHO, WHERE, TIME, DURATIONS, COSTS } from './data.js';
 import { opinions } from './taste.js';
 import { reset as redeal, toast } from './deck.js';
 import { esc, emblemRow, markHTML, lengthOf } from './cards.js';
@@ -43,6 +43,7 @@ const chips = (act, opts, cur) => `<div class="chips">${opts.map(([v, label]) =>
 const menuPanel = () => openPanel({ key:'menu', title:'Activinator', body: () => `
   <button class="pbtn" data-act="ctx">Right now<small>${esc(ctxLine())}</small></button>
   <button class="pbtn" data-act="browse">All activities<small>${pool().length} of them, searchable</small></button>
+  <button class="pbtn" data-act="packs">Packs<small>${PACKS.filter(p => packOn(p.id)).length} of ${PACKS.length} switched on</small></button>
   <button class="pbtn" data-act="add">Write your own<small>Anything it would never think of</small></button>
   <button class="pbtn" data-act="taste">What it thinks you are like<small>${S.swipes} swipes in</small></button>
   <button class="pbtn" data-act="backup">Back it up<small>There is no server, so this is the only copy</small></button>
@@ -67,6 +68,20 @@ const ctxPanel = () => openPanel({ key:'ctx', title:'Right now', back:'menu', bo
   <p class="pnote">This filters the deck and teaches it nothing — a wet Tuesday is not
   evidence about what you are like. How long you have is a ceiling, so anything
   shorter is fair game too.</p>` });
+
+/* — packs. A pack is a CSV in packs/, built into the app rather than fetched:
+     the deck has to deal on a train. Switching one off takes its activities
+     out of the pool and leaves everything you have said about them alone, so
+     switching it back on picks up where you were. — */
+const packsPanel = () => openPanel({ key:'packs', title:'Packs', back:'menu', body: () => `
+  ${PACKS.map(p => `<div class="item pack ${packOn(p.id) ? 'on' : ''}">
+      <button class="tick" data-act="togglepack" data-id="${esc(p.id)}">✓</button>
+      <div class="iwrap"><div class="itxt">${esc(p.name)}</div>
+        <div class="imeta"><span>${p.items.length} activities</span><span>${esc(p.note)}</span></div></div>
+    </div>`).join('')}
+  <p class="pnote">Switching a pack off takes its activities out of the deck and leaves
+  what you have said about them alone — switch it back on and it picks up where it was.
+  Packs are built into the app, so they work with the aeroplane mode on.</p>` });
 
 /* — everything there is, searchable. The deck decides what you see; this is
      for when you want to go and look. — */
@@ -177,5 +192,5 @@ const saveMine = () => {
   save(); redeal(); closePanel(); toast('In the deck');
 };
 
-export { openPanel, closePanel, refreshPanel, panelKey, menuPanel, ctxPanel, browsePanel,
+export { openPanel, closePanel, refreshPanel, panelKey, menuPanel, ctxPanel, packsPanel, browsePanel,
          browseSearch, tastePanel, addPanel, backupPanel, saveMine, ctxLine, DRAFT };

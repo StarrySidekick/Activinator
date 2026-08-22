@@ -30,7 +30,8 @@ const V1 = {
 const V2 = {
   v:2, w:{ outdoors:.5, friends:-.2 }, bias:0, swipes:9,
   seen:{ s12:{v:'never',at:'2026-08-21T10:00:00Z'}, s20:{v:'like',at:'2026-08-21T11:00:00Z'} },
-  recent:['s12','s20'], mine:[], ctx:{ who:'', where:'', time:'' }, nerve:.3
+  recent:['s12','s20'], mine:[], ctx:{ who:'', where:'', time:'' }, nerve:.3,
+  packs:{ core:false }        // a pack you switched off stays off across an update
 };
 
 const boot = async (browser, state) => {
@@ -65,22 +66,35 @@ const boot = async (browser, state) => {
     listGone: !('list' in ACT.S),
     // a written activity has to end up filterable and marked, or it is invisible
     mine: ACT.S.mine[0],
-    mineDealable: ACT.deal(400).some(c => c.id === 'm1')
+    mineDealable: ACT.deal(400).some(c => c.id === 'm1'),
+    // a state saved before packs existed takes the defaults each pack ships with
+    packsDefaulted: JSON.stringify(ACT.S.packs) ===
+      JSON.stringify(Object.fromEntries(ACT.PACKS.map(p => [p.id, p.on])))
   }));
   await a.page.screenshot({ path:'test/shots/upgrade-v1.png' });
 
   // — from v2 —
   const b = await boot(browser, V2);
   const two = await b.page.evaluate(() => {
-    const twelve = ACT.pool()[12].id, twenty = ACT.pool()[20].id;
+    // The ids these were saved as counted positions in what is now the core
+    // pack, so that is what they have to be looked up against — and the pool
+    // is no help here, because this saved state has core switched off.
+    const core = ACT.PACKS.find(p => p.id === 'core').items;
+    const twelve = core[12].id, twenty = core[20].id;
+    const dealable = () => { ACT.S.packs.core = true; const d = ACT.deal(400);
+      ACT.S.packs.core = false; return d; };
     return {
+      // core is off in this saved state, so the deck deals from what is left
       cards: document.querySelectorAll('#deck .card').length,
       // the list has not been reordered since, so position maps cleanly onto
       // the stable id — and the thing you banned must still be banned
       remapped: ACT.S.seen[twelve] && ACT.S.seen[twelve].v === 'never' &&
                 ACT.S.seen[twenty] && ACT.S.seen[twenty].v === 'like',
       noPositionalIds: !Object.keys(ACT.S.seen).some(k => /^s\d+$/.test(k)),
-      neverStillOut: !ACT.deal(400).some(c => c.id === twelve),
+      neverStillOut: !dealable().some(c => c.id === twelve),
+      packKept: ACT.S.packs.core === false,
+      newPackDefaulted: ACT.PACKS.filter(p => p.id !== 'core')
+        .every(p => ACT.S.packs[p.id] === p.on),
       v: ACT.S.v
     };
   });
@@ -94,6 +108,7 @@ const boot = async (browser, state) => {
       mineHasDuration: ['quick','short','medium','long','allday'].some(t => oldTitles.mine.tags.includes(t)),
       mineHasCost: ['free','frugal','costly'].some(t => oldTitles.mine.tags.includes(t)),
       mineRenamed: oldTitles.mine.tags.includes('friends'),
+      packsDefaulted: oldTitles.packsDefaulted,
       errors: a.errs },
     v2: { ...two, errors: b.errs }
   };
@@ -102,8 +117,8 @@ const boot = async (browser, state) => {
   const v1ok = out.v1.cards === 3 && out.v1.v === 3 && out.v1.ctxReset && out.v1.seenDropped &&
     out.v1.keptWeight && out.v1.renamedWeight && out.v1.droppedWeight && out.v1.listGone &&
     out.v1.mineDealable && out.v1.mineHasWhere && out.v1.mineHasDuration && out.v1.mineHasCost &&
-    out.v1.mineRenamed && !a.errs.length;
-  const v2ok = out.v2.cards === 3 && out.v2.v === 3 && out.v2.remapped && out.v2.noPositionalIds &&
-    out.v2.neverStillOut && !b.errs.length;
+    out.v1.mineRenamed && out.v1.packsDefaulted && !a.errs.length;
+  const v2ok = out.v2.cards >= 0 && out.v2.v === 3 && out.v2.remapped && out.v2.noPositionalIds &&
+    out.v2.neverStillOut && out.v2.packKept && out.v2.newPackDefaulted && !b.errs.length;
   process.exit(v1ok && v2ok ? 0 : 1);
 })();

@@ -75,6 +75,12 @@
 .imeta .nowtag{color:var(--now);font-weight:600}
 .item .del{color:var(--dim-2);font-size:17px;padding:2px 4px;flex:0 0 auto}
 
+/* A pack that is on is on, not finished — it borrows the list row and none of
+   what "done" means, or switching a pack on strikes its name through. */
+.item.pack.on .tick{background:var(--yes);border-color:var(--yes);color:#0f1410}
+.item.pack .itxt{text-decoration:none}
+.item.pack:not(.on) .itxt{color:var(--dim)}
+
 /* — all activities — */
 .brow{
   display:flex; align-items:center; gap:8px; padding:11px 0;

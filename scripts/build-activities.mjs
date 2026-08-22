@@ -1,0 +1,122 @@
+// Builds js/activities.js from the CSVs in packs/.
+//   node scripts/build-activities.mjs
+//
+// The packs are the source of truth for what is in the deck. Edit a CSV — by
+// hand, or by exporting a spreadsheet over it — run this, and commit both the
+// CSV and the generated file. Nothing fetches anything at runtime: the app has
+// to open on a train.
+//
+// Columns: title, minutes, cost, tags
+//   minutes  a whole number. The duration band is worked out from it.
+//   cost     free | frugal | costly (0 | 1 | 2 also accepted)
+//   tags     space-separated, all from the vocabulary, and NOT duration or
+//            cost tags — those two are derived, and saying them twice is how
+//            they come to disagree.
+//
+// Every row must name exactly one place and exactly one how-hard. Anything
+// else is refused with the file and line, because a bad row that builds is a
+// card that quietly never gets dealt.
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { TAGS, GROUPS, DURATIONS, COSTS, durationOf, idOf } from '../js/vocab.js';
+
+const dir = new URL('../packs/', import.meta.url);
+const read = (f) => readFileSync(new URL(f, dir), 'utf8');
+
+/* A real CSV parser, because a title like "Skateboard, badly, in an empty car
+   park" is exactly the kind of row a split(',') loses. */
+const parseCSV = (text) => {
+  const rows = []; let row = [], cell = '', q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
+    else if (c !== '\r') cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(v => v.trim()));
+};
+
+const WHERE = GROUPS.find(g => g[0] === 'Where')[1];
+const HARD  = GROUPS.find(g => g[0] === 'How hard')[1];
+const errors = [];
+const titles = new Map();
+
+const build = (meta) => {
+  const file = meta.id + '.csv';
+  if (!existsSync(new URL(file, dir))) { errors.push(`${file}: no such pack`); return null; }
+  const rows = parseCSV(read(file));
+  const head = rows.shift().map(h => h.trim().toLowerCase());
+  const want = ['title', 'minutes', 'cost', 'tags'];
+  if (want.some((w, i) => head[i] !== w))
+    errors.push(`${file}:1  header must be "${want.join(',')}" — found "${head.join(',')}"`);
+
+  const items = [];
+  rows.forEach((r, n) => {
+    const at = `${file}:${n + 2}`;
+    const t = (r[0] || '').trim();
+    const min = Number((r[1] || '').trim());
+    const rawCost = (r[2] || '').trim().toLowerCase();
+    const tags = (r[3] || '').trim().split(/[\s,]+/).filter(Boolean);
+    if (!t) return errors.push(`${at}  no title`);
+    if (titles.has(t)) return errors.push(`${at}  same title as ${titles.get(t)} — ids come from the title, so this would collide`);
+    titles.set(t, at);
+    if (!Number.isInteger(min) || min <= 0) errors.push(`${at}  minutes must be a whole number, found "${r[1]}"`);
+    const cost = COSTS.includes(rawCost) ? COSTS.indexOf(rawCost)
+      : /^[012]$/.test(rawCost) ? Number(rawCost) : -1;
+    if (cost < 0) errors.push(`${at}  cost must be ${COSTS.join(' | ')}, found "${r[2]}"`);
+
+    const unknown = tags.filter(g => !(g in TAGS));
+    if (unknown.length) errors.push(`${at}  not in the vocabulary: ${unknown.join(', ')}`);
+    const derived = tags.filter(g => DURATIONS.includes(g) || COSTS.includes(g));
+    if (derived.length) errors.push(`${at}  ${derived.join(', ')} is worked out from the minutes and cost columns — leave it out`);
+    const where = tags.filter(g => WHERE.includes(g));
+    if (where.length !== 1) errors.push(`${at}  needs exactly one of ${WHERE.join(' | ')}, found ${where.length}`);
+    const hard = tags.filter(g => HARD.includes(g));
+    if (hard.length !== 1) errors.push(`${at}  needs exactly one of ${HARD.join(' | ')}, found ${hard.length}`);
+
+    items.push({ id: idOf(t), t, tags: [...new Set(tags.concat(durationOf(min), COSTS[cost]))], min, cost });
+  });
+  return { ...meta, items };
+};
+
+const index = JSON.parse(read('index.json'));
+const packs = index.map(build).filter(Boolean);
+
+if (errors.length) {
+  console.error(`\n${errors.length} problem${errors.length > 1 ? 's' : ''} in packs/:\n`);
+  for (const e of errors) console.error('  ' + e);
+  console.error('\nNothing written.\n');
+  process.exit(1);
+}
+
+const out = `/* GENERATED FILE — do not edit.
+   Built from packs/*.csv by scripts/build-activities.mjs. Change an activity
+   by changing the CSV and running that, then commit both. */
+export const PACKS = [
+${packs.map(p => `  { id:${JSON.stringify(p.id)}, name:${JSON.stringify(p.name)}, note:${JSON.stringify(p.note)}, on:${!!p.on}, items:[
+${p.items.map(a => `    {id:'${a.id}',t:${JSON.stringify(a.t)},tags:${JSON.stringify(a.tags)},min:${a.min},cost:${a.cost}},`).join('\n')}
+  ]},`).join('\n')}
+];
+`;
+const target = new URL('../js/activities.js', import.meta.url);
+
+/* `--check` builds and compares instead of writing, so a CSV edited without a
+   rebuild fails the tests rather than shipping a deck that does not match the
+   packs it came from. */
+if (process.argv.includes('--check')) {
+  const have = existsSync(target) ? readFileSync(target, 'utf8') : '';
+  if (have !== out) {
+    console.error('js/activities.js is out of date — run: node scripts/build-activities.mjs');
+    process.exit(1);
+  }
+  console.log(`js/activities.js is up to date (${packs.reduce((n, p) => n + p.items.length, 0)} activities)`);
+  process.exit(0);
+}
+
+writeFileSync(target, out);
+console.log(packs.map(p => `${p.items.length.toString().padStart(4)}  ${p.id}${p.on ? '' : '  (off by default)'}`).join('\n'));
+console.log(`${packs.reduce((n, p) => n + p.items.length, 0)} activities → js/activities.js`);
