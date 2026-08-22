@@ -41,7 +41,12 @@
 .pnote{font-size:12.5px;color:var(--dim);line-height:1.5;margin:8px 0 0}
 
 .chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips button .mark{width:15px;height:15px;margin-right:6px;color:#cfd3de}
+.chips button.on .mark{color:#14151c}
+.chips button .mark.red{color:#c2685f}
+.chips button.on .mark.red{color:var(--suit-red)}
 .chips button{
+  display:inline-flex; align-items:center;
   font-size:13px; padding:8px 12px; border-radius:999px;
   border:1px solid #2e3240; background:#20232e; color:#b8bdcb;
 }
@@ -79,8 +84,9 @@
 .bwrap{flex:1;min-width:0}
 .btitle{font-family:var(--serif);font-size:15.5px;line-height:1.25;color:#e9e6df}
 .brow.dislike .btitle,.brow.never .btitle{color:var(--dim-2)}
-.brow .marks{position:static;margin:5px 0 0;gap:4px}
-.brow .mark{width:19px;height:19px;font-size:10.5px;background:rgba(255,255,255,.05);box-shadow:none}
+.brow .marks{margin:6px 0 0;gap:8px}
+.brow .mark{width:15px;height:15px;color:#7f8698}
+.brow .mark.red{color:#a95f58}
 .bset{
   flex:0 0 auto; width:30px; height:30px; border-radius:50%; font-size:14px;
   border:1px solid #2e3240; background:#20232e; color:var(--dim-2);
@@ -91,7 +97,10 @@
 
 /* — taste — */
 .bar{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px}
-.bar .bl{flex:0 0 42%;color:#cfd3de;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar .bl{flex:0 0 42%;color:#cfd3de;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  display:flex;align-items:center;gap:7px}
+.bar .bl .mark{width:15px;height:15px;flex:0 0 auto;color:#8f96a8}
+.bar .bl .mark.red{color:#b5615a}
 .bar .bt{flex:1;height:8px;background:#23262f;border-radius:4px;position:relative;overflow:hidden}
 .bar .bt i{position:absolute;top:0;bottom:0;left:50%;background:var(--yes);border-radius:4px}
 .bar.down .bt i{background:var(--no)}

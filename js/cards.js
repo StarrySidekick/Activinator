@@ -4,7 +4,7 @@
    card you stop swiping. The emblems say what kind of thing it is without
    spending a line on words, and everything the app actually knows is on the
    back, for once you have decided you are interested. */
-import { TAGS, EMBLEMS, GROUPS } from './data.js';
+import { TAGS, MARKS, REDS, GROUPS } from './data.js';
 import { S } from './state.js';
 import { reasons } from './taste.js';
 
@@ -29,8 +29,14 @@ const emblemsOf = (c) => {
   return ORDER.filter(g => c.tags.includes(g) && !hide.has(g));
 };
 
-const emblemRow = (c) => `<p class="marks">${emblemsOf(c).map(g =>
-  `<span class="mark" title="${esc(TAGS[g])}" aria-label="${esc(TAGS[g])}">${EMBLEMS[g]}</span>`).join('')}</p>`;
+/* One drawn mark. `evenodd` is what makes a subpath inside another a hole —
+   the eye's pupil, the key's bow, the hollow half of a diamond — so every mark
+   is authored expecting it. Mood is red, the way half a deck is red. */
+const markHTML = (g, cls = '') => !MARKS[g] ? '' :
+  `<span class="mark ${REDS.has(g) ? 'red' : ''} ${cls}" title="${esc(TAGS[g] || g)}" aria-label="${esc(TAGS[g] || g)}"
+    ><svg viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="${MARKS[g]}"/></svg></span>`;
+
+const emblemRow = (c) => `<p class="marks">${emblemsOf(c).map(g => markHTML(g)).join('')}</p>`;
 
 /* Minutes as somebody would say them. The duration tag is the band; this is
    the actual figure, and it only appears on the back. */
@@ -62,7 +68,7 @@ const cardHTML = (c) => {
       <p class="pnote" style="color:var(--text-3);margin-top:8px">${esc(lengthOf(c.min))}</p>
       <ul class="taglist">${c.tags.map(g => {
         const w = S.w[g] || 0;
-        return `<li class="${w > .12 ? 'up' : w < -.12 ? 'down' : ''}">${EMBLEMS[g] || ''} ${esc(TAGS[g] || g)}</li>`;
+        return `<li class="${w > .12 ? 'up' : w < -.12 ? 'down' : ''}">${markHTML(g)}${esc(TAGS[g] || g)}</li>`;
       }).join('')}</ul>
       <p class="odds">It puts your odds of going for this at <b>${odds}%</b>.</p>
       <div class="meter"><i style="width:${odds}%"></i></div>
@@ -78,4 +84,4 @@ const cardHTML = (c) => {
   </article>`;
 };
 
-export { cardHTML, emblemsOf, emblemRow, lengthOf, esc };
+export { cardHTML, emblemsOf, emblemRow, markHTML, lengthOf, esc };

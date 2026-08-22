@@ -35,6 +35,7 @@ at them, this is a visual app and a passing assertion doesn't mean it looks
 right.
 
 `scripts/icons.py` redraws `icons/` with nothing but the standard library.
+`test/marks.mjs` renders the contact sheet of every tag mark.
 
 ## Deploying
 
@@ -131,10 +132,29 @@ float over the bottom — everything else, write one, find one — and undo join
 them only when there is something to take back, because a dead button is
 furniture.
 
-**The front is a row of emblems and the activity.** No description, no tag
-names, no reason. The emblems say what kind of thing it is without spending a
-line on words, and they come out in the vocabulary's own order so the row can
-be read by shape.
+**The front is a row of marks and the activity.** No description, no tag names,
+no reason. The marks say what kind of thing it is without spending a line on
+words, and they come out in the vocabulary's own order so the row can be read
+by shape. The general one is dropped where a particular one is present, since
+create + visual art + drawing is three pictures saying one thing.
+
+**The marks are drawn, in the manner of the suits on a playing card.** Solid
+silhouettes, `MARKS` in `data.js`, one 24×24 path each, filled `evenodd` so a
+subpath inside another is a hole — that is how the eye gets its pupil and the
+key its bow. Mood is red and everything else is ink, the way half a deck is
+red. They were emoji for one version, which are somebody else's drawings and
+never sat right on cream paper.
+
+The four scales are families rather than pictures: one pip, two, three for who;
+a meter of one, two, three bars for how hard, with the slots you have not
+reached drawn hollow; a dial filling by fifths for duration; a diamond from
+hollow to solid for cost. A scale drawn as five unrelated pictures is a scale
+nobody can read.
+
+`node test/marks.mjs` renders every mark to `test/shots/marks.png`, large and
+at the size it is really used. **Draw one, run it, look at it** — paths written
+blind are paths that look wrong, and half the first set had to be redrawn after
+seeing that sheet.
 
 **Nothing is dealt without a reason it can print.** Every card carries `why` —
 what it thinks it knows, or that it is still guessing, or that this is a

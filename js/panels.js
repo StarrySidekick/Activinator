@@ -3,10 +3,10 @@
    `body` is a function, not a string, so a panel can redraw itself from state
    after any change — no handler rebuilds a panel by hand. */
 import { S, save, APP_VERSION, pool, exportJSON, importJSON } from './state.js';
-import { TAGS, GROUPS, EMBLEMS, WHO, WHERE, TIME, DURATIONS, COSTS } from './data.js';
+import { TAGS, GROUPS, WHO, WHERE, TIME, DURATIONS, COSTS } from './data.js';
 import { opinions } from './taste.js';
 import { reset as redeal, toast } from './deck.js';
-import { esc, emblemRow, lengthOf } from './cards.js';
+import { esc, emblemRow, markHTML, lengthOf } from './cards.js';
 
 const host = () => document.getElementById('panelhost');
 let PANEL = null;
@@ -36,7 +36,7 @@ const panelKey = () => PANEL && PANEL.key;
 
 const chips = (act, opts, cur) => `<div class="chips">${opts.map(([v, label]) =>
   `<button data-act="${act}" data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${
-    v && EMBLEMS[v] ? EMBLEMS[v] + ' ' : ''}${esc(label)}</button>`).join('')}</div>`;
+    markHTML(v)}${esc(label)}</button>`).join('')}</div>`;
 
 /* — the hub. One button on the deck reaches everything, so the deck itself can
      be the whole screen. — */
@@ -110,7 +110,7 @@ const browseSearch = (v) => {
 const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are like', back:'menu', body: () => {
   const ops = opinions(), up = ops.filter(o => o.v > 0).slice(0, 8), down = ops.filter(o => o.v < 0).slice(-7).reverse();
   const max = Math.max(.35, ...ops.map(o => Math.abs(o.v)));
-  const bar = (o) => `<div class="bar ${o.v < 0 ? 'down' : ''}"><span class="bl">${EMBLEMS[o.tag] || ''} ${esc(o.label)}</span>
+  const bar = (o) => `<div class="bar ${o.v < 0 ? 'down' : ''}"><span class="bl">${markHTML(o.tag)}${esc(o.label)}</span>
     <span class="bt"><i style="${o.v > 0 ? 'left:50%' : 'right:50%;left:auto'};width:${Math.round(Math.abs(o.v) / max * 48)}%"></i></span></div>`;
   const n = v => Object.values(S.seen).filter(s => s.v === v).length;
   return `
@@ -146,7 +146,7 @@ const addPanel = () => openPanel({ key:'add', title:'Write your own', back:'menu
     thing — there is nowhere else for it to go.</p></div>
   ${GROUPS.map(([name, keys]) => `<div class="prow"><p class="plabel">${esc(name)}</p>
     <div class="chips">${keys.map(k =>
-      `<button data-act="dtag" data-v="${k}" class="${DRAFT.tags.includes(k) ? 'on' : ''}">${EMBLEMS[k]} ${esc(TAGS[k])}</button>`).join('')}</div></div>`).join('')}
+      `<button data-act="dtag" data-v="${k}" class="${DRAFT.tags.includes(k) ? 'on' : ''}">${markHTML(k)}${esc(TAGS[k])}</button>`).join('')}</div></div>`).join('')}
   <p class="pnote">Tags are the only thing it learns from, and the emblems on the card are
   these. Pick the ones that are actually true.</p>
   <button class="pbtn" data-act="savemine">Put it in the deck</button>` });
