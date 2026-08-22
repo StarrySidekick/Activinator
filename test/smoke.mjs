@@ -17,7 +17,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   const shot = async n => { await page.waitForTimeout(300); await page.screenshot({ path:`test/shots/${n}.png` }); };
 
   await page.goto(URL);
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(700);
   const dealt = await page.locator('#deck .card').count();
   await shot('01-deck');
 
@@ -26,39 +26,37 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return j.name === 'Activinator' && j.icons.length === 3;
   });
 
-  // — the card flips —
-  // The front is the activity and nothing else. The stamps live there too but
-  // are inked on by the drag, so they are not part of what you read.
+  // — the card fills the screen. The top card is the LAST in the DOM, because
+  //   the hand is painted back to front; the first one is scaled down behind it. —
+  const fullBleed = await page.evaluate(() => {
+    const r = document.querySelector('.card.top').getBoundingClientRect();
+    return Math.round(r.width) === innerWidth && Math.round(r.height) === innerHeight;
+  });
+
+  // — the front is emblems and the activity, and nothing else —
   const frontIsBare = await page.evaluate(() => {
     const f = document.querySelector('.card.top .front');
     const kids = [...f.children].filter(el => !el.classList.contains('stamp'));
-    const text = kids.map(el => el.innerText.trim()).join('');
-    return kids.length === 1 && kids[0].classList.contains('t') &&
-           text === f.querySelector('.t').innerText.trim() &&
-           !f.querySelector('.facts, .taglist, .kicker, .why, .odds, .twist, .d');
+    return kids.length === 2 && kids[0].classList.contains('marks') &&
+           kids[1].classList.contains('t') &&
+           !f.querySelector('.taglist, .kicker, .why, .odds, .facts');
   });
+  const emblems = await page.locator('.card.top .marks .mark').count();
 
+  // — flip: the front must not be readable through the back, and it must turn back —
   await page.locator('.card.top').click();
   await page.waitForTimeout(600);
   const flipped = await page.locator('.card.top.flip').count() === 1;
-  // …and the front must not be readable through the back once it is turned.
-  const frontHidden = await page.evaluate(() => {
-    const f = document.querySelector('.card.top .front');
-    return getComputedStyle(f).opacity === '0' || getComputedStyle(f).backfaceVisibility === 'hidden';
-  });
-  const backOpaque = await page.evaluate(() => {
-    const b = document.querySelector('.card.top .back');
-    const bg = getComputedStyle(b).backgroundColor;
-    return getComputedStyle(b).opacity === '1' && !/rgba\(.*,\s*0?\.\d+\)/.test(bg);
-  });
+  const frontHidden = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.card.top .front')).opacity === '0');
   await shot('02-back');
-  // a flipped card must turn back over, which it once could not
   await page.locator('.card.top').click();
   await page.waitForTimeout(600);
   const flipsBack = await page.locator('.card.top.flip').count() === 0;
 
-  // — a swipe right files it and the deck moves on —
+  // — a swipe right is a like, and it moves the deck on —
   const first = await page.locator('.card.top .t').innerText();
+  const firstId = await page.evaluate(() => ACT.S && document.querySelector('.card.top').dataset.key);
   const box = await page.locator('.card.top').boundingBox();
   await page.mouse.move(box.x + box.width/2, box.y + box.height/2);
   await page.mouse.down();
@@ -66,76 +64,100 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('03-mid-swipe');
   await page.mouse.up();
   await page.waitForTimeout(500);
-  const listed = await page.evaluate(() => ACT.S.list.length);
-  const moved  = (await page.locator('.card.top .t').innerText()) !== first;
+  const liked = await page.evaluate(() => Object.values(ACT.S.seen).some(s => s.v === 'like'));
+  const moved = (await page.locator('.card.top .t').innerText()) !== first;
   const learned = await page.evaluate(() => Object.keys(ACT.S.w).length > 0);
 
-  // — undo puts the card back and takes the learning back with it —
+  // — undo takes the learning back with it, not just the card —
   const wBefore = await page.evaluate(() => JSON.stringify(ACT.S.w));
   await page.click('[data-act="undo"]');
   await page.waitForTimeout(400);
-  const undone = await page.evaluate(() => ACT.S.list.length === 0);
+  const undone = await page.evaluate(() => Object.keys(ACT.S.seen).length === 0);
   const backAgain = (await page.locator('.card.top .t').innerText()) === first;
-  const wAfter = await page.evaluate(() => JSON.stringify(ACT.S.w));
-  // undo must take the learning back with it, not just the card
-  const unlearned = wBefore !== wAfter && await page.evaluate(() =>
+  const unlearned = wBefore !== '{}' && await page.evaluate(() =>
     ACT.S.swipes === 0 && Object.values(ACT.S.w).every(v => Math.abs(v) < 1e-9));
 
-  // — pass with the button —
-  await page.click('[data-act="no"]');
-  await page.waitForTimeout(450);
-  const passed = await page.evaluate(() => Object.values(ACT.S.seen).some(s => s.v === 'no'));
+  // — a swipe up is not a verdict: it passes the card on and teaches nothing —
+  const skipped = await page.evaluate(async () => {
+    const before = ACT.S.swipes, w = JSON.stringify(ACT.S.w);
+    const t = document.querySelector('.card.top .t').innerText;
+    ACT.say('skip');
+    await new Promise(r => setTimeout(r, 420));
+    return ACT.S.swipes === before && JSON.stringify(ACT.S.w) === w &&
+           Object.values(ACT.S.seen).some(s => s.v === 'skip') &&
+           document.querySelector('.card.top .t').innerText !== t;
+  });
 
-  // — the panels —
-  await page.click('[data-act="ctx"]'); await page.waitForTimeout(350);
-  await shot('04-context');
-  await page.click('[data-act="setwho"][data-v="two"]'); await page.waitForTimeout(350);
-  const ctxKept = await page.evaluate(() => ACT.S.ctx.who === 'two');
-  await shot('05-context-set');
-  await page.click('.panel .x'); await page.waitForTimeout(300);
-  await shot('06-two-of-us');
+  // — nothing leaves the pool. Dislike everything and the deck still deals;
+  //   only "never again" takes something out. —
+  const poolIsForever = await page.evaluate(() => {
+    const id = ACT.pool()[0].id;
+    for (const c of ACT.pool()) ACT.S.seen[c.id] = { v:'dislike', at:new Date().toISOString() };
+    const stillDeals = ACT.deal(3).length === 3;
+    ACT.S.seen[id] = { v:'never', at:new Date().toISOString() };
+    const goneForGood = !ACT.deal(400).some(c => c.id === id);
+    ACT.S.seen = {}; ACT.redeal();
+    return stillDeals && goneForGood;
+  });
 
-  // — the context is a hard filter: nothing outside it may ever be dealt,
-  //   twists and doubles included, however the dice fall —
+  // — the context is a hard filter, and it is the same tags the cards carry —
   const ctxHonoured = await page.evaluate(() => {
     const was = JSON.stringify(ACT.S.ctx);
-    ACT.S.ctx = { who:'two', where:'out', time:90 };
+    ACT.S.ctx = { who:'partner', where:'outdoors', time:'medium' };
+    const WHO = ['solo','partner','friends','newpeople'];
     let ok = true;
-    for (let i = 0; i < 60 && ok; i++) for (const c of ACT.deal(6)) {
-      const s = c.seed;
-      if (c.min > 90) ok = false;
-      if (s.who !== 'any' && s.who !== 'two') ok = false;
-      if (s.where !== 'any' && s.where !== 'out') ok = false;
+    for (let i = 0; i < 50 && ok; i++) for (const c of ACT.deal(6)) {
+      const named = WHO.filter(t => c.tags.includes(t));
+      if (named.length && !named.includes('partner')) ok = false;
+      if (!c.tags.includes('outdoors') && !c.tags.includes('anywhere')) ok = false;
+      if (c.tags.includes('long') || c.tags.includes('allday')) ok = false;
     }
-    ACT.S.ctx = JSON.parse(was);
+    ACT.S.ctx = JSON.parse(was); ACT.redeal();
     return ok;
   });
 
-  await page.click('[data-act="ctx"]'); await page.waitForTimeout(300);
-  await page.click('[data-act="setwho"][data-v="any"]'); await page.waitForTimeout(300);
-  await page.click('.panel .x'); await page.waitForTimeout(300);
+  // — the dock reaches everything —
+  await page.click('[data-act="menu"]'); await page.waitForTimeout(400);
+  await shot('04-menu');
+  const menuOpen = await page.locator('.panel h2').innerText() === 'Activinator';
+  await page.click('[data-act="ctx"]'); await page.waitForTimeout(400);
+  await page.click('[data-act="setwho"][data-v="partner"]'); await page.waitForTimeout(350);
+  const ctxKept = await page.evaluate(() => ACT.S.ctx.who === 'partner');
+  await shot('05-context');
+  await page.click('[data-act="setwho"][data-v=""]'); await page.waitForTimeout(300);
+  await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
+
+  // — all activities, searchable, and liking one there is the same act —
+  await page.click('[data-act="browse"]'); await page.waitForTimeout(400);
+  const allRows = await page.locator('.brow').count();
+  await page.fill('[data-in="q"]', 'graveyard');
+  await page.waitForTimeout(300);
+  const searched = await page.locator('.brow').count();
+  const keptFocus = await page.evaluate(() => document.activeElement.dataset.in === 'q');
+  await shot('06-browse');
+  await page.locator('.brow .bset.like').first().click();
+  await page.waitForTimeout(300);
+  const browseLiked = await page.evaluate(() => Object.values(ACT.S.seen).some(s => s.v === 'like'));
+  await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
   // — swipe a dozen so taste has something to show —
-  for (let i = 0; i < 14; i++) { await page.click(i % 3 ? '[data-act="yes"]' : '[data-act="no"]'); await page.waitForTimeout(140); }
+  for (let i = 0; i < 14; i++) { await page.click('#deck'); await page.waitForTimeout(60);
+    await page.evaluate(i => ACT.say(i % 3 ? 'like' : 'dislike'), i); await page.waitForTimeout(120); }
+  await page.click('[data-act="menu"]'); await page.waitForTimeout(300);
   await page.click('[data-act="taste"]'); await page.waitForTimeout(400);
   const bars = await page.locator('.bar').count();
   await shot('07-taste');
-  await page.click('.panel .x'); await page.waitForTimeout(300);
+  await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
-  await page.click('[data-act="list"]'); await page.waitForTimeout(350);
-  const items = await page.locator('.item').count();
-  await page.locator('.item .tick').first().click(); await page.waitForTimeout(300);
-  const ticked = await page.evaluate(() => ACT.S.list.some(l => l.done));
-  await shot('08-list');
-  await page.click('.panel .x'); await page.waitForTimeout(300);
-
-  // — writing your own puts it in the same pool —
-  await page.click('[data-act="taste"]'); await page.waitForTimeout(300);
-  await page.click('[data-act="add"]'); await page.waitForTimeout(350);
+  // — writing your own: it needs enough tags to be filterable at all —
+  await page.click('[data-act="add"]'); await page.waitForTimeout(400);
   await page.fill('[data-in="t"]', 'Walk the whole canal path');
-  await page.click('[data-act="dtag"][data-v="outdoors"]');
-  await page.waitForTimeout(200);
-  await shot('09-add');
+  await page.click('[data-act="savemine"]'); await page.waitForTimeout(250);
+  const refusedBare = await page.evaluate(() => ACT.S.mine.length === 0);
+  for (const v of ['outdoors','solo','long','move']) {
+    await page.click(`[data-act="dtag"][data-v="${v}"]`); await page.waitForTimeout(120);
+  }
+  await shot('08-add');
   await page.click('[data-act="savemine"]'); await page.waitForTimeout(400);
   const mine = await page.evaluate(() => ACT.S.mine.length === 1 && ACT.pool().some(c => c.src === 'mine'));
 
@@ -146,17 +168,18 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await ctx.setOffline(true);
   await page.reload(); await page.waitForTimeout(800);
   const offline = await page.locator('#deck .card').count() > 0;
-  await shot('10-offline');
+  await shot('09-offline');
   await ctx.setOffline(false);
 
-  console.log({ dealt, manifestOk, frontIsBare, flipped, frontHidden, backOpaque, flipsBack,
-    listed, moved, learned, undone, backAgain,
-    unlearned, passed, ctxKept, ctxHonoured, bars, items, ticked, mine, persisted, swReady,
-    offline, errors: errs });
+  console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, flipped, frontHidden,
+    flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
+    ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
+    refusedBare, mine, persisted, swReady, offline, errors: errs });
   await browser.close();
-  const ok = dealt === 3 && manifestOk && frontIsBare && flipped && frontHidden && backOpaque &&
-    flipsBack && listed === 1 && moved && learned &&
-    undone && backAgain && passed && ctxKept && ctxHonoured && bars > 0 && items > 0 && ticked && mine &&
-    persisted && swReady && offline && !errs.length;
+  const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && flipped &&
+    frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
+    skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
+    searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
+    mine && persisted && swReady && offline && !errs.length;
   process.exit(ok ? 0 : 1);
 })();

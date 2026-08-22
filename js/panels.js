@@ -1,12 +1,12 @@
 /* Activinator — panels.
-   One panel at a time, up from the bottom, over a deck that stays where it
-   is. `body` is a function, not a string, so a panel can redraw itself from
-   state after any change — no handler rebuilds a panel by hand. */
-import { S, save, APP_VERSION, exportJSON, importJSON } from './state.js';
-import { TAGS, GROUPS, WHO, WHERE, TIME } from './data.js';
-import { opinions, learn } from './taste.js';
-import { reset as redeal, render, toast } from './deck.js';
-import { esc, lengthOf } from './cards.js';
+   One panel at a time, up from the bottom, over a deck that stays where it is.
+   `body` is a function, not a string, so a panel can redraw itself from state
+   after any change — no handler rebuilds a panel by hand. */
+import { S, save, APP_VERSION, pool, exportJSON, importJSON } from './state.js';
+import { TAGS, GROUPS, EMBLEMS, WHO, WHERE, TIME, DURATIONS, COSTS } from './data.js';
+import { opinions } from './taste.js';
+import { reset as redeal, toast } from './deck.js';
+import { esc, emblemRow, lengthOf } from './cards.js';
 
 const host = () => document.getElementById('panelhost');
 let PANEL = null;
@@ -15,7 +15,9 @@ const openPanel = (spec) => {
   PANEL = spec;
   host().innerHTML = `<div class="scrim" data-act="closepanel"></div>
     <section class="panel" role="dialog" aria-label="${esc(spec.title)}">
-      <div class="phead"><i class="grab"></i><h2>${esc(spec.title)}</h2>
+      <div class="phead"><i class="grab"></i>
+        ${spec.back ? `<button class="x" data-act="${esc(spec.back)}" aria-label="Back">‹</button>` : ''}
+        <h2>${esc(spec.title)}</h2>
         <button class="x" data-act="closepanel" aria-label="Close">✕</button></div>
       <div class="pbody">${spec.body()}</div>
     </section>`;
@@ -33,50 +35,90 @@ const closePanel = () => {
 const panelKey = () => PANEL && PANEL.key;
 
 const chips = (act, opts, cur) => `<div class="chips">${opts.map(([v, label]) =>
-  `<button data-act="${act}" data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${esc(label)}</button>`).join('')}</div>`;
+  `<button data-act="${act}" data-v="${v}" class="${String(cur) === String(v) ? 'on' : ''}">${
+    v && EMBLEMS[v] ? EMBLEMS[v] + ' ' : ''}${esc(label)}</button>`).join('')}</div>`;
 
-/* — what you are in the mood for. Three questions, and every one of them has
-     an answer that means "do not filter on this". — */
-const ctxPanel = () => openPanel({ key:'ctx', title:'Right now', body: () => `
+/* — the hub. One button on the deck reaches everything, so the deck itself can
+     be the whole screen. — */
+const menuPanel = () => openPanel({ key:'menu', title:'Activinator', body: () => `
+  <button class="pbtn" data-act="ctx">Right now<small>${esc(ctxLine())}</small></button>
+  <button class="pbtn" data-act="browse">All activities<small>${pool().length} of them, searchable</small></button>
+  <button class="pbtn" data-act="add">Write your own<small>Anything it would never think of</small></button>
+  <button class="pbtn" data-act="taste">What it thinks you are like<small>${S.swipes} swipes in</small></button>
+  <button class="pbtn" data-act="backup">Back it up<small>There is no server, so this is the only copy</small></button>
+  <p class="pnote" style="text-align:center;color:var(--dim-2);margin-top:18px">Activinator ${esc(APP_VERSION)} —
+  everything is on this device and nowhere else.</p>` });
+
+const labelOf = (list, v) => (list.find(o => String(o[0]) === String(v)) || [, ''])[1];
+const ctxLine = () => {
+  const p = [];
+  if (S.ctx.who)   p.push(labelOf(WHO, S.ctx.who));
+  if (S.ctx.where) p.push(labelOf(WHERE, S.ctx.where));
+  if (S.ctx.time)  p.push(labelOf(TIME, S.ctx.time));
+  return p.length ? p.join(' · ') : 'up for anything';
+};
+
+/* — what you are in the mood for. Three axes of the vocabulary, not a second
+     set of words that has to be kept in step with it. — */
+const ctxPanel = () => openPanel({ key:'ctx', title:'Right now', back:'menu', body: () => `
   <div class="prow"><p class="plabel">Who is in</p>${chips('setwho', WHO, S.ctx.who)}</div>
   <div class="prow"><p class="plabel">Where</p>${chips('setwhere', WHERE, S.ctx.where)}</div>
   <div class="prow"><p class="plabel">How long you have</p>${chips('settime', TIME, S.ctx.time)}</div>
-  <p class="pnote">This filters the deck. It does not teach it anything — a rainy Tuesday
-  is not evidence about what you like.</p>` });
+  <p class="pnote">This filters the deck and teaches it nothing — a wet Tuesday is not
+  evidence about what you are like. How long you have is a ceiling, so anything
+  shorter is fair game too.</p>` });
 
-/* — the list: what you said yes to. Doing one is stronger evidence than
-     liking the look of it, so ticking it teaches again. — */
-const listPanel = () => openPanel({ key:'list', title:'The list', body: () => {
-  const live = S.list.filter(l => !l.done), done = S.list.filter(l => l.done);
-  const row = (l) => `<div class="item ${l.done ? 'done' : ''}">
-      <button class="tick" data-act="tick" data-id="${esc(l.at)}">✓</button>
-      <div class="iwrap"><div class="itxt">${esc(l.card.t)}</div>
-        <div class="imeta">${l.now && !l.done ? '<span class="nowtag">Doing it now</span>' : ''}
-          <span>${esc(lengthOf(l.card.min))}</span></div></div>
-      <button class="del" data-act="unlist" data-id="${esc(l.at)}" aria-label="Remove">✕</button>
+/* — everything there is, searchable. The deck decides what you see; this is
+     for when you want to go and look. — */
+let QUERY = '';
+const matches = (c) => {
+  if (!QUERY) return true;
+  const q = QUERY.toLowerCase();
+  return c.t.toLowerCase().includes(q) || c.tags.some(g => (TAGS[g] || g).includes(q));
+};
+const MARK = { like:'♥', dislike:'✕', never:'⊘' };
+const browseRows = () => {
+  const rows = pool().filter(matches);
+  if (!rows.length) return `<p class="pnote">Nothing matches that.</p>`;
+  return rows.map(c => {
+    const v = (S.seen[c.id] || {}).v;
+    return `<div class="brow ${v || ''}">
+      <div class="bwrap"><div class="btitle">${esc(c.t)}</div>
+        ${emblemRow(c)}</div>
+      <button class="bset like" data-act="blike" data-id="${esc(c.id)}" aria-label="Like">♥</button>
+      <button class="bset dis" data-act="bdislike" data-id="${esc(c.id)}" aria-label="Do not like">✕</button>
+      ${v ? `<span class="bstate">${MARK[v]}</span>` : ''}
     </div>`;
-  if (!S.list.length) return `<p class="pnote">Nothing yet. Swipe right on anything you fancy
-    and it lands here — the list is the point of the swiping.</p>`;
-  return (live.length ? `<p class="plabel">To do</p>${live.map(row).join('')}` : '')
-    + (done.length ? `<div class="prow" style="margin-top:14px"><p class="plabel">Done — ${done.length}</p>
-        ${done.map(row).join('')}
-        <button class="pbtn" data-act="clearlist">Clear the finished ones</button></div>` : '');
-} });
+  }).join('');
+};
+const browsePanel = () => openPanel({ key:'browse', title:'All activities', back:'menu', body: () => `
+  <input class="field" data-in="q" placeholder="Search — a word, or a tag" value="${esc(QUERY)}">
+  <p class="pnote">${pool().filter(matches).length} of ${pool().length}. Liking one here counts
+  the same as liking it on a card.</p>
+  <div id="browerows">${browseRows()}</div>` });
 
-/* — what it has worked out. This screen is the argument for the whole app:
-     if it cannot show you its opinions and let you throw them away, it is
-     just another feed with a different shape. — */
-const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are like', body: () => {
-  const ops = opinions(), up = ops.filter(o => o.v > 0).slice(0, 7), down = ops.filter(o => o.v < 0).slice(-6).reverse();
+/* Typing must not redraw the panel — the field is the thing being typed in. */
+const browseSearch = (v) => {
+  QUERY = v;
+  const box = document.getElementById('browerows');
+  if (box) box.innerHTML = browseRows();
+};
+
+/* — what it has worked out. This screen is the argument for the whole app: if
+     it cannot show you its opinions and let you throw them away, it is just
+     another feed with a different shape. — */
+const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are like', back:'menu', body: () => {
+  const ops = opinions(), up = ops.filter(o => o.v > 0).slice(0, 8), down = ops.filter(o => o.v < 0).slice(-7).reverse();
   const max = Math.max(.35, ...ops.map(o => Math.abs(o.v)));
-  const bar = (o) => `<div class="bar ${o.v < 0 ? 'down' : ''}"><span class="bl">${esc(o.label)}</span>
+  const bar = (o) => `<div class="bar ${o.v < 0 ? 'down' : ''}"><span class="bl">${EMBLEMS[o.tag] || ''} ${esc(o.label)}</span>
     <span class="bt"><i style="${o.v > 0 ? 'left:50%' : 'right:50%;left:auto'};width:${Math.round(Math.abs(o.v) / max * 48)}%"></i></span></div>`;
-  const done = S.list.filter(l => l.done).length;
+  const n = v => Object.values(S.seen).filter(s => s.v === v).length;
   return `
   <div class="prow"><div class="stat">
     <span><b>${S.swipes}</b>swipes</span>
-    <span><b>${S.list.filter(l => !l.done).length}</b>on the list</span>
-    <span><b>${done}</b>actually done</span>
+    <span><b>${n('like')}</b>liked</span>
+    <span><b>${n('dislike')}</b>not</span>
+    <span><b>${n('never')}</b>out</span>
   </div>${S.swipes < 12 ? `<p class="pnote">Under a dozen swipes it is mostly guessing, and it
     deals almost at random on purpose. Keep going.</p>` : ''}</div>
 
@@ -89,35 +131,27 @@ const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are 
     down and it will agree with you all day; that is how an app stops being any use.</p></div>
 
   <div class="prow">
-    <button class="pbtn" data-act="add">Write your own<small>Anything it would never think of</small></button>
-    <button class="pbtn" data-act="forgive">Bring back the passes<small>Everything you said no to becomes fair game again</small></button>
-    <button class="pbtn" data-act="backup">Back it up<small>Export and import — there is no server, so this is the only copy</small></button>
-    <button class="pbtn warn" data-act="wipe">Forget everything<small>Weights, list, the lot</small></button>
-  </div>
-  <p class="pnote" style="text-align:center;color:var(--dim-2)">Activinator ${esc(APP_VERSION)} —
-  everything is on this device and nowhere else.</p>`;
+    <button class="pbtn warn" data-act="wipe">Forget everything<small>Weights, verdicts, the lot</small></button>
+  </div>`;
 } });
 
-/* — your own activities. They go in the same pool as the library and are
-     scored the same way, which is what stops "mine" being a second app. — */
-const DRAFT = { t:'', who:'any', where:'any', min:60, tags:[] };
-const addPanel = () => openPanel({ key:'add', title:'Write your own', body: () => `
+/* — your own activities, in the same pool and scored the same way, which is
+     what stops "mine" being a second app. — */
+const DRAFT = { t:'', tags:[] };
+const REP = { quick:3, short:20, medium:75, long:180, allday:480 };   // a band needs a number behind it
+const addPanel = () => openPanel({ key:'add', title:'Write your own', back:'menu', body: () => `
   <div class="prow"><p class="plabel">The thing</p>
     <input class="field" data-in="t" placeholder="Walk the whole of the canal" value="${esc(DRAFT.t)}">
-    <p class="pnote">However you write it is how it will read on the card, so write the
-    whole thing — there is nowhere else for it to go.</p></div>
-  <div class="prow"><p class="plabel">Who</p>${chips('dwho', WHO, DRAFT.who)}</div>
-  <div class="prow"><p class="plabel">Where</p>${chips('dwhere', WHERE, DRAFT.where)}</div>
-  <div class="prow"><p class="plabel">How long — ${esc(lengthOf(DRAFT.min))}</p>
-    <input type="range" min="10" max="600" step="10" value="${DRAFT.min}" data-act="dmin"></div>
+    <p class="pnote">However you write it is how it reads on the card, so write the whole
+    thing — there is nowhere else for it to go.</p></div>
   ${GROUPS.map(([name, keys]) => `<div class="prow"><p class="plabel">${esc(name)}</p>
     <div class="chips">${keys.map(k =>
-      `<button data-act="dtag" data-v="${k}" class="${DRAFT.tags.includes(k) ? 'on' : ''}">${esc(TAGS[k])}</button>`).join('')}</div></div>`).join('')}
-  <p class="pnote">Tags are the only thing it learns from. Pick the ones that are
-  actually true and leave the rest.</p>
+      `<button data-act="dtag" data-v="${k}" class="${DRAFT.tags.includes(k) ? 'on' : ''}">${EMBLEMS[k]} ${esc(TAGS[k])}</button>`).join('')}</div></div>`).join('')}
+  <p class="pnote">Tags are the only thing it learns from, and the emblems on the card are
+  these. Pick the ones that are actually true.</p>
   <button class="pbtn" data-act="savemine">Put it in the deck</button>` });
 
-const backupPanel = () => openPanel({ key:'backup', title:'Back it up', body: () => `
+const backupPanel = () => openPanel({ key:'backup', title:'Back it up', back:'menu', body: () => `
   <div class="prow"><p class="plabel">Out</p>
     <button class="pbtn" data-act="download">Download a copy</button>
     <textarea class="field pickme" style="min-height:110px;font-size:11px" readonly>${esc(exportJSON())}</textarea></div>
@@ -125,18 +159,23 @@ const backupPanel = () => openPanel({ key:'backup', title:'Back it up', body: ()
     <textarea class="field" data-in="restore" placeholder="Paste a copy here"></textarea>
     <button class="pbtn warn" data-act="restore">Replace everything with that</button></div>` });
 
-/* Saving a written activity: it needs a title and at least one tag, because a
-   card with no tags teaches nothing and can never be scored. */
+/* Saving a written activity. It needs a name, somewhere, somebody and a
+   length, because a card with no tags teaches nothing and can never be
+   filtered — and it would be invisible the moment you asked for anything. */
 const saveMine = () => {
   if (!DRAFT.t.trim()) return toast('It needs a name');
-  if (!DRAFT.tags.length) return toast('Pick a tag or two');
-  const tags = [...new Set(DRAFT.tags.concat(
-    DRAFT.min <= 30 ? ['quick'] : DRAFT.min >= 240 ? ['longhaul'] : []))];
-  S.mine.unshift({ id:'m' + Date.now().toString(36), t:DRAFT.t.trim(),
-    tags, who:DRAFT.who, where:DRAFT.where, min:+DRAFT.min, cost:0, src:'mine' });
+  const has = keys => keys.some(k => DRAFT.tags.includes(k));
+  if (!has(['anywhere','indoors','outdoors','home'])) return toast('Say where');
+  if (!has(['solo','partner','friends','newpeople'])) return toast('Say who with');
+  if (!has(DURATIONS)) return toast('Say how long');
+  const tags = DRAFT.tags.slice();
+  if (!has(COSTS)) tags.push('free');
+  const dur = DURATIONS.find(d => tags.includes(d));
+  S.mine.unshift({ id:'m' + Date.now().toString(36), t:DRAFT.t.trim(), tags,
+    min: REP[dur], cost: Math.max(0, COSTS.findIndex(k => tags.includes(k))), src:'mine' });
   Object.assign(DRAFT, { t:'', tags:[] });
   save(); redeal(); closePanel(); toast('In the deck');
 };
 
-export { openPanel, closePanel, refreshPanel, panelKey, ctxPanel, listPanel,
-         tastePanel, addPanel, backupPanel, saveMine, DRAFT };
+export { openPanel, closePanel, refreshPanel, panelKey, menuPanel, ctxPanel, browsePanel,
+         browseSearch, tastePanel, addPanel, backupPanel, saveMine, ctxLine, DRAFT };

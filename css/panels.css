@@ -27,6 +27,7 @@
   border-bottom:1px solid #262936; flex:0 0 auto;
 }
 .phead h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.01em;flex:1}
+.phead .x[data-act="menu"]{font-size:24px;margin-right:-2px}
 .phead .x{color:var(--dim);font-size:20px;line-height:1;padding:4px 6px}
 .phead .grab{
   position:absolute;top:7px;left:50%;transform:translateX(-50%);
@@ -41,7 +42,7 @@
 
 .chips{display:flex;flex-wrap:wrap;gap:7px}
 .chips button{
-  font-size:13px; padding:9px 13px; border-radius:999px;
+  font-size:13px; padding:8px 12px; border-radius:999px;
   border:1px solid #2e3240; background:#20232e; color:#b8bdcb;
 }
 .chips button.on{background:var(--paper);color:#14151c;border-color:var(--paper);font-weight:600}
@@ -68,6 +69,25 @@
 .imeta{font-size:11.5px;color:var(--dim-2);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
 .imeta .nowtag{color:var(--now);font-weight:600}
 .item .del{color:var(--dim-2);font-size:17px;padding:2px 4px;flex:0 0 auto}
+
+/* — all activities — */
+.brow{
+  display:flex; align-items:center; gap:8px; padding:11px 0;
+  border-bottom:1px solid #23262f;
+}
+.brow:last-child{border-bottom:0}
+.bwrap{flex:1;min-width:0}
+.btitle{font-family:var(--serif);font-size:15.5px;line-height:1.25;color:#e9e6df}
+.brow.dislike .btitle,.brow.never .btitle{color:var(--dim-2)}
+.brow .marks{position:static;margin:5px 0 0;gap:4px}
+.brow .mark{width:19px;height:19px;font-size:10.5px;background:rgba(255,255,255,.05);box-shadow:none}
+.bset{
+  flex:0 0 auto; width:30px; height:30px; border-radius:50%; font-size:14px;
+  border:1px solid #2e3240; background:#20232e; color:var(--dim-2);
+}
+.brow.like .bset.like{background:var(--yes);border-color:var(--yes);color:#0f1410}
+.brow.dislike .bset.dis{background:var(--no);border-color:var(--no);color:#fff}
+.bstate{display:none}
 
 /* — taste — */
 .bar{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px}

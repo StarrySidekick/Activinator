@@ -2,28 +2,27 @@
    Pointer events, so a finger and a mouse are the same code path. The card
    follows your hand exactly and commits on release: no threshold snapping
    mid-gesture, because a card that leaves before you let go is a card you did
-   not decide about. */
+   not decide about.
+
+   Right is like, left is not, and up is neither — up passes the card on
+   without saying anything about it, which is why it has no stamp. */
 import { say } from './deck.js';
 
 const G = { on:false, el:null, x:0, y:0, dx:0, dy:0, t:0, moved:0, id:0, read:false };
 
-/* Right and left are the verdict; up is doing it now. Up has to beat sideways
-   by a clear margin or every enthusiastic yes reads as "now". */
 const verdictOf = (dx, dy, w, h, ms) => {
   const vx = Math.abs(dx) / Math.max(ms, 1);
-  if (dy < -h * .20 && Math.abs(dy) > Math.abs(dx) * 1.5) return 'now';
-  if (dx > w * .26 || (dx > 44 && vx > .55)) return 'yes';
-  if (dx < -w * .26 || (dx < -44 && vx > .55)) return 'no';
+  if (dy < -h * .18 && Math.abs(dy) > Math.abs(dx) * 1.5) return 'skip';
+  if (dx > w * .26 || (dx > 44 && vx > .55)) return 'like';
+  if (dx < -w * .26 || (dx < -44 && vx > .55)) return 'dislike';
   return null;
 };
 
-const paint = (el, dx, dy, w, h) => {
+const paint = (el, dx, dy, w) => {
   el.style.transform = `translate(${dx}px,${dy}px) rotate(${dx / 17}deg)`;
-  const q = el.querySelector('.s-yes'), n = el.querySelector('.s-no'), o = el.querySelector('.s-now');
-  const up = Math.max(0, -dy - h * .05) / (h * .18);
+  const q = el.querySelector('.s-yes'), n = el.querySelector('.s-no');
   if (q) q.style.opacity = Math.min(1, Math.max(0, dx) / (w * .22));
   if (n) n.style.opacity = Math.min(1, Math.max(0, -dx) / (w * .22));
-  if (o) o.style.opacity = Math.abs(dy) > Math.abs(dx) ? Math.min(1, up) : 0;
 };
 
 const down = (e) => {
@@ -45,8 +44,7 @@ const move = (e) => {
   G.dx = e.clientX - G.x; G.dy = e.clientY - G.y;
   G.moved = Math.max(G.moved, Math.abs(G.dx) + Math.abs(G.dy));
   if (G.read) return;
-  const r = G.el.getBoundingClientRect();
-  paint(G.el, G.dx, G.dy, r.width, r.height);
+  paint(G.el, G.dx, G.dy, G.el.getBoundingClientRect().width);
 };
 
 const up = (e) => {
@@ -59,7 +57,7 @@ const up = (e) => {
   if (G.moved < 9 && Date.now() - G.t < 500) el.classList.toggle('flip');
   el.classList.add('rest');
   el.style.transform = 'translate(0,0)';
-  ['.s-yes','.s-no','.s-now'].forEach(s => { const n = el.querySelector(s); if (n) n.style.opacity = 0; });
+  ['.s-yes','.s-no'].forEach(s => { const n = el.querySelector(s); if (n) n.style.opacity = 0; });
 };
 
 const wire = (host) => {

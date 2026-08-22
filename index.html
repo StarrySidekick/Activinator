@@ -20,20 +20,15 @@
 </head>
 <body>
 <div id="frame">
-  <header id="top">
-    <button class="ctxbtn" data-act="ctx"><span id="ctxline">Anyone · Anywhere · Any length</span></button>
-    <div class="topr">
-      <button class="chip" data-act="list">List<em id="listn"></em></button>
-      <button class="chip" data-act="taste">Taste</button>
-    </div>
-  </header>
   <main id="deck"></main>
-  <footer id="acts">
-    <button class="act undo" data-act="undo" title="Take that back">Undo</button>
-    <button class="act no"  data-act="no"  title="Not for me">Pass</button>
-    <button class="act now" data-act="now" title="Doing it now">Now</button>
-    <button class="act yes" data-act="yes" title="Yes, put it on the list">Yes</button>
-  </footer>
+  <!-- Three buttons over a full-screen card: everything else, write one, find
+       one. Undo joins them only when there is something to take back. -->
+  <nav class="dock">
+    <button data-act="menu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    <button data-act="add" aria-label="Write your own"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button data-act="browse" aria-label="All activities"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
+    <button data-act="undo" class="undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 7H6.5A4.5 4.5 0 1 0 6.5 16H12"/><path d="M12 4L8.5 7L12 10"/></svg></button>
+  </nav>
 </div>
 <div id="panelhost"></div>
 <div id="toast"></div>

@@ -1,21 +1,22 @@
 /* Activinator — the deck.
-   A card is a printed card: cream stock, letterpress serif, a coloured rule at
-   the head. Three are in the DOM at once; only the top one listens. */
+   A card is a printed card: cream stock, letterpress serif, a row of emblems
+   at the head. It fills the screen, so three of them are stacked exactly on
+   top of each other and only the top one listens. */
+/* The card is the screen. Nothing is laid out beside it — the dock floats over
+   the bottom of it — so the deck is the whole frame with the safe areas kept
+   clear of the type. */
 #deck{
-  flex:1 1 auto; position:relative; margin-top:12px;
-  perspective:1400px; touch-action:none;
+  position:absolute; inset:0; perspective:1600px; touch-action:none;
 }
 
-/* A card is a card, not a page: it keeps a card's proportions and sits in the
-   middle of the deck, so the two behind it show at the edges. The centring is
-   the `translate` property rather than `transform`, which the drag owns and
-   rewrites every frame. */
+/* The card is the screen — no radius, no inset, no edge. The two behind it sit
+   back rather than beside it, and step forward as the one above them leaves;
+   an offset would show as a misaligned edge against the screen itself. The
+   transform is written inline by deck.js so a drag can overwrite it every
+   frame without fighting a stylesheet. */
 .card{
-  position:absolute; left:0; right:0; top:50%; translate:0 -50%;
-  aspect-ratio:1 / 1.58; max-height:100%; border-radius:20px;
+  position:absolute; inset:0; border-radius:0;
   transform-style:preserve-3d; will-change:transform;
-  /* The two behind sit back and down; the transform is written inline by
-     cards.js so a drag can overwrite it without fighting a class. */
 }
 .card.rest{transition:transform .34s cubic-bezier(.2,.8,.25,1), opacity .34s}
 .card.gone{transition:transform .34s cubic-bezier(.3,.1,.3,1), opacity .3s; opacity:0}
@@ -28,7 +29,7 @@
 .card.flip .cardin{transform:rotateY(180deg)}
 
 .face{
-  position:absolute; inset:0; border-radius:20px; overflow:hidden;
+  position:absolute; inset:0; border-radius:0; overflow:hidden;
   backface-visibility:hidden; -webkit-backface-visibility:hidden;
   /* backface-visibility alone is not enough — Safari drops it whenever
      something in the card builds its own rendering layer, and then the front's
@@ -37,23 +38,29 @@
      change happens edge-on and cannot be seen. */
   transition:opacity 0s linear .25s;
   background:var(--paper); color:var(--text);
-  box-shadow:0 18px 40px -12px rgba(0,0,0,.65), 0 2px 0 rgba(255,255,255,.16) inset,
-             0 0 0 1px rgba(0,0,0,.35);
+  box-shadow:0 18px 40px -12px rgba(0,0,0,.65);
   display:flex; flex-direction:column;
-  padding:26px 24px 20px;
+  padding:calc(var(--top) + 26px) 26px calc(var(--bot) + 74px);
 }
-.face.front{justify-content:center; padding:34px 28px}
+/* — the emblems, and then the activity. That is the whole front.
+     The row stays in the flow: `.face>*` makes every direct child position
+     relative, so an absolutely-placed row of marks quietly became a centred
+     one and sat on top of the title. — */
+.face.front{justify-content:flex-start}
+.marks{margin:0; display:flex; flex-wrap:wrap; gap:6px}
+.mark{
+  width:25px; height:25px; border-radius:50%; display:flex;
+  align-items:center; justify-content:center; font-size:13px; line-height:1;
+  background:rgba(0,0,0,.05); box-shadow:0 0 0 1px rgba(0,0,0,.045) inset;
+}
+/* auto above and below: the activity sits in the middle of what the emblems
+   leave, however many of them there are. */
+.face.front .t{margin:auto 0}
 .face.back{transform:rotateY(180deg); background:var(--paper-2); overflow-y:auto}
 .card .face.back{opacity:0}
 .card.flip .face.front{opacity:0}
 .card.flip .face.back{opacity:1}
 
-/* The rule at the head of the card is the only colour on it, and it is the
-   card's own — accentOf() picks it from what the activity is made of. */
-.face::before{
-  content:''; position:absolute; left:0; right:0; top:0; height:7px;
-  background:var(--accent);
-}
 /* Paper, not a rectangle of cream: a faint tooth, printed under everything. */
 .face::after{
   content:''; position:absolute; inset:0; pointer-events:none; opacity:.5;
@@ -65,7 +72,7 @@
 
 .kicker{
   font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--accent); margin:0; display:flex; gap:8px; align-items:center;
+  color:var(--text-3); margin:0; display:flex; gap:8px; align-items:center;
 }
 .kicker .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.55}
 .kicker .k2{color:var(--text-3);font-weight:600;letter-spacing:.1em}
@@ -75,19 +82,11 @@
   font-size:clamp(29px,8.4vw,42px); line-height:1.1; letter-spacing:-.012em;
   text-wrap:balance;
 }
-.facts{
-  list-style:none; display:flex; flex-wrap:wrap; gap:6px; margin:18px 0 auto; padding:0;
-}
-.facts li{
-  font-size:11px; font-weight:600; letter-spacing:.03em; color:var(--text-2);
-  border:1px solid rgba(0,0,0,.14); border-radius:999px; padding:4px 9px;
-  background:rgba(255,255,255,.4);
-}
 .why{
   margin:10px 0 0; font-size:13px; line-height:1.4; color:var(--text-2);
 }
 /* — the back — */
-.back .facts{margin:12px 0 0}
+
 .back h3{
   font-family:var(--serif); font-weight:400; font-size:21px; line-height:1.2; margin:0;
 }
@@ -111,18 +110,17 @@
 .meter{
   height:5px;border-radius:3px;background:rgba(0,0,0,.1);overflow:hidden;margin:8px 0 2px;
 }
-.meter i{display:block;height:100%;background:var(--accent)}
+.meter i{display:block;height:100%;background:var(--text-2)}
 
 /* — the stamps, inked on as you pull — */
 .stamp{
-  position:absolute; top:21%; z-index:3; font-family:var(--serif);
+  position:absolute; top:26%; z-index:3; font-family:var(--serif);
   font-size:26px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
   padding:6px 14px; border:3px solid currentColor; border-radius:8px;
   opacity:0; pointer-events:none;
 }
-.stamp.s-yes{left:22px;transform:rotate(-13deg);color:var(--yes)}
-.stamp.s-no {right:22px;transform:rotate(13deg);color:var(--no)}
-.stamp.s-now{left:50%;top:38%;transform:translateX(-50%) rotate(-5deg);color:var(--now)}
+.stamp.s-yes{left:26px;transform:rotate(-13deg);color:var(--yes)}
+.stamp.s-no {right:26px;transform:rotate(13deg);color:var(--no);font-size:22px}
 
 /* — the empty deck — */
 .empty{

@@ -1,9 +1,9 @@
 # Activinator
 
-A deck of things to actually go and do. It deals you one activity at a time;
-you swipe right on the ones you fancy and left on the ones you don't, and it
-works out what you are like — while deliberately, permanently, keeping some of
-the deck outside what it thinks you are like.
+A deck of things to actually go and do. It deals you one activity at a time,
+full screen; you swipe right on the ones you would probably do and left on the
+ones you wouldn't, and it works out what you are like — while deliberately,
+permanently, keeping some of the deck outside what it thinks you are like.
 
 The point is a scroll where every card is a launchpad off the phone. Same
 thumb, opposite direction.
@@ -26,9 +26,11 @@ and the manifest won't load, so you'd be testing a different app than the one
 that ships.
 
 `test/smoke.mjs` needs Playwright (`npm i playwright` at the repo root, which is
-already a dependency there). It exercises dealing, the flip, a real dragged
-swipe, undo, the context filter, all four panels, writing your own, persistence
-across a reload and an offline reload. Screenshots land in `test/shots/` — look
+already a dependency there). It exercises dealing, the full-bleed card, the bare front and its emblems, the
+flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
+leaves the pool but "never again" does, the context filter, the dock, search,
+liking from the browser, writing your own, persistence across a reload and an
+offline reload. Screenshots land in `test/shots/` — look
 at them, this is a visual app and a passing assertion doesn't mean it looks
 right.
 
@@ -72,19 +74,30 @@ space: the model learns one weight per tag and nothing else, which is why a tag
 like `screenfree` or `spooky` is worth adding and a tag like `nice` is not.
 
 **The vocabulary is grouped, and the groups mean different things.** `GROUPS`
-in `data.js`: what you're *doing* (create, organize, clean, repair, try, watch,
-listen, read, travel, eat, play, move, learn, kindness), what you're *making*
-if you are (writing, visual art and its five kinds, music, acting, dancing,
-film), *where* (indoors↔outdoors, nature, water, city), *who* (solo↔social,
-romantic), *how hard* (casual→engaging→challenging, a scale — exactly one per
-activity), *mood* (adventurous, funny, mindful, spooky, nostalgic), and the
-practical facts. Nesting is deliberate: a painting activity carries `create`,
-`visualart` and `painting`, so taste can learn that you like making things,
-or visual art specifically, or painting and not sculpting.
+in `data.js` — nine of them: *doing* (create, organize, clean, repair, try,
+play, move, learn, kindness), *making* if you are (writing, visual art and its
+five kinds, music, acting, dancing, film), *experience* (watch, listen, read,
+travel, eat), *where*, *who*, *how hard* (casual→engaging→challenging, a scale,
+exactly one per activity), *mood* (adventurous, funny, mindful, spooky,
+nostalgic, romantic), *duration* and *cost*.
 
-**Length, cost and company are tags too**, derived in `data.js` rather than
-written out. Without them the model could learn that you like cooking but never
-that you only ever say yes to the quick ones.
+Nesting is deliberate: a painting activity carries `create`, `visualart` and
+`painting`, so taste can learn that you like making things, or visual art
+specifically, or painting and not sculpting. The general tag is dropped when
+drawing the emblems, because there it would be three pictures saying one thing.
+
+**There is one where and one who, and they are tags rather than fields.** Two
+places to say where a thing happens is two places to keep in step, and they
+drifted. `where` is exactly one of `anywhere | indoors | outdoors | home`, and
+`home` means indoors, so asking for indoors gets it. `who` is a *constraint*,
+not a description: an activity names nobody unless it needs somebody, so it
+answers to whoever you asked for — `solo partner friends` on five cards in six
+told the reader nothing and the model less.
+
+**Duration and cost are bands, derived from the minutes and the cost.**
+`quick` under five minutes, `short` under thirty, `medium` up to two hours,
+`long` beyond that, `allday` from six hours. The minutes stay because a band
+has to be worked out from something, but nothing else reads them.
 
 **Taste is online logistic regression, and it is small on purpose.** Score is
 the bias plus the mean of the card's tag weights; the update is one gradient
@@ -97,11 +110,31 @@ weights as they were. Reversing the arithmetic instead looks right and isn't —
 the error term gets recomputed from weights the update itself moved, so undo
 left the model slightly different every time.
 
+**Nothing ever leaves the pool.** A dislike is not a deletion: it sinks — the
+verdict is worth ±0.8 on the ranking — and it can surface again months later
+when you are a different mood. A swipe up is not a soft no at all: it passes
+the card on without saying anything about it, teaches nothing, and carries no
+weight. The only thing that takes an activity out for good is "never again", on
+the back of the card. What keeps a hand from repeating is recency: the last
+forty things you were shown sink by up to 2.6 and then wear off completely.
+
 **A share of every hand is dealt against what it knows.** `S.nerve` (a slider,
 default 30%) is how often the dealer picks from the activities whose tags it
 knows *least* about rather than from the top of the ranking. A wildcard says on
 its face that it is one — except on the first day, when it knows nothing and
 there is nothing to deal against, so nothing is labelled.
+
+**The card is the screen.** Full bleed, no radius, no edge. The two behind it
+sit back rather than beside it and step forward as the one above leaves; an
+offset would show as a misaligned edge against the screen itself. Three buttons
+float over the bottom — everything else, write one, find one — and undo joins
+them only when there is something to take back, because a dead button is
+furniture.
+
+**The front is a row of emblems and the activity.** No description, no tag
+names, no reason. The emblems say what kind of thing it is without spending a
+line on words, and they come out in the vocabulary's own order so the row can
+be read by shape.
 
 **Nothing is dealt without a reason it can print.** Every card carries `why` —
 what it thinks it knows, or that it is still guessing, or that this is a
@@ -122,25 +155,24 @@ you like.
 the list updates — and the card flies off over the top of all that. Nothing ever
 waits for an animation.
 
-**A no is not forever.** Verdicts go quiet for a while (`QUIET` in `deal.js`) and
-come back; only "never again" is permanent, and there is a button to forgive
-every pass at once.
-
-**Doing it counts for more than fancying it.** Ticking something off the list
-learns again, harder, and un-ticking puts the weights back exactly.
+**Liking is not committing, so there is no list.** Right means "I would
+probably do this" and left means "I probably wouldn't" — neither files anything
+anywhere. What there is instead is every activity, searchable, behind the
+magnifier; liking one there counts exactly as liking it on a card, or the two
+would disagree about what you think.
 
 ## The files
 
 | Module | What lives there |
 | --- | --- |
-| `data.js` | The 291 activities, the tag vocabulary and its groups, the three context questions. The substance of the app. |
+| `data.js` | The 303 activities, the tag vocabulary with its groups and emblems, the three context questions. The substance of the app. |
 | `state.js` | The one localStorage key, the shape, export/import. Nothing else touches storage. |
 | `taste.js` | The model: `scoreOf`, `learn`, `unlearn`, `opinions`, `reasons`. |
-| `deal.js` | What gets dealt next — filtering, ranking, wildcards, and the `why` line. |
+| `deal.js` | What gets dealt next — filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
 | `cards.js` | How a card is printed: `cardHTML`, the accent colour, the wording of a length. The front is the title and nothing else; the back carries everything the app knows. |
-| `deck.js` | The hand, the verdicts, undo, the fan, the empty deck. |
-| `swipe.js` | Pointer drag, the stamps, and the tap that flips. |
-| `panels.js` | Every panel: right now, the list, taste, write your own, backup. |
+| `deck.js` | The hand, the verdicts, undo, the stack, the empty deck. |
+| `swipe.js` | Pointer drag, the two stamps, and the tap that flips. Right is like, left is not, up is neither — which is why up has no stamp. |
+| `panels.js` | Every panel: the hub, right now, all activities, taste, write your own, backup. |
 | `boot.js` | One delegated listener set. To add an action, add a `data-act` and a case in `act()`. |
 
 Three stylesheets: `base.css` (the room), `deck.css` (the card), `panels.css`.

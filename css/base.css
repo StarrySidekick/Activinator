@@ -24,52 +24,30 @@ body{
 input,textarea,.pickme{user-select:text;-webkit-user-select:text}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 
-#frame{
-  height:100dvh; display:flex; flex-direction:column;
-  padding:calc(var(--top) + 10px) 14px calc(var(--bot) + 8px);
-}
+#frame{ height:100dvh; position:relative; overflow:hidden }
 
-/* — the bar — */
-#top{display:flex;align-items:center;gap:8px;flex:0 0 auto}
-.ctxbtn{
-  flex:1 1 auto; min-width:0; text-align:left; color:var(--dim);
-  font-size:13px; letter-spacing:.02em; padding:7px 11px;
-  border:1px solid var(--ink-3); border-radius:999px; background:#191b24;
-  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+/* — the dock. Three buttons over a full-screen card: everything else, write
+     one, find one. Undo joins them only when there is something to take back,
+     because a dead button is furniture. — */
+.dock{
+  position:absolute; left:0; right:0; bottom:calc(var(--bot) + 10px);
+  display:flex; justify-content:center; gap:10px; z-index:20; pointer-events:none;
 }
-.ctxbtn::after{content:'▾'; margin-left:6px; opacity:.6}
-.topr{display:flex;gap:6px;flex:0 0 auto}
-.chip{
-  font-size:12.5px; color:var(--dim); padding:7px 11px; border-radius:999px;
-  border:1px solid var(--ink-3); background:#191b24;
+.dock button{
+  pointer-events:auto; width:46px; height:46px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(20,21,28,.62); border:1px solid rgba(255,255,255,.14);
+  color:#e9e6df; backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px);
+  box-shadow:0 6px 18px -6px rgba(0,0,0,.6);
 }
-.chip em{
-  font-style:normal; margin-left:5px; background:var(--yes); color:#0f1410;
-  border-radius:999px; padding:1px 5px; font-size:11px; font-weight:600;
-}
-.chip em:empty{display:none}
-
-/* — the buttons under the deck. The card is the interface; these are for
-     people who would rather press than swipe, and for the first day. — */
-#acts{
-  flex:0 0 auto; display:grid; grid-template-columns:auto 1fr 1fr 1fr;
-  gap:8px; align-items:center; padding-top:12px;
-}
-.act{
-  border-radius:14px; padding:13px 8px; font-size:13.5px; font-weight:600;
-  letter-spacing:.03em; border:1px solid var(--ink-3); background:#191b24;
-  color:#cfd3de;
-}
-.act:active{transform:translateY(1px)}
-.act.undo{padding:13px 12px;font-weight:500;color:var(--dim-2);font-size:12.5px}
-.act.undo.on{color:var(--dim)}
-.act.no{color:#e0a49c;border-color:#3a2724}
-.act.now{color:#e8c48a;border-color:#3a3122}
-.act.yes{color:#b9d6a8;border-color:#2a3626}
-.act[disabled]{opacity:.35}
+.dock button:active{transform:scale(.94)}
+.dock svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.dock .undo{opacity:0;transform:scale(.7);pointer-events:none;transition:opacity .18s,transform .18s}
+.dock .undo.on{opacity:1;transform:scale(1);pointer-events:auto}
 
 #toast{
-  position:fixed; left:50%; bottom:calc(var(--bot) + 92px); transform:translateX(-50%) translateY(8px);
+  position:fixed; left:50%; bottom:calc(var(--bot) + 74px); transform:translateX(-50%) translateY(8px);
   background:#e9e6df; color:#14151c; font-size:13px; font-weight:500;
   padding:9px 15px; border-radius:999px; opacity:0; pointer-events:none;
   transition:opacity .18s, transform .18s; z-index:80; max-width:80vw; text-align:center;
