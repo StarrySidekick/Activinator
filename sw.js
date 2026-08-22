@@ -3,7 +3,7 @@
    launch picks it up. A new file must also be added to SHELL or it will not be
    there offline. An already-open page finishes on the old assets, so a bump
    takes effect on the second launch, not the first. */
-const CACHE = 'activinator-v1';
+const CACHE = 'activinator-v2';
 const SHELL = [
   './', './index.html',
   './css/base.css', './css/deck.css', './css/panels.css',
@@ -23,9 +23,16 @@ self.addEventListener('install', e => {
     .then(() => self.skipWaiting()));
 });
 
+/* Only ever delete Activinator's own old caches. A cache store belongs to the
+   whole origin rather than to a scope, so `k !== CACHE` means "everything
+   anybody else put here" — and while this is served alongside another app on
+   one origin, that wipes the other app's offline copy every time you open
+   this one. */
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
+    .then(ks => Promise.all(ks
+      .filter(k => k.startsWith('activinator-') && k !== CACHE)
+      .map(k => caches.delete(k))))
     .then(() => self.clients.claim()));
 });
 

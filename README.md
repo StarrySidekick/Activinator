@@ -9,9 +9,10 @@ The point is a scroll where every card is a launchpad off the phone. Same
 thumb, opposite direction.
 
 It lives in this repository for now because it was started from a phone. It is
-entirely self-contained in `activinator/` — no imports from Bureau, no shared
-files, nothing added to Bureau's build or deploy — so moving it to its own
-repository is `git mv activinator ../activinator` and nothing else.
+self-contained in `activinator/` — no imports from Bureau, no shared files — so
+moving it to its own repository is `git mv activinator ../activinator` plus
+undoing two things: the assemble step in `.github/workflows/pages.yml`, and the
+`/activinator/` guard in `web/sw.js`. Both are marked.
 
 ## Running it
 
@@ -33,13 +34,33 @@ right.
 
 `scripts/icons.py` redraws `icons/` with nothing but the standard library.
 
-## It is not deployed yet
+## Deploying
 
-Nothing in this repository's Pages workflow knows about `activinator/` — it
-uploads `web/` and only `web/`. To put this on a phone, either give it its own
-repository (the intention) or add one step to `.github/workflows/pages.yml` that
-copies `activinator/` into the artifact alongside Bureau. That is a decision
-about publishing to a live site, so it is left for you to make.
+Live at **https://starrysidekick.github.io/bureau/activinator/**. Pushing to
+`main` deploys it — `.github/workflows/pages.yml` assembles `web/` at the root
+with `activinator/` beside it, minus `test/` and `scripts/`.
+
+After changing anything in `js/`, `css/` or `index.html`, bump `CACHE` in
+`sw.js` **and** `APP_VERSION` in `js/state.js`. Without the cache bump an
+installed copy keeps serving the old version, and the symptom — "my change
+didn't deploy" — points at the wrong culprit. A new file must also be added to
+`SHELL` in `sw.js` or it won't be there offline. An already-open page finishes
+on the old assets, so a bump takes effect on the **second** launch.
+
+**It shares an origin with Bureau, and a cache store belongs to the origin
+rather than to a service worker's scope.** Both workers therefore see each
+other's caches in `caches.keys()`, and the usual `filter(k => k !== CACHE)` on
+activate reads as "delete everything anybody else put here". It did exactly
+that: one visit to Activinator wiped Bureau's entire shell, and Bureau's next
+launch quietly rebuilt a partial one from whatever that page happened to
+request. Both workers now reap **only their own prefix**. In the same vein,
+Bureau's worker skips `/activinator/` altogether — its navigation branch stores
+whatever it fetched as Bureau's own shell, so without that guard opening this
+app once left Bureau opening into this app whenever it was offline.
+
+`test/deploy.mjs` at the repository root is the guard on both of those. It is
+the one test that has to run against the assembled site rather than either app
+alone.
 
 ## How it works
 

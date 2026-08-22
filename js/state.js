@@ -5,7 +5,7 @@
 import { SEEDS } from './data.js';
 
 const KEY = 'activinator.v1';
-const APP_VERSION = '0.1';
+const APP_VERSION = '0.2';
 
 /* `w` is the taste model: one weight per tag, plus a bias. `seen` is what
    each card was told and when, so a no can expire rather than being a life
