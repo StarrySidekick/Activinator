@@ -27,12 +27,35 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   });
 
   // — the card flips —
+  // The front is the activity and nothing else. The stamps live there too but
+  // are inked on by the drag, so they are not part of what you read.
+  const frontIsBare = await page.evaluate(() => {
+    const f = document.querySelector('.card.top .front');
+    const kids = [...f.children].filter(el => !el.classList.contains('stamp'));
+    const text = kids.map(el => el.innerText.trim()).join('');
+    return kids.length === 1 && kids[0].classList.contains('t') &&
+           text === f.querySelector('.t').innerText.trim() &&
+           !f.querySelector('.facts, .taglist, .kicker, .why, .odds, .twist, .d');
+  });
+
   await page.locator('.card.top').click();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(600);
   const flipped = await page.locator('.card.top.flip').count() === 1;
+  // …and the front must not be readable through the back once it is turned.
+  const frontHidden = await page.evaluate(() => {
+    const f = document.querySelector('.card.top .front');
+    return getComputedStyle(f).opacity === '0' || getComputedStyle(f).backfaceVisibility === 'hidden';
+  });
+  const backOpaque = await page.evaluate(() => {
+    const b = document.querySelector('.card.top .back');
+    const bg = getComputedStyle(b).backgroundColor;
+    return getComputedStyle(b).opacity === '1' && !/rgba\(.*,\s*0?\.\d+\)/.test(bg);
+  });
   await shot('02-back');
+  // a flipped card must turn back over, which it once could not
   await page.locator('.card.top').click();
-  await page.waitForTimeout(450);
+  await page.waitForTimeout(600);
+  const flipsBack = await page.locator('.card.top.flip').count() === 0;
 
   // — a swipe right files it and the deck moves on —
   const first = await page.locator('.card.top .t').innerText();
@@ -110,7 +133,6 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await page.click('[data-act="taste"]'); await page.waitForTimeout(300);
   await page.click('[data-act="add"]'); await page.waitForTimeout(350);
   await page.fill('[data-in="t"]', 'Walk the whole canal path');
-  await page.fill('[data-in="d"]', 'End to end, one Saturday.');
   await page.click('[data-act="dtag"][data-v="outdoors"]');
   await page.waitForTimeout(200);
   await shot('09-add');
@@ -127,11 +149,13 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('10-offline');
   await ctx.setOffline(false);
 
-  console.log({ dealt, manifestOk, flipped, listed, moved, learned, undone, backAgain,
+  console.log({ dealt, manifestOk, frontIsBare, flipped, frontHidden, backOpaque, flipsBack,
+    listed, moved, learned, undone, backAgain,
     unlearned, passed, ctxKept, ctxHonoured, bars, items, ticked, mine, persisted, swReady,
     offline, errors: errs });
   await browser.close();
-  const ok = dealt === 3 && manifestOk && flipped && listed === 1 && moved && learned &&
+  const ok = dealt === 3 && manifestOk && frontIsBare && flipped && frontHidden && backOpaque &&
+    flipsBack && listed === 1 && moved && learned &&
     undone && backAgain && passed && ctxKept && ctxHonoured && bars > 0 && items > 0 && ticked && mine &&
     persisted && swReady && offline && !errs.length;
   process.exit(ok ? 0 : 1);

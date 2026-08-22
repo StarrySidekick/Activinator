@@ -64,10 +64,27 @@ alone.
 
 ## How it works
 
-**Everything is one object with tags.** A seed activity is `{t, d, tags, who,
-where, min, cost}`. Tags are the whole feature space: the model learns one
-weight per tag and nothing else. That is why a tag like `screenfree` or
-`morning` is worth adding and a tag like `nice` is not.
+**An activity is a title and a set of tags.** `{t, tags, who, where, min,
+cost}` — and no description. A card is one thing to go and do; a second
+sentence explaining it is a second sentence you have to read before you can
+swipe, so the title has to carry the whole idea. Tags are the entire feature
+space: the model learns one weight per tag and nothing else, which is why a tag
+like `screenfree` or `spooky` is worth adding and a tag like `nice` is not.
+
+**The vocabulary is grouped, and the groups mean different things.** `GROUPS`
+in `data.js`: what you're *doing* (create, organize, clean, repair, try, watch,
+listen, read, travel, eat, play, move, learn, kindness), what you're *making*
+if you are (writing, visual art and its five kinds, music, acting, dancing,
+film), *where* (indoors↔outdoors, nature, water, city), *who* (solo↔social,
+romantic), *how hard* (casual→engaging→challenging, a scale — exactly one per
+activity), *mood* (adventurous, funny, mindful, spooky, nostalgic), and the
+practical facts. Nesting is deliberate: a painting activity carries `create`,
+`visualart` and `painting`, so taste can learn that you like making things,
+or visual art specifically, or painting and not sculpting.
+
+**Length, cost and company are tags too**, derived in `data.js` rather than
+written out. Without them the model could learn that you like cooking but never
+that you only ever say yes to the quick ones.
 
 **Taste is online logistic regression, and it is small on purpose.** Score is
 the bias plus the mean of the card's tag weights; the update is one gradient
@@ -86,14 +103,16 @@ knows *least* about rather than from the top of the ranking. A wildcard says on
 its face that it is one — except on the first day, when it knows nothing and
 there is nothing to deal against, so nothing is labelled.
 
-**Nothing is dealt without a reason it can print.** Every card carries `why`:
+**Nothing is dealt without a reason it can print.** Every card carries `why` —
 what it thinks it knows, or that it is still guessing, or that this is a
-deliberate shot in the dark.
+deliberate shot in the dark. It is on the back, with the tags and the odds,
+because the front is for deciding and the back is for understanding.
 
-**A twist is a second sentence, never a splice.** Generated variety comes from
-`TWISTS` — "Leave the phone at home for it", "Only use what is already in the
-house" — appended whole. Grammar-spliced titles eventually produce a sentence no
-person would say. A twist adds its own tags, so taste has a view about twists.
+**The flip does not rely on `backface-visibility`.** Safari drops it the moment
+anything in the card builds its own rendering layer, and then the front's type
+shows through the back and neither face is readable. The hidden face is also
+made transparent, swapped at the halfway point of the turn so the change
+happens edge-on.
 
 **Context filters, it does not teach.** Who's in, where, and how long you have
 are a hard filter on what can be dealt. A wet Tuesday is not evidence about what
@@ -114,11 +133,11 @@ learns again, harder, and un-ticking puts the weights back exactly.
 
 | Module | What lives there |
 | --- | --- |
-| `data.js` | The 130 seed activities, the twists, the tag vocabulary, the three context questions. The substance of the app. |
+| `data.js` | The 291 activities, the tag vocabulary and its groups, the three context questions. The substance of the app. |
 | `state.js` | The one localStorage key, the shape, export/import. Nothing else touches storage. |
 | `taste.js` | The model: `scoreOf`, `learn`, `unlearn`, `opinions`, `reasons`. |
-| `deal.js` | What gets dealt next — filtering, ranking, wildcards, twists, doubles, and the `why` line. |
-| `cards.js` | How a card is printed: `cardHTML`, the accent colour, the wording of a length. |
+| `deal.js` | What gets dealt next — filtering, ranking, wildcards, and the `why` line. |
+| `cards.js` | How a card is printed: `cardHTML`, the accent colour, the wording of a length. The front is the title and nothing else; the back carries everything the app knows. |
 | `deck.js` | The hand, the verdicts, undo, the fan, the empty deck. |
 | `swipe.js` | Pointer drag, the stamps, and the tap that flips. |
 | `panels.js` | Every panel: right now, the list, taste, write your own, backup. |

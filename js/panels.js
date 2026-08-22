@@ -3,7 +3,7 @@
    is. `body` is a function, not a string, so a panel can redraw itself from
    state after any change — no handler rebuilds a panel by hand. */
 import { S, save, APP_VERSION, exportJSON, importJSON } from './state.js';
-import { TAGS, WHO, WHERE, TIME } from './data.js';
+import { TAGS, GROUPS, WHO, WHERE, TIME } from './data.js';
 import { opinions, learn } from './taste.js';
 import { reset as redeal, render, toast } from './deck.js';
 import { esc, lengthOf } from './cards.js';
@@ -52,8 +52,7 @@ const listPanel = () => openPanel({ key:'list', title:'The list', body: () => {
       <button class="tick" data-act="tick" data-id="${esc(l.at)}">✓</button>
       <div class="iwrap"><div class="itxt">${esc(l.card.t)}</div>
         <div class="imeta">${l.now && !l.done ? '<span class="nowtag">Doing it now</span>' : ''}
-          <span>${esc(lengthOf(l.card.min))}</span>
-          ${l.card.twist ? `<span>${esc(l.card.twist)}</span>` : ''}</div></div>
+          <span>${esc(lengthOf(l.card.min))}</span></div></div>
       <button class="del" data-act="unlist" data-id="${esc(l.at)}" aria-label="Remove">✕</button>
     </div>`;
   if (!S.list.length) return `<p class="pnote">Nothing yet. Swipe right on anything you fancy
@@ -101,20 +100,21 @@ const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are 
 
 /* — your own activities. They go in the same pool as the library and are
      scored the same way, which is what stops "mine" being a second app. — */
-const DRAFT = { t:'', d:'', who:'any', where:'any', min:60, tags:[] };
+const DRAFT = { t:'', who:'any', where:'any', min:60, tags:[] };
 const addPanel = () => openPanel({ key:'add', title:'Write your own', body: () => `
   <div class="prow"><p class="plabel">The thing</p>
-    <input class="field" data-in="t" placeholder="Walk the whole of the canal" value="${esc(DRAFT.t)}"></div>
-  <div class="prow"><p class="plabel">A line about it</p>
-    <textarea class="field" data-in="d" placeholder="Why it is worth doing, or how to start.">${esc(DRAFT.d)}</textarea></div>
+    <input class="field" data-in="t" placeholder="Walk the whole of the canal" value="${esc(DRAFT.t)}">
+    <p class="pnote">However you write it is how it will read on the card, so write the
+    whole thing — there is nowhere else for it to go.</p></div>
   <div class="prow"><p class="plabel">Who</p>${chips('dwho', WHO, DRAFT.who)}</div>
   <div class="prow"><p class="plabel">Where</p>${chips('dwhere', WHERE, DRAFT.where)}</div>
   <div class="prow"><p class="plabel">How long — ${esc(lengthOf(DRAFT.min))}</p>
     <input type="range" min="10" max="600" step="10" value="${DRAFT.min}" data-act="dmin"></div>
-  <div class="prow"><p class="plabel">What it is made of</p>
-    <div class="chips">${Object.entries(TAGS).map(([k, l]) =>
-      `<button data-act="dtag" data-v="${k}" class="${DRAFT.tags.includes(k) ? 'on' : ''}">${esc(l)}</button>`).join('')}</div>
-    <p class="pnote">Tags are how it learns. Pick the three or four that are actually true.</p></div>
+  ${GROUPS.map(([name, keys]) => `<div class="prow"><p class="plabel">${esc(name)}</p>
+    <div class="chips">${keys.map(k =>
+      `<button data-act="dtag" data-v="${k}" class="${DRAFT.tags.includes(k) ? 'on' : ''}">${esc(TAGS[k])}</button>`).join('')}</div></div>`).join('')}
+  <p class="pnote">Tags are the only thing it learns from. Pick the ones that are
+  actually true and leave the rest.</p>
   <button class="pbtn" data-act="savemine">Put it in the deck</button>` });
 
 const backupPanel = () => openPanel({ key:'backup', title:'Back it up', body: () => `
@@ -132,9 +132,9 @@ const saveMine = () => {
   if (!DRAFT.tags.length) return toast('Pick a tag or two');
   const tags = [...new Set(DRAFT.tags.concat(
     DRAFT.min <= 30 ? ['quick'] : DRAFT.min >= 240 ? ['longhaul'] : []))];
-  S.mine.unshift({ id:'m' + Date.now().toString(36), t:DRAFT.t.trim(), d:DRAFT.d.trim() || 'Yours.',
+  S.mine.unshift({ id:'m' + Date.now().toString(36), t:DRAFT.t.trim(),
     tags, who:DRAFT.who, where:DRAFT.where, min:+DRAFT.min, cost:0, src:'mine' });
-  Object.assign(DRAFT, { t:'', d:'', tags:[] });
+  Object.assign(DRAFT, { t:'', tags:[] });
   save(); redeal(); closePanel(); toast('In the deck');
 };
 

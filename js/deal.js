@@ -4,7 +4,6 @@
    you do, so a fixed share of every hand is a wildcard, and a wildcard says on
    its face that it is one. Nothing is dealt without a reason it can print. */
 import { S, pool } from './state.js';
-import { TWISTS } from './data.js';
 import { scoreOf, chanceOf, reasons, warm } from './taste.js';
 
 const DAY = 864e5;
@@ -30,30 +29,14 @@ const fits = (c) => {
   return true;
 };
 
-/* A dealt card is not a seed — it is a seed plus whatever was done to it, and
-   it carries the sentence explaining why it is in front of you. */
+/* A dealt card is a seed plus the sentence explaining why it is in front of
+   you, and nothing else. There is no variation on a seed and no pairing of two
+   of them: a card is one thing to go and do. */
 let n = 0;
-const cardOf = (seed, kind, extra = {}) => ({
+const cardOf = (seed, kind) => ({
   key: 'c' + (++n), id: seed.id, seed, kind,
-  t: seed.t, d: seed.d, tags: seed.tags, min: seed.min, who: seed.who,
-  where: seed.where, cost: seed.cost, ...extra
-});
-
-const twisted = (seed, not) => {
-  const ok = TWISTS.filter(t => t.ok(seed) && t.t !== not);
-  if (!ok.length) return null;
-  const tw = ok[(Math.random() * ok.length) | 0];
-  return cardOf(seed, 'twist', {
-    twist: tw.t,
-    tags: [...new Set(seed.tags.concat(tw.tags))]
-  });
-};
-
-const doubled = (a, b) => cardOf(a, 'double', {
-  t: a.t + ', then ' + b.t.charAt(0).toLowerCase() + b.t.slice(1),
-  d: 'Two in one go. ' + a.d,
-  min: a.min + b.min, second: b.id,
-  tags: [...new Set(a.tags.concat(b.tags))]
+  t: seed.t, tags: seed.tags, min: seed.min, who: seed.who,
+  where: seed.where, cost: seed.cost
 });
 
 /* The line under the title. It is the honest reason, not a flourish: what it
@@ -120,35 +103,18 @@ const deal = (want = 6, exclude = []) => {
     used.add(seed.id);
     lean.push(...seed.tags.slice(0, 2)); while (lean.length > 4) lean.shift();
 
-    let card = null;
-    const roomForTwo = (!S.ctx.time || S.ctx.time >= 300) && seed.min <= 120;
-    if (roomForTwo && Math.random() < 0.07) {
-      const mate = live.find(c => c.id !== seed.id && !used.has(c.id) &&
-        c.where === seed.where && c.min <= 120 && c.tags.every(g => !seed.tags.includes(g)) &&
-        (!S.ctx.time || c.min + seed.min <= S.ctx.time));
-      if (mate) { used.add(mate.id); card = doubled(seed, mate); }
-    }
-    if (!card && Math.random() < 0.24 + Math.min(0.2, S.swipes / 500)) card = twisted(seed);
-    if (!card) card = cardOf(seed, 'plain');
+    const card = cardOf(seed, 'plain');
 
     /* A wildcard is a card dealt against what it knows, so on the first day it
        knows nothing and there is nothing to deal against — labelling the whole
        first hand "wildcard" teaches you that the word means nothing. */
     card.wild = wild && !cold;
-    if (card.wild && card.kind === 'plain') card.kind = 'wild';
-    card.why = why(card.wild ? { ...card, kind:'wild' } : card);
+    if (card.wild) card.kind = 'wild';
+    card.why = why(card);
     card.odds = chanceOf(card);
     out.push(card);
   }
   return out;
 };
 
-/* A twist you do not fancy is not a reason to lose the activity under it. */
-const retwist = (card) => {
-  const t = twisted(card.seed, card.twist);
-  if (!t) return null;
-  t.wild = card.wild; t.why = why(t); t.odds = chanceOf(t);
-  return t;
-};
-
-export { deal, retwist, fits, awake, why };
+export { deal, fits, awake, why };

@@ -3,7 +3,7 @@
    moves, the list updates — and the card flies off over the top of all that.
    Nothing waits for an animation, ever. */
 import { S, save, setUndo, getUndo } from './state.js';
-import { deal, retwist as reroll } from './deal.js';
+import { deal } from './deal.js';
 import { learn, unlearn } from './taste.js';
 import { cardHTML } from './cards.js';
 
@@ -93,7 +93,7 @@ const say = (v) => {
   S.seen[c.id] = { v, at: now() };
   let entry = null;
   if (v === 'yes' || v === 'now') {
-    entry = { id: c.id, card: { t:c.t, d:c.d, twist:c.twist, tags:c.tags, min:c.min, where:c.where, who:c.who, cost:c.cost },
+    entry = { id: c.id, card: { t:c.t, tags:c.tags, min:c.min, where:c.where, who:c.who, cost:c.cost },
               at: now(), now: v === 'now', done: null };
     S.list.unshift(entry);
   }
@@ -140,13 +140,4 @@ const more = () => {
   render();
 };
 
-/* Re-rolling lands you back on the front, because the new twist is the thing
-   you just asked to see. */
-const retwist = () => {
-  const c = top(); if (!c) return;
-  const t = reroll(c);
-  if (!t) return toast('Nothing else to try with this one');
-  Q[0] = t; render(); toast('Different twist');
-};
-
-export { Q, retwist, render, refill, reset, say, takeBack, more, toast, top, ctxLine, place };
+export { Q, render, refill, reset, say, takeBack, more, toast, top, ctxLine, place };

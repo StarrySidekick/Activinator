@@ -3,7 +3,7 @@
    data-act and a case here. Nothing binds a listener inside a render. */
 import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool } from './state.js';
 import { learn, unlearn } from './taste.js';
-import { render, reset as redeal, say, takeBack, more, retwist, toast, top } from './deck.js';
+import { render, reset as redeal, say, takeBack, more, toast, top } from './deck.js';
 import { deal } from './deal.js';
 import { wire as wireSwipe } from './swipe.js';
 import * as P from './panels.js';
@@ -21,7 +21,6 @@ const act = (name, el, e) => {
     case 'yes': case 'no': case 'now': return say(name);
     case 'undo': return takeBack();
     case 'more': return more();
-    case 'retwist': return retwist();
     case 'never': return say('never');
 
     /* Context filters what is dealt and teaches nothing: a wet Tuesday is not
@@ -96,7 +95,7 @@ const wire = () => {
       const l = el.previousElementSibling; if (l) l.textContent = `Nerve — ${el.value}% wildcards`; return; }
     if (el.dataset.act === 'dmin') { P.DRAFT.min = +el.value;
       const l = el.previousElementSibling; if (l) l.textContent = 'How long — ' + minText(+el.value); return; }
-    if (el.dataset.in && el.dataset.in !== 'restore') P.DRAFT[el.dataset.in] = el.value;
+    if (el.dataset.in === 't') P.DRAFT.t = el.value;
   });
 
   /* A keyboard is a Mac, and on a Mac the arrows are the swipe. */
