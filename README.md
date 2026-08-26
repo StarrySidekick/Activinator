@@ -148,6 +148,23 @@ lets one you switched off stay off.
 
 `packs/winter.csv` is an example pack, off by default. Delete it or fill it in.
 
+### The question packs
+
+The deck is a template as much as an app, and the `q-*` packs are the first
+thing built on it that is not an activity: **questions** — to ask yourself, a
+partner, a friend, somebody new, plus the big ones and the purely fun ones.
+They are ordinary pack rows on purpose, so everything already works: the same
+build checks them, taste learns from them, and Menu → Packs is the toggle
+between things to do, questions, or both — per category, no new machinery.
+
+The columns just read a little differently on a question. `minutes` is how
+long the conversation deserves, so the duration band still means something;
+how-hard is depth — `casual` is small talk with better aim, `engaging` takes a
+real answer, `challenging` is the ones you circle before answering; `who` is
+who it is for (`solo` means ask yourself); the moods mean what they always
+mean. Every question is `free` and `anywhere`, which is true and also means
+the context filter never hides them for the wrong reason.
+
 ## How it works
 
 **An activity is a title and a set of tags.** `{t, tags, who, where, min,
