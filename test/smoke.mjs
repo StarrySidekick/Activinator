@@ -136,12 +136,14 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     ACT.S.packs.core = true;
     const back = ACT.pool().length;
     const other = PACKS.find(p => p.id !== 'core');
+    ACT.S.packs[other.id] = false;
+    const without = ACT.pool().length;
     ACT.S.packs[other.id] = true;
     const withExtra = ACT.pool().length;
     ACT.S.packs[other.id] = other.on;
     ACT.redeal();
     return { shipsMoreThanOne: PACKS.length > 1, off: off === before - core.items.length,
-             back: back === before, adds: withExtra === before + other.items.length };
+             back: back === before, adds: withExtra === without + other.items.length };
   });
 
   // — the dock reaches everything —
