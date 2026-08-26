@@ -1,5 +1,5 @@
 # Publishes the app to GitHub Pages on every push to main, at
-# https://starrysidekick.github.io/activinator/.
+# https://starrysidekick.github.io/Activinator/.
 #
 # The deploy is a force-push of the assembled site to the gh-pages branch,
 # which Pages serves. Not the artifact flow Bureau uses: that flow needs the

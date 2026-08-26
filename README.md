@@ -48,7 +48,7 @@ right.
 
 ## Deploying
 
-Live at **https://starrysidekick.github.io/activinator/**. Pushing to `main`
+Live at **https://starrysidekick.github.io/Activinator/**. Pushing to `main`
 deploys it — `.github/workflows/pages.yml` rebuilds `js/activities.js` from
 `packs/` and force-pushes the app files to the `gh-pages` branch, which Pages
 serves, leaving the tooling (`test/`, `scripts/`, `packs/`) behind. That branch
@@ -57,7 +57,7 @@ artifact flow because creating a Pages site is an admin-only API call the
 workflow token isn't allowed — pushing a `gh-pages` branch enables Pages by
 itself.)
 
-It used to live at `/bureau/activinator/`, and Bureau's site keeps a hand-off
+It used to live at `/Bureau/activinator/`, and Bureau's site keeps a hand-off
 stub there: a self-destructing `sw.js` that unregisters the old worker and
 clears the old caches, and an `index.html` that redirects here. A phone that
 installed the old copy walks itself over the next time it opens the app online.
