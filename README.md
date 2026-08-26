@@ -146,7 +146,12 @@ pack a saved state has never heard of takes the default it ships with, which is
 what lets a new pack arrive in an update without being silently disabled — and
 lets one you switched off stay off.
 
-`packs/winter.csv` is an example pack, off by default. Delete it or fill it in.
+Besides the core deck there are four content packs — prompts, words, quotes,
+Italian — where the title carries the content itself and the doing is small: a
+word to use, a line to carry around, a little Italian said out loud. The quotes
+pack holds only lines verified as actually said or written by the person named;
+no poems, though — a real poem on a card means reproducing the whole work, and
+public-domain ones would be a separate decision.
 
 ## How it works
 

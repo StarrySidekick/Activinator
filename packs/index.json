@@ -1,4 +1,7 @@
 [
-  { "id": "core",   "name": "The core deck", "note": "Everything the app shipped with.", "on": true },
-  { "id": "winter", "name": "Winter",        "note": "An example pack — delete it or fill it in.", "on": false }
+  { "id": "core",    "name": "The core deck", "note": "Everything the app shipped with.", "on": true },
+  { "id": "prompts", "name": "Prompts",       "note": "Something to write about, today.", "on": true },
+  { "id": "words",   "name": "Words",         "note": "A word and what it means. Use it on somebody before the day is out.", "on": true },
+  { "id": "quotes",  "name": "Quotes",        "note": "Short, verified, and actually said by the person named. One to carry for a day.", "on": true },
+  { "id": "italian", "name": "Italian",       "note": "A little Italian at a time. Say it out loud.", "on": true }
 ]
