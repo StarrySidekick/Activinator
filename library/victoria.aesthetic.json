@@ -1,0 +1,85 @@
+{
+  "format": "aesthetic/1",
+  "id": "victoria",
+  "name": "Victoria",
+  "status": "canon",
+  "tagline": "An old desk: baize, brass, sage and claret",
+  "lineage": "Grew up as Bureau's Victorian — the desk the whole system was built on.",
+  "story": "An old writing desk by a window. Parchment that has been written on before, baize worn smooth where the elbows go, brass that acts because it is the only thing on the desk that moves. Everything here is finite: the desk has edges, the drawers have bottoms, and the room is lit by the day. Nothing is pure white and nothing is pure black, because nothing real is.",
+  "mood": ["finite", "warm", "deliberate"],
+  "principles": [
+    "Nothing pure white, nothing pure black — every colour has been somewhere.",
+    "Brass is the one metal, and it marks the thing to act on.",
+    "Ornament is panelling, not decoration: it says what a surface is, never just prettifies it.",
+    "The desk follows the day — it has a lamplit after-dark self, and the slots deepen rather than change."
+  ],
+  "do": [
+    "Set display type in an old-style serif and let it be large.",
+    "Tell surfaces apart by material (parchment, baize, walnut), not by grey level.",
+    "Use claret and emerald as verdicts — rich, but sparingly."
+  ],
+  "dont": [
+    "No neon, no gradients, no glow for its own sake.",
+    "No sharp 0px corners — everything here was made by hand.",
+    "Never white text on saturated colour; ink on paper, always."
+  ],
+  "voice": {
+    "tone": "Plain, specific and unexcited, like a well-kept ledger. It records rather than celebrates.",
+    "samples": ["On the list", "Filed", "Nothing here yet — the drawer is real, though"]
+  },
+  "color": {
+    "roles": {
+      "bg": "#E9E1CC",
+      "surface": "#EFEADA",
+      "ink": "#2A241C",
+      "inkSoft": "#5A5142",
+      "line": "#4A4034",
+      "accent": "#A9793F",
+      "glow": "#D9B57C"
+    },
+    "darkRoles": {
+      "bg": "#241C14",
+      "surface": "#2C2419",
+      "ink": "#EDE3CE",
+      "inkSoft": "#B5A587",
+      "line": "#6B5942",
+      "accent": "#C89B54",
+      "glow": "#E4C68A"
+    },
+    "palette": [
+      { "name": "Walnut", "hex": "#6F5137" },
+      { "name": "Baize", "hex": "#4A7C59" },
+      { "name": "Sage", "hex": "#6E7F63" },
+      { "name": "Emerald", "hex": "#2E6B52" },
+      { "name": "Royal", "hex": "#4A6382" },
+      { "name": "Delft", "hex": "#5A7A9E" },
+      { "name": "Claret", "hex": "#8E3B38" },
+      { "name": "Gilt", "hex": "#9A7B2F" },
+      { "name": "Oak", "hex": "#8A6A3C" },
+      { "name": "Regal", "hex": "#5E4A72" },
+      { "name": "Pewter", "hex": "#6E7075" }
+    ]
+  },
+  "type": {
+    "display": { "stack": "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif", "weight": "600", "tracking": "0em", "transform": "none" },
+    "body": { "stack": "'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif", "weight": "400", "lineHeight": 1.5 },
+    "mono": { "stack": "'Courier New', Courier, monospace" },
+    "baseSize": 16,
+    "scale": 1.25
+  },
+  "shape": { "radiusSm": 4, "radiusMd": 9, "radiusLg": 14, "border": 1 },
+  "space": { "unit": 8, "density": 1 },
+  "elevation": {
+    "shadow": "0 1px 3px rgba(42,36,28,.18)",
+    "shadowLg": "0 10px 26px rgba(42,36,28,.24)"
+  },
+  "motion": { "speed": 180, "easing": "ease-out", "character": "Deliberate. Nothing bounces; things settle like paper being set down." },
+  "texture": {
+    "kind": "checker",
+    "a": "#EFEADA",
+    "b": "#DDE5CE",
+    "alpha": 1,
+    "notes": "Cream and soft-green baize checkerboard, the desk's playing surface. Panelled borders and round brass pulls on anything drawer-like."
+  },
+  "notes": "Seeded from Bureau's Victorian style (web/js/look.js + docs/STYLES.md). The sixteen-slot palette maps here as seven roles plus the eleven named colours."
+}

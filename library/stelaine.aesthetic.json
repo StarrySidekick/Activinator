@@ -1,0 +1,85 @@
+{
+  "format": "aesthetic/1",
+  "id": "stelaine",
+  "name": "Stelaine",
+  "status": "draft",
+  "tagline": "Silver-lavender, starlit, quietly formal",
+  "lineage": "New — not yet defined anywhere but here.",
+  "story": "DRAFT — a sketch to rewrite in your own words. The guess, from the name: a colder, more elegant cousin of the night styles. Moonlight on frost, lavender shading into silver, a place that is formal without being stiff — an observatory ballroom. Where Starful Gothic is a pencil outdoors, Stelaine is engraved.",
+  "mood": ["lunar", "elegant", "cool", "still"],
+  "principles": [
+    "Lavender is a temperature, not a theme — it lives in the greys.",
+    "Elegance by restraint: one hairline, one serif, lots of air.",
+    "Light is reflected, never emitted: pale surfaces, silvered edges, no neon.",
+    "Stillness — the layout holds a pose."
+  ],
+  "do": [
+    "Set headings in a high-contrast serif with real tracking.",
+    "Use hairline rules to structure the page.",
+    "Keep the accent dusk-violet and rare."
+  ],
+  "dont": [
+    "No saturated colour above a whisper.",
+    "No heavy borders or loud shadows.",
+    "No crowding; emptiness is part of the style."
+  ],
+  "voice": {
+    "tone": "Composed and slightly formal, warm underneath.",
+    "samples": ["Kept", "As you were", "It will keep until morning"]
+  },
+  "color": {
+    "roles": {
+      "bg": "#ECEAF4",
+      "surface": "#F9F8FD",
+      "ink": "#2E2A3E",
+      "inkSoft": "#6A6484",
+      "line": "#B4AECB",
+      "accent": "#7A6BC4",
+      "glow": "#C9BFF2"
+    },
+    "darkRoles": {
+      "bg": "#17151F",
+      "surface": "#1F1C2B",
+      "ink": "#E9E6F4",
+      "inkSoft": "#9A93B5",
+      "line": "#4A4462",
+      "accent": "#9C8CE8",
+      "glow": "#C9BFF2"
+    },
+    "palette": [
+      { "name": "Moonstone", "hex": "#C8C4D8" },
+      { "name": "Wisteria", "hex": "#8E7BB8" },
+      { "name": "Dusk", "hex": "#524A78" },
+      { "name": "Silverleaf", "hex": "#A8AAB8" },
+      { "name": "Frost", "hex": "#DDE2EE" },
+      { "name": "Nocturne", "hex": "#2E3252" },
+      { "name": "Orchid grey", "hex": "#7E7290" },
+      { "name": "Pale gold", "hex": "#C9B98A" },
+      { "name": "Slate bloom", "hex": "#5E6478" },
+      { "name": "Ashlight", "hex": "#8F93A3" },
+      { "name": "Deep violet", "hex": "#3A2E58" }
+    ]
+  },
+  "type": {
+    "display": { "stack": "Didot, 'Bodoni MT', 'Playfair Display', Georgia, serif", "weight": "500", "tracking": ".04em", "transform": "none" },
+    "body": { "stack": "-apple-system, 'Avenir Next', 'Segoe UI', sans-serif", "weight": "300", "lineHeight": 1.6 },
+    "mono": { "stack": "ui-monospace, 'SF Mono', Menlo, monospace" },
+    "baseSize": 16,
+    "scale": 1.3
+  },
+  "shape": { "radiusSm": 2, "radiusMd": 6, "radiusLg": 10, "border": 0.5 },
+  "space": { "unit": 10, "density": 1.25 },
+  "elevation": {
+    "shadow": "0 1px 2px rgba(46,42,62,.10)",
+    "shadowLg": "0 12px 36px rgba(46,42,62,.14)"
+  },
+  "motion": { "speed": 260, "easing": "cubic-bezier(.25,.1,.25,1)", "character": "Fades and slow reveals; nothing moves far, most things simply appear." },
+  "texture": {
+    "kind": "none",
+    "a": "#ECEAF4",
+    "b": "#E2DFEE",
+    "alpha": 1,
+    "notes": "None by design — the emptiness is the texture."
+  },
+  "notes": "DRAFT seeded as a starting point — every value here is a guess for the editor to correct, especially the story."
+}
