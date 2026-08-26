@@ -1,15 +1,13 @@
 [
-  { "id": "core",      "name": "The core deck",   "note": "Everything the app shipped with.", "on": true },
+  { "id": "core",           "name": "Activities",     "note": "Things to actually go and do.", "on": true },
 
-  { "id": "q-self",    "name": "Ask yourself",    "note": "Questions for a quiet minute alone.", "on": true },
-  { "id": "q-partner", "name": "Ask a partner",   "note": "Questions for the two of you.", "on": true },
-  { "id": "q-friends", "name": "Ask a friend",    "note": "Questions that make a conversation.", "on": true },
-  { "id": "q-new",     "name": "Ask somebody new","note": "Openers that beat small talk.", "on": true },
-  { "id": "q-big",     "name": "The big ones",    "note": "Questions with no easy answers.", "on": true },
-  { "id": "q-fun",     "name": "Just for fun",    "note": "Hypotheticals and would-you-rathers.", "on": true },
+  { "id": "questions",      "name": "Questions",      "note": "For yourself, for a friend, for anybody.", "on": true },
+  { "id": "q-partner",      "name": "Ask a partner",  "note": "Questions for the two of you.", "on": true },
 
-  { "id": "prompts",   "name": "Prompts",         "note": "Something to write about, today.", "on": true },
-  { "id": "words",     "name": "Words",           "note": "A word and what it means. Use it on somebody before the day is out.", "on": true },
-  { "id": "quotes",    "name": "Quotes",          "note": "Short, verified, and actually said by the person named. One to carry for a day.", "on": true },
-  { "id": "italian",   "name": "Italian",         "note": "A little Italian at a time. Say it out loud.", "on": true }
+  { "id": "words",          "name": "Words",          "note": "Words you might not know, and what they mean.", "on": true },
+  { "id": "quotes",         "name": "Quotes",         "note": "Short, verified, and actually said by the person named.", "on": true },
+  { "id": "italian",        "name": "Italian",        "note": "A word, its meaning, and a voice to say it.", "on": true, "lang": "it-IT" },
+
+  { "id": "tableaus",       "name": "Tableaus",       "note": "A scene in a sentence. Work off it.", "on": true },
+  { "id": "visualizations", "name": "Visualizations", "note": "Impossible things to picture.", "on": true }
 ]

@@ -6,12 +6,18 @@
 // CSV and the generated file. Nothing fetches anything at runtime: the app has
 // to open on a train.
 //
-// Columns: title, minutes, cost, tags
-//   minutes  a whole number. The duration band is worked out from it.
-//   cost     free | frugal | costly (0 | 1 | 2 also accepted)
-//   tags     space-separated, all from the vocabulary, and NOT duration or
-//            cost tags — those two are derived, and saying them twice is how
-//            they come to disagree.
+// Columns: title, minutes, cost, tags, definition (optional)
+//   minutes    a whole number. The duration band is worked out from it.
+//   cost       free | frugal | costly (0 | 1 | 2 also accepted)
+//   tags       space-separated, all from the vocabulary, and NOT duration or
+//              cost tags — those two are derived, and saying them twice is how
+//              they come to disagree.
+//   definition on cards that teach a word, the meaning — printed separately
+//              from the word itself. Newlines survive (quote the cell), which
+//              is how a verb card carries its conjugations.
+//
+// A pack may declare "lang" in index.json (e.g. "it-IT"); its cards then get
+// a speak button that says the title out loud in that language.
 //
 // Every row must name exactly one place and exactly one how-hard. Anything
 // else is refused with the file and line, because a bad row that builds is a
@@ -53,6 +59,8 @@ const build = (meta) => {
   const want = ['title', 'minutes', 'cost', 'tags'];
   if (want.some((w, i) => head[i] !== w))
     errors.push(`${file}:1  header must be "${want.join(',')}" — found "${head.join(',')}"`);
+  if (head.length > 4 && head[4] !== 'definition')
+    errors.push(`${file}:1  the only fifth column is "definition" — found "${head[4]}"`);
 
   const items = [];
   rows.forEach((r, n) => {
@@ -78,7 +86,11 @@ const build = (meta) => {
     const hard = tags.filter(g => HARD.includes(g));
     if (hard.length !== 1) errors.push(`${at}  needs exactly one of ${HARD.join(' | ')}, found ${hard.length}`);
 
-    items.push({ id: idOf(t), t, tags: [...new Set(tags.concat(durationOf(min), COSTS[cost]))], min, cost });
+    const item = { id: idOf(t), t, tags: [...new Set(tags.concat(durationOf(min), COSTS[cost]))], min, cost };
+    const d = (r[4] || '').trim();
+    if (d) item.d = d;
+    if (meta.lang) item.lang = meta.lang;
+    items.push(item);
   });
   return { ...meta, items };
 };
@@ -98,7 +110,7 @@ const out = `/* GENERATED FILE — do not edit.
    by changing the CSV and running that, then commit both. */
 export const PACKS = [
 ${packs.map(p => `  { id:${JSON.stringify(p.id)}, name:${JSON.stringify(p.name)}, note:${JSON.stringify(p.note)}, on:${!!p.on}, items:[
-${p.items.map(a => `    {id:'${a.id}',t:${JSON.stringify(a.t)},tags:${JSON.stringify(a.tags)},min:${a.min},cost:${a.cost}},`).join('\n')}
+${p.items.map(a => `    {id:'${a.id}',t:${JSON.stringify(a.t)},tags:${JSON.stringify(a.tags)},min:${a.min},cost:${a.cost}${a.d ? `,d:${JSON.stringify(a.d)}` : ''}${a.lang ? `,lang:${JSON.stringify(a.lang)}` : ''}},`).join('\n')}
   ]},`).join('\n')}
 ];
 `;

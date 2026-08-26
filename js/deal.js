@@ -53,7 +53,8 @@ const live = (c) => (S.seen[c.id] || {}).v !== 'never';
 let n = 0;
 const cardOf = (seed, kind) => ({
   key: 'c' + (++n), id: seed.id, seed, kind,
-  t: seed.t, tags: seed.tags, min: seed.min, cost: seed.cost
+  t: seed.t, tags: seed.tags, min: seed.min, cost: seed.cost,
+  d: seed.d, lang: seed.lang
 });
 
 /* The line on the back. The honest reason, not a flourish. */

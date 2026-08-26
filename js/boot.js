@@ -21,6 +21,19 @@ const act = (name, el) => {
     case 'backup': return P.backupPanel();
     case 'closepanel': return P.closePanel();
 
+    /* Speech synthesis is the one voice that works on a train: it is in the
+       browser, it costs nothing, and on an iPhone the Italian voice is already
+       installed. A local voice is preferred because the network ones lag. */
+    case 'speak': {
+      if (!('speechSynthesis' in window)) return toast('No voice on this device');
+      const u = new SpeechSynthesisUtterance(el.dataset.say);
+      u.lang = el.dataset.lang; u.rate = .9;
+      const same = speechSynthesis.getVoices().filter(x => x.lang.replace('_', '-').startsWith(u.lang.slice(0, 2)));
+      if (same.length) u.voice = same.find(x => x.localService) || same[0];
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+      return;
+    }
+
     case 'like': case 'dislike': case 'skip': return say(name);
     case 'undo':  return takeBack();
     case 'more':  return more();

@@ -55,7 +55,9 @@
 .mark.red{color:var(--suit-red)}
 /* auto above and below: the activity sits in the middle of what the emblems
    leave, however many of them there are. */
-.face.front .t{margin:auto 0}
+/* The word and its definition centre together; on a plain card the group is
+   just the title, so nothing moves. */
+.face.front .word{margin:auto 0}
 .face.back{transform:rotateY(180deg); background:var(--paper-2); overflow-y:auto}
 .card .face.back{opacity:0}
 .card.flip .face.front{opacity:0}
@@ -81,10 +83,27 @@
   font-family:var(--serif); font-weight:400; margin:0;
   font-size:clamp(29px,8.4vw,42px); line-height:1.1; letter-spacing:-.012em;
   text-wrap:balance;
+  /* Floccinaucinihilipilification is a real card now. */
+  hyphens:auto; overflow-wrap:anywhere;
 }
 .why{
   margin:10px 0 0; font-size:13px; line-height:1.4; color:var(--text-2);
 }
+/* The definition is the other voice on the card: the word is the serif and
+   the meaning is set apart, smaller and quieter. pre-line is what lets a verb
+   card keep its conjugations one tense to a line. */
+.def{
+  margin:16px 0 0; font-size:15.5px; line-height:1.5; color:var(--text-2);
+  white-space:pre-line; max-width:34em;
+}
+.back .def{font-size:13px;line-height:1.45;margin-top:8px}
+.speak{
+  margin:18px 0 0; width:46px; height:46px; border-radius:50%;
+  border:1.5px solid rgba(30,26,20,.3); background:transparent; color:inherit;
+  display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer;
+}
+.speak:active{background:rgba(30,26,20,.08)}
+.speak .mark{width:20px;height:20px;display:block}
 /* — the back — */
 
 .back h3{

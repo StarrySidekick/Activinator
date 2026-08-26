@@ -1,21 +1,121 @@
-title,minutes,cost,tags
-Petrichor — the smell of rain on dry ground,5,free,learn casual anywhere
-"Apricity — the warmth of the sun, felt in winter",5,free,learn casual anywhere
-Susurrus — a soft whispering or rustling sound,5,free,learn casual anywhere
-"Crepuscular — of twilight, or active in it",5,free,learn casual anywhere
-"Liminal — on a threshold, between one state and the next",5,free,learn casual anywhere
-Defenestrate — to throw out of a window,5,free,learn funny casual anywhere
-Borborygmus — the rumble of a hungry stomach,5,free,learn funny casual anywhere
-Psithurism — the sound of wind moving through trees,5,free,learn casual anywhere
-Saudade — longing for something absent that may never return,5,free,learn nostalgic casual anywhere
-Ultracrepidarian — a person who opines well beyond their knowledge,5,free,learn funny engaging anywhere
-"Mellifluous — sweetly flowing, said of a voice",5,free,learn casual anywhere
-"Halcyon — calm and golden, said of remembered days",5,free,learn nostalgic casual anywhere
-"Lacuna — a gap, especially in a text or an argument",5,free,learn casual anywhere
-Quotidian — everyday; belonging to the ordinary run of things,5,free,learn casual anywhere
-Velleity — a wish too faint to act on,5,free,learn casual anywhere
-Nepenthe — a thing that makes you forget sorrow,5,free,learn casual anywhere
-Frisson — a sudden shiver of excitement,5,free,learn casual anywhere
-"Zugzwang — the spot where every possible move makes it worse",5,free,learn engaging anywhere
-Sprezzatura — studied carelessness; art hiding its effort,5,free,learn engaging anywhere
-Tsundoku — buying books and letting them pile up unread,5,free,learn funny casual anywhere
+title,minutes,cost,tags,definition
+Petrichor,5,free,learn casual anywhere,the smell of rain falling on dry ground
+Apricity,5,free,learn casual anywhere,"the warmth of the sun, felt in winter"
+Susurrus,5,free,learn casual anywhere,a soft whispering or rustling sound
+Crepuscular,5,free,learn casual anywhere,"of twilight, or active in it"
+Liminal,5,free,learn casual anywhere,"on a threshold, between one state and the next"
+Defenestrate,5,free,learn funny casual anywhere,to throw out of a window
+Borborygmus,5,free,learn funny casual anywhere,the rumble of a hungry stomach
+Psithurism,5,free,learn casual anywhere,the sound of wind moving through trees
+Saudade,5,free,learn nostalgic casual anywhere,longing for something absent that may never return
+Ultracrepidarian,5,free,learn funny engaging anywhere,a person who opines well beyond their knowledge
+Mellifluous,5,free,learn casual anywhere,"sweetly flowing, said of a voice"
+Halcyon,5,free,learn nostalgic casual anywhere,"calm and golden, said of remembered days"
+Lacuna,5,free,learn casual anywhere,"a gap, especially in a text or an argument"
+Quotidian,5,free,learn casual anywhere,everyday; belonging to the ordinary run of things
+Velleity,5,free,learn casual anywhere,a wish too faint to act on
+Nepenthe,5,free,learn casual anywhere,a thing that makes you forget sorrow
+Frisson,5,free,learn casual anywhere,a sudden shiver of excitement
+Zugzwang,5,free,learn engaging anywhere,the spot where every possible move makes it worse
+Sprezzatura,5,free,learn engaging anywhere,studied carelessness; art that hides its effort
+Tsundoku,5,free,learn funny casual anywhere,buying books and letting them pile up unread
+Gloaming,5,free,learn casual anywhere,twilight; the fading light after sunset
+Vespertine,5,free,learn casual anywhere,"of the evening, or flowering and waking in it"
+Hypnagogic,5,free,learn casual anywhere,of the drowsy borderland just before sleep
+Hypnopompic,5,free,learn casual anywhere,"of the state between sleep and waking, on the waking side"
+Pareidolia,5,free,learn casual anywhere,seeing faces and figures in random patterns
+Apophenia,5,free,learn engaging anywhere,perceiving meaningful connections between unrelated things
+Sesquipedalian,5,free,learn funny casual anywhere,given to using long words; a foot and a half long
+Tenebrous,5,free,learn spooky casual anywhere,"dark, shadowy, hard to see into"
+Widdershins,5,free,learn spooky casual anywhere,counterclockwise; against the course of the sun
+Zeugma,5,free,learn engaging anywhere,one word yoked to two others in different senses — she broke his car and his heart
+Limn,5,free,learn casual anywhere,"to depict or describe, in paint or in words"
+Quiddity,5,free,learn engaging anywhere,the essence that makes a thing what it is; also a quibble
+Mumpsimus,5,free,learn funny casual anywhere,"a stubborn refusal to correct a known error, or the person refusing"
+Noctambulist,5,free,learn spooky casual anywhere,a sleepwalker
+Obnubilate,5,free,learn casual anywhere,"to cloud over, darken, or obscure"
+Interrobang,5,free,learn funny casual anywhere,the punctuation mark that is a question mark and an exclamation point at once
+Floccinaucinihilipilification,5,free,learn funny challenging anywhere,the act of judging something to be worthless
+Eigengrau,5,free,learn casual anywhere,the dark grey the eyes see in total darkness
+Jentacular,5,free,learn funny casual anywhere,of or relating to breakfast
+Grawlix,5,free,learn funny casual anywhere,the string of symbols that stands in for swearing
+Callipygian,5,free,learn funny casual anywhere,having shapely buttocks
+Absquatulate,5,free,learn funny casual anywhere,to leave abruptly; to make off
+Cacoethes,5,free,learn engaging anywhere,"an irresistible urge, especially to do something inadvisable"
+Deliquesce,5,free,learn casual anywhere,to melt away; to turn liquid by drawing moisture from the air
+Erstwhile,5,free,learn casual anywhere,former; of an earlier time
+Fugacious,5,free,learn casual anywhere,"fleeting, quick to pass away"
+Gossamer,5,free,learn casual anywhere,fine drifting cobweb; anything impossibly light and delicate
+Ineluctable,5,free,learn engaging anywhere,impossible to struggle out of; inescapable
+Jactitation,5,free,learn casual anywhere,restless tossing in bed; also a false boast
+Kakistocracy,5,free,learn funny engaging anywhere,government by the worst people
+Logomachy,5,free,learn engaging anywhere,an argument that is really about words
+Mondegreen,5,free,learn funny casual anywhere,a misheard lyric that makes its own sense
+Nyctophilia,5,free,learn spooky casual anywhere,a love of night and darkness
+Operose,5,free,learn casual anywhere,done with great labour; industrious
+Palimpsest,5,free,learn engaging anywhere,"a page scraped and rewritten, the old text showing through; anything layered over its past"
+Peregrinate,5,free,learn casual anywhere,to travel from place to place on foot; to wander
+Quincunx,5,free,learn casual anywhere,five things arranged like the pips on a die
+Rime,5,free,learn casual anywhere,frost feathers formed when fog freezes onto surfaces
+Sillage,5,free,learn casual anywhere,the trail of scent a person leaves behind
+Tarantism,5,free,learn funny casual anywhere,an uncontrollable urge to dance
+Ullage,5,free,learn casual anywhere,the empty space between the liquid and the top of the bottle
+Wamble,5,free,learn funny casual anywhere,to move unsteadily; of a stomach: to churn
+Xenial,5,free,learn kindness casual anywhere,of the friendship between a host and a guest
+Yestreen,5,free,learn nostalgic casual anywhere,yesterday evening
+Zephyr,5,free,learn casual anywhere,a soft gentle breeze; the west wind
+Anagnorisis,5,free,learn engaging anywhere,the moment in a story when a character finally recognises the truth
+Bathos,5,free,learn funny casual anywhere,an accidental fall from the sublime to the ridiculous
+Chatoyant,5,free,learn casual anywhere,"shimmering with a band of light, like a cat's eye"
+Ekphrasis,5,free,learn engaging anywhere,a vivid description of a work of art inside another work of art
+Fernweh,5,free,learn adventurous casual anywhere,an ache for far-off places you have never been
+Gallimaufry,5,free,learn funny casual anywhere,a confused jumble; a hodgepodge
+Hiraeth,5,free,learn nostalgic casual anywhere,longing for a home you cannot return to — or that never was
+Kenspeckle,5,free,learn casual anywhere,conspicuous; easily recognised
+Lambent,5,free,learn casual anywhere,"light that plays softly over a surface, flickering without burning"
+Moonglade,5,free,learn romantic casual anywhere,the track of moonlight on water
+Nacreous,5,free,learn casual anywhere,"pearly, iridescent, like the inside of a shell"
+Omphalos,5,free,learn casual anywhere,the navel; the centre point of a place or a world
+Pettifogger,5,free,learn funny casual anywhere,a quibbler over trifles; a small-time lawyer of low methods
+Qualia,5,free,learn challenging anywhere,"the private, felt qualities of experience — what red is like from inside"
+Rhadamanthine,5,free,learn engaging anywhere,rigorously and inflexibly just
+Scintilla,5,free,learn casual anywhere,the smallest possible trace of something
+Tintinnabulation,5,free,learn casual anywhere,the ringing and jingling of bells
+Umbra,5,free,learn spooky casual anywhere,the darkest inner part of a shadow
+Verklempt,5,free,learn casual anywhere,choked up; overcome with emotion
+Weltschmerz,5,free,learn nostalgic engaging anywhere,the weariness of a world that falls short of how it ought to be
+Xanthic,5,free,learn casual anywhere,yellowish
+Yawp,5,free,learn funny casual anywhere,a loud raucous cry
+Zoetrope,5,free,learn nostalgic casual anywhere,a spinning drum of still pictures that moves when you look through the slits
+Aestival,5,free,learn casual anywhere,belonging to summer
+Brumal,5,free,learn casual anywhere,belonging to winter
+Clepsydra,5,free,learn casual anywhere,a clock that tells time by dripping water
+Doryphore,5,free,learn funny casual anywhere,a persistent and self-satisfied critic of small mistakes
+Empyrean,5,free,learn casual anywhere,the highest heaven; the vault of the sky
+Fissiparous,5,free,learn engaging anywhere,inclined to split into pieces or factions
+Growlery,5,free,learn funny casual anywhere,a room you retreat to when out of temper
+Heliotropic,5,free,learn casual anywhere,turning toward the sun
+Illeist,5,free,learn funny casual anywhere,a person who refers to themselves in the third person
+Jouissance,5,free,learn casual anywhere,intense delight; pleasure at the edge of too much
+Kintsugi,5,free,learn mindful casual anywhere,"mending broken pottery with gold, so the break becomes part of the beauty"
+Lethologica,5,free,learn funny casual anywhere,the inability to summon the exact word you want
+Mizzle,5,free,learn casual anywhere,fine misty drizzle
+Noctilucent,5,free,learn casual anywhere,"shining in the night, as the highest clouds do after sunset"
+Oneiric,5,free,learn spooky casual anywhere,of dreams or dreaming
+Paracosm,5,free,learn engaging anywhere,"a detailed imaginary world, kept and returned to over years"
+Quockerwodger,5,free,learn funny casual anywhere,a wooden puppet on strings; a politician worked by somebody else
+Redolent,5,free,learn nostalgic casual anywhere,smelling strongly of something; steeped in the suggestion of it
+Snollygoster,5,free,learn funny casual anywhere,"a shrewd, unprincipled person, especially in politics"
+Thalassic,5,free,learn casual anywhere,of the sea
+Uxorious,5,free,learn romantic casual anywhere,excessively devoted to one's wife
+Vertiginous,5,free,learn adventurous casual anywhere,dizzying; so high or steep it turns the head
+Williwaw,5,free,learn adventurous casual anywhere,a sudden violent squall blowing down off the mountains
+Yugen,5,free,learn mindful engaging anywhere,"a profound, dim awareness of the depth and mystery of the universe"
+Zeitgeber,5,free,learn engaging anywhere,"an external cue, like daylight, that sets the body's clock"
+Ailurophile,5,free,learn funny casual anywhere,a lover of cats
+Bibliopole,5,free,learn casual anywhere,a dealer in rare books
+Crepitate,5,free,learn casual anywhere,to crackle and pop softly
+Deracinate,5,free,learn engaging anywhere,to tear up by the roots
+Estivate,5,free,learn funny casual anywhere,to pass the summer in a dormant state; to hibernate through the heat
+Funambulist,5,free,learn adventurous casual anywhere,a tightrope walker
+Grimoire,5,free,learn spooky casual anywhere,a book of spells and invocations

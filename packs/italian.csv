@@ -1,23 +1,239 @@
-title,minutes,cost,tags
-Piano piano — little by little; the honest answer to how it is going,5,free,learn casual anywhere
-"Magari — 'if only', and also 'maybe'; say it about something you want",5,free,learn casual anywhere
-Chiacchierare — to chat; say it out loud until it stops being difficult,5,free,learn funny casual anywhere
-"Boh — the shrug in word form: 'no idea'; deploy it once today",5,free,learn funny casual anywhere
-"Allora — 'so, well then'; how every Italian sentence gets going",5,free,learn casual anywhere
-Basta — enough; the most satisfying word to say like you mean it,5,free,learn casual anywhere
-"Figurati — 'don't mention it'; the graceful reply to grazie",5,free,learn casual anywhere
-"In bocca al lupo — 'into the wolf's mouth': good luck; the reply is crepi",5,free,learn casual anywhere
-Dolce far niente — the sweetness of doing nothing; practise it,10,free,learn mindful casual anywhere
-"Passeggiata — the unhurried evening walk, taken to see and be seen",5,free,learn casual anywhere
-Abbiocco — the drowsiness that follows a big meal,5,free,learn funny casual anywhere
-Meriggiare — to rest at midday in the shade,5,free,learn mindful casual anywhere
-Purtroppo — unfortunately; the word you will need most,5,free,learn casual anywhere
-"Anzi — 'on the contrary, better yet'; a whole argument in four letters",5,free,learn casual anywhere
-"Ci vediamo — 'we'll see each other'; how to leave without saying goodbye",5,free,learn casual anywhere
-"Piacere — 'a pleasure'; what you say when you meet someone",5,free,learn casual anywhere
-Label ten things in your kitchen in Italian and leave the labels up,20,free,learn writing home casual
-"Order your next coffee in Italian, in your head first",10,free,learn engaging indoors
-Count to a hundred in Italian on your next walk,15,free,learn move outdoors casual
-Write your shopping list in Italian and shop from it,15,free,learn writing engaging anywhere
-Watch ten minutes of Italian television and count the words you catch,15,free,learn watch home casual
-Change your phone to Italian for the rest of the day,5,free,learn try adventurous engaging anywhere
+title,minutes,cost,tags,definition
+Essere,10,free,learn engaging anywhere,"to be
+presente: sono, sei, è, siamo, siete, sono
+imperfetto: ero, eri, era, eravamo, eravate, erano
+futuro: sarò, sarai, sarà, saremo, sarete, saranno
+passato prossimo: sono stato"
+Avere,10,free,learn engaging anywhere,"to have
+presente: ho, hai, ha, abbiamo, avete, hanno
+imperfetto: avevo, avevi, aveva, avevamo, avevate, avevano
+futuro: avrò, avrai, avrà, avremo, avrete, avranno
+passato prossimo: ho avuto"
+Andare,10,free,learn engaging anywhere,"to go
+presente: vado, vai, va, andiamo, andate, vanno
+imperfetto: andavo, andavi, andava, andavamo, andavate, andavano
+futuro: andrò, andrai, andrà, andremo, andrete, andranno
+passato prossimo: sono andato"
+Fare,10,free,learn engaging anywhere,"to do; to make
+presente: faccio, fai, fa, facciamo, fate, fanno
+imperfetto: facevo, facevi, faceva, facevamo, facevate, facevano
+futuro: farò, farai, farà, faremo, farete, faranno
+passato prossimo: ho fatto"
+Dire,10,free,learn engaging anywhere,"to say; to tell
+presente: dico, dici, dice, diciamo, dite, dicono
+imperfetto: dicevo, dicevi, diceva, dicevamo, dicevate, dicevano
+futuro: dirò, dirai, dirà, diremo, direte, diranno
+passato prossimo: ho detto"
+Potere,10,free,learn engaging anywhere,"to be able to; can
+presente: posso, puoi, può, possiamo, potete, possono
+imperfetto: potevo, potevi, poteva, potevamo, potevate, potevano
+futuro: potrò, potrai, potrà, potremo, potrete, potranno
+passato prossimo: ho potuto"
+Volere,10,free,learn engaging anywhere,"to want
+presente: voglio, vuoi, vuole, vogliamo, volete, vogliono
+imperfetto: volevo, volevi, voleva, volevamo, volevate, volevano
+futuro: vorrò, vorrai, vorrà, vorremo, vorrete, vorranno
+passato prossimo: ho voluto"
+Dovere,10,free,learn engaging anywhere,"to have to; must
+presente: devo, devi, deve, dobbiamo, dovete, devono
+imperfetto: dovevo, dovevi, doveva, dovevamo, dovevate, dovevano
+futuro: dovrò, dovrai, dovrà, dovremo, dovrete, dovranno
+passato prossimo: ho dovuto"
+Sapere,10,free,learn engaging anywhere,"to know a fact; to know how
+presente: so, sai, sa, sappiamo, sapete, sanno
+imperfetto: sapevo, sapevi, sapeva, sapevamo, sapevate, sapevano
+futuro: saprò, saprai, saprà, sapremo, saprete, sapranno
+passato prossimo: ho saputo"
+Conoscere,10,free,learn engaging anywhere,"to know a person or place; to be acquainted with
+presente: conosco, conosci, conosce, conosciamo, conoscete, conoscono
+imperfetto: conoscevo, conoscevi, conosceva, conoscevamo, conoscevate, conoscevano
+futuro: conoscerò, conoscerai, conoscerà, conosceremo, conoscerete, conosceranno
+passato prossimo: ho conosciuto"
+Stare,10,free,learn engaging anywhere,"to stay; to be (of states and health)
+presente: sto, stai, sta, stiamo, state, stanno
+imperfetto: stavo, stavi, stava, stavamo, stavate, stavano
+futuro: starò, starai, starà, staremo, starete, staranno
+passato prossimo: sono stato"
+Dare,10,free,learn engaging anywhere,"to give
+presente: do, dai, dà, diamo, date, danno
+imperfetto: davo, davi, dava, davamo, davate, davano
+futuro: darò, darai, darà, daremo, darete, daranno
+passato prossimo: ho dato"
+Venire,10,free,learn engaging anywhere,"to come
+presente: vengo, vieni, viene, veniamo, venite, vengono
+imperfetto: venivo, venivi, veniva, venivamo, venivate, venivano
+futuro: verrò, verrai, verrà, verremo, verrete, verranno
+passato prossimo: sono venuto"
+Uscire,10,free,learn engaging anywhere,"to go out
+presente: esco, esci, esce, usciamo, uscite, escono
+imperfetto: uscivo, uscivi, usciva, uscivamo, uscivate, uscivano
+futuro: uscirò, uscirai, uscirà, usciremo, uscirete, usciranno
+passato prossimo: sono uscito"
+Mangiare,10,free,learn engaging anywhere,"to eat
+presente: mangio, mangi, mangia, mangiamo, mangiate, mangiano
+imperfetto: mangiavo, mangiavi, mangiava, mangiavamo, mangiavate, mangiavano
+futuro: mangerò, mangerai, mangerà, mangeremo, mangerete, mangeranno
+passato prossimo: ho mangiato"
+Bere,10,free,learn engaging anywhere,"to drink
+presente: bevo, bevi, beve, beviamo, bevete, bevono
+imperfetto: bevevo, bevevi, beveva, bevevamo, bevevate, bevevano
+futuro: berrò, berrai, berrà, berremo, berrete, berranno
+passato prossimo: ho bevuto"
+Parlare,10,free,learn engaging anywhere,"to speak; to talk
+presente: parlo, parli, parla, parliamo, parlate, parlano
+imperfetto: parlavo, parlavi, parlava, parlavamo, parlavate, parlavano
+futuro: parlerò, parlerai, parlerà, parleremo, parlerete, parleranno
+passato prossimo: ho parlato"
+Vedere,10,free,learn engaging anywhere,"to see
+presente: vedo, vedi, vede, vediamo, vedete, vedono
+imperfetto: vedevo, vedevi, vedeva, vedevamo, vedevate, vedevano
+futuro: vedrò, vedrai, vedrà, vedremo, vedrete, vedranno
+passato prossimo: ho visto"
+Sentire,10,free,learn engaging anywhere,"to hear; to feel
+presente: sento, senti, sente, sentiamo, sentite, sentono
+imperfetto: sentivo, sentivi, sentiva, sentivamo, sentivate, sentivano
+futuro: sentirò, sentirai, sentirà, sentiremo, sentirete, sentiranno
+passato prossimo: ho sentito"
+Prendere,10,free,learn engaging anywhere,"to take; to catch; to have (food or drink)
+presente: prendo, prendi, prende, prendiamo, prendete, prendono
+imperfetto: prendevo, prendevi, prendeva, prendevamo, prendevate, prendevano
+futuro: prenderò, prenderai, prenderà, prenderemo, prenderete, prenderanno
+passato prossimo: ho preso"
+Mettere,10,free,learn engaging anywhere,"to put; to place
+presente: metto, metti, mette, mettiamo, mettete, mettono
+imperfetto: mettevo, mettevi, metteva, mettevamo, mettevate, mettevano
+futuro: metterò, metterai, metterà, metteremo, metterete, metteranno
+passato prossimo: ho messo"
+Leggere,10,free,learn engaging anywhere,"to read
+presente: leggo, leggi, legge, leggiamo, leggete, leggono
+imperfetto: leggevo, leggevi, leggeva, leggevamo, leggevate, leggevano
+futuro: leggerò, leggerai, leggerà, leggeremo, leggerete, leggeranno
+passato prossimo: ho letto"
+Scrivere,10,free,learn engaging anywhere,"to write
+presente: scrivo, scrivi, scrive, scriviamo, scrivete, scrivono
+imperfetto: scrivevo, scrivevi, scriveva, scrivevamo, scrivevate, scrivevano
+futuro: scriverò, scriverai, scriverà, scriveremo, scriverete, scriveranno
+passato prossimo: ho scritto"
+Dormire,10,free,learn engaging anywhere,"to sleep
+presente: dormo, dormi, dorme, dormiamo, dormite, dormono
+imperfetto: dormivo, dormivi, dormiva, dormivamo, dormivate, dormivano
+futuro: dormirò, dormirai, dormirà, dormiremo, dormirete, dormiranno
+passato prossimo: ho dormito"
+Capire,10,free,learn engaging anywhere,"to understand
+presente: capisco, capisci, capisce, capiamo, capite, capiscono
+imperfetto: capivo, capivi, capiva, capivamo, capivate, capivano
+futuro: capirò, capirai, capirà, capiremo, capirete, capiranno
+passato prossimo: ho capito"
+Finire,10,free,learn engaging anywhere,"to finish
+presente: finisco, finisci, finisce, finiamo, finite, finiscono
+imperfetto: finivo, finivi, finiva, finivamo, finivate, finivano
+futuro: finirò, finirai, finirà, finiremo, finirete, finiranno
+passato prossimo: ho finito"
+Cercare,10,free,learn engaging anywhere,"to look for; to try
+presente: cerco, cerchi, cerca, cerchiamo, cercate, cercano
+imperfetto: cercavo, cercavi, cercava, cercavamo, cercavate, cercavano
+futuro: cercherò, cercherai, cercherà, cercheremo, cercherete, cercheranno
+passato prossimo: ho cercato"
+Trovare,10,free,learn engaging anywhere,"to find
+presente: trovo, trovi, trova, troviamo, trovate, trovano
+imperfetto: trovavo, trovavi, trovava, trovavamo, trovavate, trovavano
+futuro: troverò, troverai, troverà, troveremo, troverete, troveranno
+passato prossimo: ho trovato"
+Pensare,10,free,learn engaging anywhere,"to think
+presente: penso, pensi, pensa, pensiamo, pensate, pensano
+imperfetto: pensavo, pensavi, pensava, pensavamo, pensavate, pensavano
+futuro: penserò, penserai, penserà, penseremo, penserete, penseranno
+passato prossimo: ho pensato"
+Chiacchierare,10,free,learn engaging anywhere,"to chat; to chatter
+presente: chiacchiero, chiacchieri, chiacchiera, chiacchieriamo, chiacchierate, chiacchierano
+imperfetto: chiacchieravo, chiacchieravi, chiacchierava, chiacchieravamo, chiacchieravate, chiacchieravano
+futuro: chiacchiererò, chiacchiererai, chiacchiererà, chiacchiereremo, chiacchiererete, chiacchiereranno
+passato prossimo: ho chiacchierato"
+Allora,5,free,learn casual anywhere,so; well then
+Magari,5,free,learn casual anywhere,if only; I wish; maybe
+Boh,5,free,learn funny casual anywhere,I don't know; no idea (informal)
+Dai,5,free,learn casual anywhere,come on! (informal encouragement)
+Basta,5,free,learn casual anywhere,enough; stop
+Figurati,5,free,learn casual anywhere,don't mention it; not at all (informal)
+Purtroppo,5,free,learn casual anywhere,unfortunately
+Anzi,5,free,learn casual anywhere,on the contrary; rather; better yet
+Piacere,5,free,learn casual anywhere,pleasure; pleased to meet you
+Ci vediamo,5,free,learn casual anywhere,see you; literally: we see each other
+In bocca al lupo,5,free,learn casual anywhere,good luck — literally: into the wolf's mouth; the reply is crepi
+Piano piano,5,free,learn casual anywhere,slowly; little by little
+Dolce far niente,5,free,learn mindful casual anywhere,the sweetness of doing nothing
+Meno male,5,free,learn casual anywhere,thank goodness; just as well
+Mi raccomando,5,free,learn casual anywhere,I'm counting on you; mind you don't forget
+Fa niente,5,free,learn casual anywhere,it doesn't matter; never mind
+Come mai,5,free,learn casual anywhere,how come; why is that
+Da solo,5,free,learn casual anywhere,alone; by oneself
+In giro,5,free,learn casual anywhere,around; out and about
+Forse,5,free,learn casual anywhere,maybe; perhaps
+Sempre,5,free,learn casual anywhere,always
+Mai,5,free,learn casual anywhere,never
+Adesso,5,free,learn casual anywhere,now
+Dopo,5,free,learn casual anywhere,after; later
+Ieri,5,free,learn casual anywhere,yesterday
+Oggi,5,free,learn casual anywhere,today
+Domani,5,free,learn casual anywhere,tomorrow
+Già,5,free,learn casual anywhere,already; yes indeed
+Ancora,5,free,learn casual anywhere,still; again; more
+Insieme,5,free,learn casual anywhere,together
+Qualcosa,5,free,learn casual anywhere,something
+Niente,5,free,learn casual anywhere,nothing
+Tutto,5,free,learn casual anywhere,everything; all
+Però,5,free,learn casual anywhere,but; however
+Quindi,5,free,learn casual anywhere,so; therefore
+Perché,5,free,learn casual anywhere,why; because — one word for both
+Anche,5,free,learn casual anywhere,also; too
+Verso,5,free,learn casual anywhere,toward; around (of times)
+Presto,5,free,learn casual anywhere,soon; early
+Tardi,5,free,learn casual anywhere,late
+Il pane,5,free,learn casual anywhere,bread (masculine)
+L'acqua,5,free,learn casual anywhere,water (feminine)
+Il vino,5,free,learn casual anywhere,wine (masculine)
+Il caffè,5,free,learn casual anywhere,coffee (masculine)
+La colazione,5,free,learn casual anywhere,breakfast (feminine)
+Il pranzo,5,free,learn casual anywhere,lunch (masculine)
+La cena,5,free,learn casual anywhere,dinner (feminine)
+La casa,5,free,learn casual anywhere,house; home (feminine)
+La strada,5,free,learn casual anywhere,street; road (feminine)
+Il lavoro,5,free,learn casual anywhere,work; job (masculine)
+Il tempo,5,free,learn casual anywhere,time; also the weather (masculine)
+La settimana,5,free,learn casual anywhere,week (feminine)
+Il fine settimana,5,free,learn casual anywhere,the weekend (masculine)
+Il libro,5,free,learn casual anywhere,book (masculine)
+La parola,5,free,learn casual anywhere,word (feminine)
+Il cuore,5,free,learn casual anywhere,heart (masculine)
+La testa,5,free,learn casual anywhere,head (feminine)
+La mano,5,free,learn casual anywhere,"hand — feminine, despite the -o"
+Gli occhi,5,free,learn casual anywhere,the eyes (masculine plural; singular l'occhio)
+Il sole,5,free,learn casual anywhere,sun (masculine)
+La luna,5,free,learn casual anywhere,moon (feminine)
+La pioggia,5,free,learn casual anywhere,rain (feminine)
+Il mare,5,free,learn casual anywhere,sea (masculine)
+Il treno,5,free,learn casual anywhere,train (masculine)
+I soldi,5,free,learn casual anywhere,money (masculine plural)
+L'amico,5,free,learn casual anywhere,friend (masculine; feminine l'amica)
+Il gatto,5,free,learn casual anywhere,cat (masculine)
+Il cane,5,free,learn casual anywhere,dog (masculine)
+La passeggiata,5,free,learn casual anywhere,"a stroll; the unhurried evening walk, taken to see and be seen"
+L'abbiocco,5,free,learn funny casual anywhere,the drowsiness that follows a big meal (masculine)
+La gattara,5,free,learn funny casual anywhere,a woman who looks after street cats
+Bello,5,free,learn casual anywhere,beautiful; fine; lovely
+Brutto,5,free,learn casual anywhere,ugly; bad; nasty
+Buono,5,free,learn casual anywhere,good
+Grande,5,free,learn casual anywhere,big; great
+Piccolo,5,free,learn casual anywhere,small; little
+Caldo,5,free,learn casual anywhere,hot; warm
+Freddo,5,free,learn casual anywhere,cold
+Stanco,5,free,learn casual anywhere,tired (feminine stanca)
+Felice,5,free,learn casual anywhere,happy
+Facile,5,free,learn casual anywhere,easy
+Difficile,5,free,learn casual anywhere,difficult
+Nuovo,5,free,learn casual anywhere,new
+Vecchio,5,free,learn casual anywhere,old
+Veloce,5,free,learn casual anywhere,fast
+Lento,5,free,learn casual anywhere,slow
+Vicino,5,free,learn casual anywhere,near; nearby
+Lontano,5,free,learn casual anywhere,far; far away

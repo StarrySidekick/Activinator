@@ -100,6 +100,14 @@ vocabulary, and must **not** include a duration or cost tag — those two are
 derived, and saying them twice is how they come to disagree. Every row needs
 exactly one place and exactly one how-hard.
 
+A pack that teaches words adds a fifth column, `definition`: the word is the
+title and the meaning is printed separately, smaller, under it. Newlines
+survive inside a quoted cell, which is how an Italian verb card carries its
+conjugations one tense to a line. A pack may also declare `"lang"` in
+`index.json` (Italian says `"it-IT"`); its cards then get a speak button that
+says the title out loud through the browser's own speech synthesis — no
+network, no dependency, and on an iPhone the Italian voice is already there.
+
 The build refuses anything else, with the file and the line. That is the point
 of it: a bad row that builds is a card that quietly never gets dealt. It earned
 its keep on the first run by catching an unquoted comma in a title of mine and
@@ -146,18 +154,21 @@ pack a saved state has never heard of takes the default it ships with, which is
 what lets a new pack arrive in an update without being silently disabled — and
 lets one you switched off stay off.
 
-Besides the core deck there are four content packs — prompts, words, quotes,
-Italian — where the title carries the content itself and the doing is small: a
-word to use, a line to carry around, a little Italian said out loud. The quotes
-pack holds only lines verified as actually said or written by the person named;
-no poems, though — a real poem on a card means reproducing the whole work, and
+Besides the core deck (named **Activities**) there are content packs where the
+card carries the content itself: **Words** (esoteric words with their
+definitions), **Quotes** (only lines verified as actually said or written by
+the person named — the famous misattributions are deliberately absent),
+**Italian** (strict definitions, verbs with their conjugations, a voice to say
+them), **Tableaus** (a scene in a sentence, to work off — it doesn't have to
+make sense), and **Visualizations** (impossible objects to picture). No poems,
+though — a real poem on a card means reproducing the whole work, and
 public-domain ones would be a separate decision.
 
 ### The question packs
 
-The deck is a template as much as an app, and the `q-*` packs are the first
-thing built on it that is not an activity: **questions** — to ask yourself, a
-partner, a friend, somebody new, plus the big ones and the purely fun ones.
+The deck is a template as much as an app, and the question packs are the first
+thing built on it that is not an activity: **questions**. They live in two
+packs — one for everything, and one apart for the ones to ask a partner.
 They are ordinary pack rows on purpose, so everything already works: the same
 build checks them, taste learns from them, and Menu → Packs is the toggle
 between things to do, questions, or both — per category, no new machinery.

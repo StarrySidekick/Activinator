@@ -60,11 +60,17 @@ const cardHTML = (c) => {
       <div class="stamp s-yes">Like</div>
       <div class="stamp s-no">Don’t Like</div>
       ${emblemRow(c)}
-      <h2 class="t">${esc(c.t)}</h2>
+      <div class="word">
+        <h2 class="t">${esc(c.t)}</h2>
+        ${c.d ? `<p class="def">${esc(c.d)}</p>` : ''}
+        ${c.lang ? `<button class="speak" data-act="speak" data-say="${esc(c.t)}"
+          data-lang="${esc(c.lang)}" aria-label="say it out loud">${markHTML('listen')}</button>` : ''}
+      </div>
     </div>
     <div class="face back">
       <p class="kicker">${c.kind === 'wild' ? 'wildcard' : esc(TAGS[c.tags[0]] || 'what this is')}</p>
       <h3>${esc(c.t)}</h3>
+      ${c.d ? `<p class="def">${esc(c.d)}</p>` : ''}
       <p class="pnote" style="color:var(--text-3);margin-top:8px">${esc(lengthOf(c.min))}</p>
       <ul class="taglist">${c.tags.map(g => {
         const w = S.w[g] || 0;
