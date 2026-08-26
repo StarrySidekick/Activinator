@@ -1,0 +1,77 @@
+{
+  "format": "aesthetic/1",
+  "id": "carca",
+  "name": "Carca",
+  "status": "draft",
+  "tagline": "Sun-baked stone, banners, a walled town",
+  "lineage": "New — not yet defined anywhere but here.",
+  "story": "DRAFT — a sketch to rewrite in your own words. The guess, from the name (Carcassonne?): a walled hill town in the south. Warm limestone, moss in the joints, painted banners against the stone, everything built to last and carved rather than printed. Headings read like inscriptions; the accent is a banner red-orange you can see from outside the walls.",
+  "mood": ["ancient", "sturdy", "sunbaked", "heraldic"],
+  "principles": [
+    "Stone first: warm greys and limestone carry everything, colour arrives as a banner.",
+    "Carved, not drawn — type is inscriptional, edges are chamfered, nothing is flimsy.",
+    "Built to last: heavy borders, honest weight, no translucency.",
+    "Heraldry for meaning — a small set of banner colours, each standing for something."
+  ],
+  "do": [
+    "Set headings in caps with wide tracking, like an inscription.",
+    "Use thick borders and small radii — chamfers, not curves.",
+    "Hang the banner colours sparingly against the stone."
+  ],
+  "dont": [
+    "No glass, no gloss, no blur.",
+    "No pastels — every colour must survive weather.",
+    "No thin hairlines; nothing here is fragile."
+  ],
+  "voice": {
+    "tone": "Declarative and brief, like words that had to be carved.",
+    "samples": ["Done", "It stands", "Within the walls"]
+  },
+  "color": {
+    "roles": {
+      "bg": "#E8E0D0",
+      "surface": "#F2ECDE",
+      "ink": "#322A20",
+      "inkSoft": "#6A5E4C",
+      "line": "#8A7C64",
+      "accent": "#A64B2A",
+      "glow": "#D9A44B"
+    },
+    "darkRoles": null,
+    "palette": [
+      { "name": "Limestone", "hex": "#D8CCB4" },
+      { "name": "Mortar", "hex": "#B0A48C" },
+      { "name": "Moss", "hex": "#5E6B3C" },
+      { "name": "Rampart", "hex": "#7A6E58" },
+      { "name": "Banner", "hex": "#A64B2A" },
+      { "name": "Azure field", "hex": "#3A5A82" },
+      { "name": "Vinewine", "hex": "#6E3A44" },
+      { "name": "Old gold", "hex": "#B08A3E" },
+      { "name": "Cypress", "hex": "#3E5240" },
+      { "name": "Terrace", "hex": "#C08050" },
+      { "name": "Nightwall", "hex": "#443C30" }
+    ]
+  },
+  "type": {
+    "display": { "stack": "Optima, 'Trajan Pro', 'Gill Sans', Georgia, serif", "weight": "600", "tracking": ".08em", "transform": "uppercase" },
+    "body": { "stack": "'Iowan Old Style', Palatino, Georgia, serif", "weight": "400", "lineHeight": 1.5 },
+    "mono": { "stack": "'Courier New', monospace" },
+    "baseSize": 16,
+    "scale": 1.25
+  },
+  "shape": { "radiusSm": 1, "radiusMd": 3, "radiusLg": 6, "border": 2 },
+  "space": { "unit": 8, "density": 1 },
+  "elevation": {
+    "shadow": "0 2px 0 rgba(50,42,32,.22)",
+    "shadowLg": "0 4px 0 rgba(50,42,32,.26)"
+  },
+  "motion": { "speed": 140, "easing": "ease-out", "character": "Solid. Things land with weight and stay put; nothing floats." },
+  "texture": {
+    "kind": "checker",
+    "a": "#E4DAC6",
+    "b": "#DCD2BC",
+    "alpha": 1,
+    "notes": "Coursed-stone checker, joints barely darker than the blocks. Hard drop shadows — offset, no blur — like noon light on a wall."
+  },
+  "notes": "DRAFT seeded as a starting point — every value here is a guess for the editor to correct, especially the story."
+}

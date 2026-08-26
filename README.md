@@ -295,6 +295,17 @@ installed copy keeps serving the old version, and the symptom — "my change
 didn't deploy" — points at the wrong culprit. A new file must also be added to
 `SHELL` in `sw.js` or it won't be there offline.
 
+## The aesthetics studio
+
+`aesthetics/` is a separate thing sharing the repository: a workbench for
+Timothy's aesthetics (Victoria, Starful Gothic, Aeros, Golf 97, Girando,
+Stelaine, Carca) — each a full style guide with a story, a philosophy and
+every visual parameter, kept as `aesthetics/library/*.aesthetic.json`. It is
+self-contained — no imports either way, not in the service-worker shell — and
+deploys alongside the app at `/Activinator/aesthetics/`. Its own
+`aesthetics/README.md` is the reference; "build this in Aeros" plus the JSON
+file is the intended workflow.
+
 ## Not yet
 
 - Sync between devices. Export/import JSON is the bridge, as in Bureau.

@@ -1,0 +1,167 @@
+/* The studio's own chrome is deliberately nobody: quiet greys, system faces.
+   Seven aesthetics hang in this room and the room must not argue with any of
+   them — everything with a personality is inside .preview, painted from the
+   aesthetic's own tokens. */
+
+* { box-sizing: border-box; margin: 0 }
+html { -webkit-text-size-adjust: 100% }
+body {
+  font: 14px/1.45 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #24262b; background: #f2f2f4;
+}
+button { font: inherit; cursor: pointer }
+h1 { font-size: 18px; font-weight: 650 }
+.hint { color: #75777e; font-size: 12px; font-weight: 400 }
+.mono { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; font-size: 12px }
+code { font-family: ui-monospace, Menlo, monospace; font-size: 12px; background: #e8e8ec; padding: 0 3px; border-radius: 3px }
+
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px; background: #fff; border-bottom: 1px solid #dfdfe4;
+  position: sticky; top: 0; z-index: 5;
+}
+.topbtns { display: flex; gap: 8px; flex-wrap: wrap }
+.topbtns button, .mini {
+  background: #fff; border: 1px solid #c9c9d1; border-radius: 6px;
+  padding: 5px 11px; color: #35373d;
+}
+.topbtns button:hover, .mini:hover { border-color: #8f8f9a }
+#darkbtn.on { background: #24262b; color: #f2f2f4; border-color: #24262b }
+
+.cols {
+  display: grid; grid-template-columns: 200px minmax(320px, 1fr) minmax(360px, 520px);
+  gap: 16px; padding: 16px; align-items: start; max-width: 1500px; margin: 0 auto;
+}
+
+/* ---- the list ---------------------------------------------------------- */
+.col-list { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 68px }
+.who {
+  display: flex; align-items: center; gap: 8px; text-align: left;
+  background: none; border: 1px solid transparent; border-radius: 8px; padding: 8px 10px;
+}
+.who:hover { background: #e9e9ee }
+.who.on { background: #fff; border-color: #d4d4db }
+.who .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; border: 1px solid rgba(0,0,0,.15) }
+.who-name { font-weight: 550 }
+.who-tags { margin-left: auto; color: #9a9ba3; font-size: 11px; white-space: nowrap }
+
+/* ---- the form ---------------------------------------------------------- */
+.sec { background: #fff; border: 1px solid #dfdfe4; border-radius: 10px; margin-bottom: 10px }
+.sec summary {
+  padding: 10px 14px; font-weight: 600; cursor: pointer; list-style: none;
+  display: flex; align-items: baseline; gap: 10px;
+}
+.sec summary::-webkit-details-marker { display: none }
+.sec summary::before { content: '▸'; color: #9a9ba3; font-size: 11px }
+.sec[open] summary::before { content: '▾' }
+.sec summary .hint { font-weight: 400 }
+.fields { padding: 4px 14px 14px; display: grid; gap: 12px }
+
+.field { display: grid; gap: 4px }
+.field label { font-size: 12px; font-weight: 600; color: #4a4c53; display: flex; gap: 8px; align-items: baseline }
+.field input[type=text], .field textarea, .field select {
+  font: inherit; border: 1px solid #c9c9d1; border-radius: 6px; padding: 6px 9px;
+  background: #fdfdfe; color: inherit; width: 100%;
+}
+.field textarea { resize: vertical }
+.field input.mono, .field textarea.mono { font-family: ui-monospace, Menlo, monospace; font-size: 12px }
+.rangerow { display: flex; gap: 10px; align-items: center }
+.rangerow input { flex: 1 }
+.rangerow output { min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; color: #4a4c53; font-size: 12px }
+.colorrow, .swrow { display: flex; gap: 8px; align-items: center }
+input[type=color] {
+  width: 34px; height: 30px; padding: 2px; border: 1px solid #c9c9d1; border-radius: 6px;
+  background: #fff; flex: none;
+}
+.hex { width: 90px !important; flex: none }
+.swrow input[type=text]:not(.hex) { flex: 1 }
+.swrow .who-name { font-size: 12px; flex: 1 }
+.mini.wide { width: 100%; margin-top: 2px }
+.checkrow { display: flex; gap: 8px; align-items: center; font-weight: 400 !important }
+
+/* ---- the preview ------------------------------------------------------- */
+.col-side { position: sticky; top: 68px; display: grid; gap: 12px }
+.preview { border: 1px solid #dfdfe4; border-radius: 12px; overflow: hidden; background: #fff }
+
+.pv-room {
+  background: var(--v-backdrop); padding: calc(var(--v-gap) * 2.5);
+  transition: background .2s;
+}
+.pv-app { display: grid; gap: calc(var(--v-gap) * 1.25) }
+.pv-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--v-surface); color: var(--v-ink);
+  border: var(--v-bw) solid var(--v-line); border-radius: var(--v-r-md);
+  padding: calc(var(--v-gap) * .75) var(--v-gap); box-shadow: var(--v-shadow);
+}
+.pv-name {
+  font-family: var(--v-display); font-weight: var(--v-display-weight);
+  letter-spacing: var(--v-display-tracking); text-transform: var(--v-display-transform);
+  font-size: var(--v-h2);
+}
+.pv-card {
+  background: var(--v-surface); color: var(--v-ink);
+  border: var(--v-bw) solid var(--v-line); border-radius: var(--v-r-lg);
+  padding: calc(var(--v-gap) * 1.5); box-shadow: var(--v-shadow-lg);
+  display: grid; gap: var(--v-gap);
+  font-family: var(--v-body); font-weight: var(--v-body-weight);
+  font-size: var(--v-size); line-height: var(--v-leading);
+}
+.pv-h {
+  font-family: var(--v-display); font-weight: var(--v-display-weight);
+  letter-spacing: var(--v-display-tracking); text-transform: var(--v-display-transform);
+  font-size: var(--v-h1); line-height: 1.15;
+}
+.pv-tagline { color: var(--v-inksoft); font-style: italic }
+.pv-story { color: var(--v-inksoft); font-size: calc(var(--v-size) * .92) }
+.pv-chips { display: flex; gap: calc(var(--v-gap) * .5); flex-wrap: wrap }
+.pv-chip {
+  border: var(--v-bw) solid var(--v-line); border-radius: var(--v-r-sm);
+  color: var(--v-inksoft); padding: 2px 8px; font-size: calc(var(--v-size) * .8);
+}
+.pv-row { display: flex; gap: calc(var(--v-gap) * .75); flex-wrap: wrap }
+.pv-btn {
+  font-family: var(--v-body); font-size: calc(var(--v-size) * .95);
+  background: var(--v-surface); color: var(--v-accent);
+  border: var(--v-bw) solid var(--v-accent); border-radius: var(--v-r-md);
+  padding: calc(var(--v-gap) * .6) calc(var(--v-gap) * 1.4);
+  transition: transform var(--v-speed) var(--v-ease), box-shadow var(--v-speed) var(--v-ease);
+}
+.pv-btn:hover { transform: translateY(-1px); box-shadow: var(--v-shadow) }
+.pv-primary { background: var(--v-accent); color: var(--v-surface); border-color: var(--v-accent) }
+.pv-primary:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--v-glow) 45%, transparent), var(--v-shadow) }
+.pv-input {
+  font: inherit; font-family: var(--v-body); font-size: calc(var(--v-size) * .95);
+  background: color-mix(in srgb, var(--v-bg) 55%, var(--v-surface));
+  color: var(--v-ink); border: var(--v-bw) solid var(--v-line);
+  border-radius: var(--v-r-sm); padding: calc(var(--v-gap) * .6) var(--v-gap);
+}
+.pv-mono { font-family: var(--v-mono); font-size: calc(var(--v-size) * .82); color: var(--v-inksoft) }
+.pv-toast {
+  justify-self: center; background: var(--v-ink); color: var(--v-bg);
+  border-radius: var(--v-r-lg); padding: calc(var(--v-gap) * .5) calc(var(--v-gap) * 1.5);
+  font-family: var(--v-body); font-size: calc(var(--v-size) * .9);
+  box-shadow: var(--v-shadow);
+}
+.pv-swatches { display: flex; padding: 10px; gap: 4px; flex-wrap: wrap; background: #fff }
+.pv-sw { width: 22px; height: 22px; border-radius: 5px; border: 1px solid rgba(0,0,0,.15); flex: none }
+
+/* ---- the exports ------------------------------------------------------- */
+.export { display: grid; gap: 8px }
+.tabs { display: flex; gap: 6px; align-items: center }
+.tabs .spacer { flex: 1 }
+.tabs [data-tab] {
+  background: none; border: 1px solid transparent; border-radius: 6px; padding: 4px 10px; color: #5b5d64;
+}
+.tabs [data-tab].on { background: #fff; border-color: #c9c9d1; color: #24262b; font-weight: 600 }
+#out {
+  width: 100%; height: 260px; resize: vertical;
+  border: 1px solid #dfdfe4; border-radius: 10px; padding: 10px; background: #fff;
+  white-space: pre; overflow: auto;
+}
+
+@media (max-width: 1080px) {
+  .cols { grid-template-columns: 1fr }
+  .col-list { position: static; flex-direction: row; flex-wrap: wrap }
+  .col-side { position: static }
+}

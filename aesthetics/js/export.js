@@ -1,0 +1,99 @@
+/* The three ways an aesthetic leaves the studio.
+
+   JSON is the aesthetic — the file that lives in library/ and the one a future
+   session is pointed at. CSS is the same numbers wearing tokens, for dropping
+   into a project. Markdown is the guide: the story, the philosophy and the
+   tokens in one document a person (or a Claude) can read top to bottom and
+   then build in the style without asking anything else. */
+
+import { ROLES } from './schema.js';
+
+export const asJSON = (a) => JSON.stringify(a, null, 2) + '\n';
+
+/* Token names are prefixed with the aesthetic's id so two of them can coexist
+   on one page — swapping aesthetics is swapping one attribute, not a war over
+   --accent. */
+export function asCSS (a) {
+  const p = '--' + a.id.replace(/[^a-z0-9-]/g, '');
+  const r = a.color.roles;
+  const t = a.type;
+  const line = (k, v) => `  ${p}-${k}: ${v};`;
+  const roles = (set) => ROLES.map(([k]) => line(k.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()), set[k]));
+  const out = [
+    `/* ${a.name} — ${a.tagline || 'an aesthetic'} */`,
+    `/* Generated from ${a.id}.aesthetic.json — edit the aesthetic, not this. */`,
+    ':root {',
+    ...roles(r),
+    ...a.color.palette.map((s) => line('p-' + s.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), s.hex)),
+    line('display', t.display.stack),
+    line('body', t.body.stack),
+    line('mono', t.mono.stack),
+    line('display-weight', t.display.weight),
+    line('display-tracking', t.display.tracking),
+    line('display-transform', t.display.transform),
+    line('body-weight', t.body.weight),
+    line('leading', t.body.lineHeight),
+    line('size', t.baseSize + 'px'),
+    line('scale', t.scale),
+    line('r-sm', a.shape.radiusSm + 'px'),
+    line('r-md', a.shape.radiusMd + 'px'),
+    line('r-lg', a.shape.radiusLg + 'px'),
+    line('border', a.shape.border + 'px'),
+    line('unit', a.space.unit + 'px'),
+    line('density', a.space.density),
+    line('shadow', a.elevation.shadow),
+    line('shadow-lg', a.elevation.shadowLg),
+    line('speed', a.motion.speed + 'ms'),
+    line('ease', a.motion.easing),
+    '}',
+  ];
+  if (a.color.darkRoles) {
+    out.push('', '@media (prefers-color-scheme: dark) {', '  :root {',
+      ...roles(a.color.darkRoles).map((l) => '  ' + l), '  }', '}');
+  }
+  return out.join('\n') + '\n';
+}
+
+/* The guide. Written to be handed over whole: “build this in Girando” should
+   need nothing but this document. */
+export function asGuide (a) {
+  const r = a.color.roles;
+  const list = (xs) => xs.filter(Boolean).map((x) => `- ${x}`).join('\n');
+  const roleRows = (set) => ROLES
+    .map(([k, label, hint]) => `| ${label} | \`${set[k]}\` | ${hint} |`).join('\n');
+  const s = [];
+  s.push(`# ${a.name}`);
+  if (a.tagline) s.push(`\n*${a.tagline}*`);
+  s.push(`\n> Status: ${a.status}${a.lineage ? ` · ${a.lineage}` : ''}`);
+  if (a.story) s.push(`\n## The place\n\n${a.story}`);
+  if (a.mood.length) s.push(`\nMood: ${a.mood.join(' · ')}`);
+  if (a.principles.length) s.push(`\n## Philosophy\n\n${list(a.principles)}`);
+  if (a.do.length) s.push(`\n**Do**\n\n${list(a.do)}`);
+  if (a.dont.length) s.push(`\n**Don’t**\n\n${list(a.dont)}`);
+  if (a.voice.tone || a.voice.samples.length) {
+    s.push('\n## Voice');
+    if (a.voice.tone) s.push(`\n${a.voice.tone}`);
+    if (a.voice.samples.length) s.push(`\nIt would say:\n\n${list(a.voice.samples.map((x) => `“${x}”`))}`);
+  }
+  s.push(`\n## Colour\n\n| Role | Hex | Used for |\n| --- | --- | --- |\n${roleRows(r)}`);
+  if (a.color.darkRoles) s.push(`\nAfter dark:\n\n| Role | Hex | Used for |\n| --- | --- | --- |\n${roleRows(a.color.darkRoles)}`);
+  if (a.color.palette.length) {
+    s.push(`\nPalette — what things get painted in:\n\n| Name | Hex |\n| --- | --- |\n` +
+      a.color.palette.map((p) => `| ${p.name} | \`${p.hex}\` |`).join('\n'));
+  }
+  s.push(`\n## Type\n
+- Display: \`${a.type.display.stack}\` — weight ${a.type.display.weight}, tracking ${a.type.display.tracking}, ${a.type.display.transform === 'none' ? 'as written' : a.type.display.transform}
+- Body: \`${a.type.body.stack}\` — weight ${a.type.body.weight}, line height ${a.type.body.lineHeight}
+- Mono: \`${a.type.mono.stack}\`
+- Base ${a.type.baseSize}px, scale ${a.type.scale}`);
+  s.push(`\n## Shape, space, depth\n
+- Radii ${a.shape.radiusSm} / ${a.shape.radiusMd} / ${a.shape.radiusLg} px; borders ${a.shape.border}px
+- Space unit ${a.space.unit}px at density ×${a.space.density}
+- Shadow: \`${a.elevation.shadow}\`; lifted: \`${a.elevation.shadowLg}\`
+- Backdrop: ${a.texture.kind}${a.texture.kind !== 'none' ? ` (\`${a.texture.a}\` / \`${a.texture.b}\` at ${a.texture.alpha})` : ''}${a.texture.notes ? ` — ${a.texture.notes}` : ''}`);
+  s.push(`\n## Motion\n\n${a.motion.speed}ms, \`${a.motion.easing}\`.${a.motion.character ? ' ' + a.motion.character : ''}`);
+  if (a.notes) s.push(`\n## Notes\n\n${a.notes}`);
+  s.push(`\n---\n\nCSS tokens:\n\n\`\`\`css\n${asCSS(a)}\`\`\``);
+  s.push(`\nGenerated by the aesthetics studio from \`${a.id}.aesthetic.json\` — the JSON is the source of truth.`);
+  return s.join('\n') + '\n';
+}
