@@ -1,0 +1,60 @@
+# Publishes the app to GitHub Pages on every push to main, at
+# https://starrysidekick.github.io/activinator/.
+#
+# The activities are CSVs in packs/, and js/activities.js is built from them.
+# Building here rather than trusting the committed copy is what makes editing a
+# CSV — on github.com from a phone, or by pushing a spreadsheet export over it —
+# enough to change the live app. A CSV the build refuses fails the deploy
+# instead of shipping a broken deck.
+#
+# This is a project site, so it shares the starrysidekick.github.io origin with
+# Bureau. A cache store belongs to the origin rather than to a service worker's
+# scope, which is why sw.js only ever reaps activinator- caches — see README.md
+# before touching that.
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish; queue at most one behind it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - name: Build the activity packs
+        run: |
+          cp js/activities.js /tmp/committed.js
+          node scripts/build-activities.mjs
+          if ! cmp -s js/activities.js /tmp/committed.js; then
+            echo "::notice::js/activities.js was rebuilt from packs/ — the committed copy was out of date. Run 'node scripts/build-activities.mjs' and commit it."
+          fi
+      # The site is the app: everything except the tooling that made it.
+      - name: Assemble the site
+        run: |
+          mkdir -p _site
+          cp -r css icons js index.html manifest.webmanifest sw.js _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
