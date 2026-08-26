@@ -50,8 +50,12 @@ right.
 
 Live at **https://starrysidekick.github.io/activinator/**. Pushing to `main`
 deploys it — `.github/workflows/pages.yml` rebuilds `js/activities.js` from
-`packs/` and uploads the app files as the Pages artifact, leaving the tooling
-(`test/`, `scripts/`, `packs/`) behind.
+`packs/` and force-pushes the app files to the `gh-pages` branch, which Pages
+serves, leaving the tooling (`test/`, `scripts/`, `packs/`) behind. That branch
+is entirely generated: never commit to it. (Branch mode rather than Bureau's
+artifact flow because creating a Pages site is an admin-only API call the
+workflow token isn't allowed — pushing a `gh-pages` branch enables Pages by
+itself.)
 
 It used to live at `/bureau/activinator/`, and Bureau's site keeps a hand-off
 stub there: a self-destructing `sw.js` that unregisters the old worker and

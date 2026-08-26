@@ -1,6 +1,13 @@
 # Publishes the app to GitHub Pages on every push to main, at
 # https://starrysidekick.github.io/activinator/.
 #
+# The deploy is a force-push of the assembled site to the gh-pages branch,
+# which Pages serves. Not the artifact flow Bureau uses: that flow needs the
+# Pages site created first, creating it is an admin-only API call the workflow
+# token isn't allowed, and pushing a gh-pages branch enables Pages by itself.
+# The branch is entirely generated — never commit to it, never base anything
+# on it.
+#
 # The activities are CSVs in packs/, and js/activities.js is built from them.
 # Building here rather than trusting the committed copy is what makes editing a
 # CSV — on github.com from a phone, or by pushing a spreadsheet export over it —
@@ -19,9 +26,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
 # Let a running deploy finish; queue at most one behind it.
 concurrency:
@@ -31,14 +36,8 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/setup-node@v4
         with: { node-version: '20' }
       - name: Build the activity packs
@@ -49,12 +48,18 @@ jobs:
             echo "::notice::js/activities.js was rebuilt from packs/ — the committed copy was out of date. Run 'node scripts/build-activities.mjs' and commit it."
           fi
       # The site is the app: everything except the tooling that made it.
-      - name: Assemble the site
+      # .nojekyll because this is already the built site — nothing to process.
+      - name: Assemble and push the site
         run: |
           mkdir -p _site
           cp -r css icons js index.html manifest.webmanifest sw.js _site/
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          touch _site/.nojekyll
+          cd _site
+          git init -b gh-pages
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add -A
+          git commit -m "Deploy ${GITHUB_SHA}"
+          git push -f "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}" gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
