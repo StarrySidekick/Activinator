@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aesthetics studio</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+<header class="top">
+  <div>
+    <h1 id="title">Aesthetics</h1>
+    <p id="subtitle" class="hint"></p>
+  </div>
+  <div class="topbtns">
+    <button id="darkbtn" data-act="dark" hidden>After dark</button>
+    <button id="revert" data-act="revert" hidden>Revert to file</button>
+    <button id="deletebtn" data-act="delete" hidden>Delete</button>
+    <button data-act="fork">Fork</button>
+    <button data-act="import">Import</button>
+    <button data-act="new">New</button>
+    <input id="file" type="file" accept=".json,application/json" hidden>
+  </div>
+</header>
+
+<div class="cols">
+  <nav id="list" class="col-list" aria-label="Aesthetics"></nav>
+
+  <main id="form" class="col-form"></main>
+
+  <aside class="col-side">
+    <!-- The preview never changes shape; the aesthetic paints it. -->
+    <section id="preview" class="preview">
+      <div class="pv-room">
+        <div class="pv-app">
+          <div class="pv-bar">
+            <span class="pv-name">—</span>
+            <button class="pv-btn pv-primary">Begin</button>
+          </div>
+          <div class="pv-card">
+            <h2 class="pv-h">A room in this place</h2>
+            <p class="pv-tagline hint-none">—</p>
+            <p class="pv-story"></p>
+            <div class="pv-chips"></div>
+            <div class="pv-row">
+              <button class="pv-btn pv-primary">Keep it</button>
+              <button class="pv-btn">Not today</button>
+            </div>
+            <input class="pv-input" value="Something typed here" readonly>
+            <p class="pv-mono">code, if the place has any</p>
+          </div>
+          <div class="pv-toast">On the list</div>
+        </div>
+      </div>
+      <div class="pv-swatches"></div>
+    </section>
+
+    <section class="export">
+      <div class="tabs">
+        <button data-tab="guide">Guide</button>
+        <button data-tab="json">JSON</button>
+        <button data-tab="css">CSS</button>
+        <span class="spacer"></span>
+        <button class="mini" data-act="copy">Copy</button>
+        <button class="mini" data-act="download">Download</button>
+      </div>
+      <textarea id="out" class="mono" readonly spellcheck="false"></textarea>
+      <p class="hint">The JSON is the aesthetic. Commit it to <code>aesthetics/library/</code>
+        (or hand it to a session) and it is kept; the guide is the same thing written
+        out for reading.</p>
+    </section>
+  </aside>
+</div>
+
+<script type="module" src="js/editor.js"></script>
+</body>
+</html>

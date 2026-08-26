@@ -35,6 +35,16 @@ and a passing assertion doesn't mean it looks right. Add a case to
   the origin, not to a scope — the general filter wiped Bureau's shell once.
   See "Deploying" in the README before touching the service worker.
 
+## The aesthetics studio
+
+`aesthetics/` is a self-contained workbench for Timothy's aesthetics — full
+style guides kept as JSON in `aesthetics/library/`. When he says "build this
+in Aeros" (or Victoria, Starful Gothic, Golf 97, Girando, Stelaine, Carca),
+read `aesthetics/library/<id>.aesthetic.json` and follow it: the story and
+philosophy in the file are instructions, not flavour. It has its own README
+and smoke test; it is not part of the app, its files never join `SHELL`, and
+changing it needs no cache bump.
+
 ## Style
 
 No dependencies, no build step, no framework. Two-space indent, single quotes,

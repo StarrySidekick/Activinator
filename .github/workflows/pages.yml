@@ -53,6 +53,10 @@ jobs:
         run: |
           mkdir -p _site
           cp -r css icons js index.html manifest.webmanifest sw.js _site/
+          # The aesthetics studio rides along at /aesthetics/ — self-contained,
+          # not in the app's service-worker shell, online-only by design.
+          cp -r aesthetics _site/
+          rm -rf _site/aesthetics/test
           touch _site/.nojekyll
           cd _site
           git init -b gh-pages
