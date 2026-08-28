@@ -330,14 +330,16 @@ didn't deploy" — points at the wrong culprit. A new file must also be added to
 
 ## The aesthetics studio
 
-`aesthetics/` is a separate thing sharing the repository: a workbench for
-Timothy's aesthetics (Victoria, Starful Gothic, Aeros, Golf 97, Girando,
-Stelaine, Carca) — each a full style guide with a story, a philosophy and
-every visual parameter, kept as `aesthetics/library/*.aesthetic.json`. It is
-self-contained — no imports either way, not in the service-worker shell — and
-deploys alongside the app at `/Activinator/aesthetics/`. Its own
-`aesthetics/README.md` is the reference; "build this in Aeros" plus the JSON
-file is the intended workflow.
+It used to live here, in `aesthetics/`. It is its own repository now —
+**https://github.com/StarrySidekick/Aesthetics**, live at
+**https://starrysidekick.github.io/Aesthetics/** — carried over with its
+history by `git subtree split`, the same way this app left Bureau. It shared
+nothing with the deck but a folder, and it had outgrown being a folder.
+
+That is where Victoria, Starful Gothic, Aeros, Golf 97, Girando, Stelaine and
+Carca are kept, each as a full style guide in
+`library/<id>.aesthetic.json`. "Build this in Aeros" plus that file is the
+intended workflow, here as anywhere else.
 
 ## Not yet
 

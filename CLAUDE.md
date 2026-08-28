@@ -37,13 +37,12 @@ and a passing assertion doesn't mean it looks right. Add a case to
 
 ## The aesthetics studio
 
-`aesthetics/` is a self-contained workbench for Timothy's aesthetics — full
-style guides kept as JSON in `aesthetics/library/`. When he says "build this
-in Aeros" (or Victoria, Starful Gothic, Golf 97, Girando, Stelaine, Carca),
-read `aesthetics/library/<id>.aesthetic.json` and follow it: the story and
-philosophy in the file are instructions, not flavour. It has its own README
-and smoke test; it is not part of the app, its files never join `SHELL`, and
-changing it needs no cache bump.
+Moved out. It is its own repository now — `StarrySidekick/Aesthetics`, live at
+https://starrysidekick.github.io/Aesthetics/ — and nothing in this one depends
+on it. If Timothy names an aesthetic (Victoria, Starful Gothic, Aeros, Golf 97,
+Girando, Stelaine, Carca) while working on the deck, that repository is where
+the style guide lives; read the JSON there rather than looking for a folder
+here.
 
 ## Style
 
