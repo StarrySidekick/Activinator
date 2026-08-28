@@ -54,9 +54,11 @@ jobs:
           mkdir -p _site
           cp -r css icons js index.html manifest.webmanifest sw.js _site/
           # The aesthetics studio rides along at /aesthetics/ — self-contained,
-          # not in the app's service-worker shell, online-only by design.
-          cp -r aesthetics _site/
-          rm -rf _site/aesthetics/test
+          # not in the app's service-worker shell, online-only by design. It is
+          # a whole repository in waiting (see aesthetics/README.md), so copy
+          # only its site and leave its tooling and notes behind.
+          mkdir -p _site/aesthetics
+          cp -r aesthetics/css aesthetics/js aesthetics/library aesthetics/index.html _site/aesthetics/
           touch _site/.nojekyll
           cd _site
           git init -b gh-pages

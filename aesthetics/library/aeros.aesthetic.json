@@ -6,7 +6,12 @@
   "tagline": "Teal gloss and clear skies, straight from 2006",
   "lineage": "Bureau's Aero style, the frutiger-aero desk.",
   "story": "2006 in the best way: a swimming pool on a clear morning, an operating system that believed the future would be nice. Everything is slightly wet — gloss sweeps across tiles, buttons are orbs with a highlight, drawers have a glassy rim lit from inside. The water is clean, the sky is open, and there is nothing warm anywhere: no reds, no browns, no golds. Slots that hold a terracotta elsewhere hold a harbour blue here, and that is the point.",
-  "mood": ["optimistic", "glossy", "clean", "aquatic"],
+  "mood": [
+    "optimistic",
+    "glossy",
+    "clean",
+    "aquatic"
+  ],
   "principles": [
     "Cool only: no reds, browns or golds anywhere in it.",
     "Everything is slightly wet — a gloss gradient or a glassy rim is what makes a surface a surface.",
@@ -25,7 +30,11 @@
   ],
   "voice": {
     "tone": "Bright and frictionless, like good-natured system software. Short words, forward motion.",
-    "samples": ["On the list", "All set", "Ready when you are"]
+    "samples": [
+      "On the list",
+      "All set",
+      "Ready when you are"
+    ]
   },
   "color": {
     "roles": {
@@ -39,33 +48,96 @@
     },
     "darkRoles": null,
     "palette": [
-      { "name": "Aqua", "hex": "#1E9AAE" },
-      { "name": "Lagoon", "hex": "#2FA39A" },
-      { "name": "Meadow", "hex": "#3F8F63" },
-      { "name": "Bliss", "hex": "#6FA83C" },
-      { "name": "Harbour", "hex": "#2B6B99" },
-      { "name": "Sky", "hex": "#4C89C8" },
-      { "name": "Deep sea", "hex": "#14607A" },
-      { "name": "Steel", "hex": "#5E7A8A" },
-      { "name": "Slate", "hex": "#44515C" },
-      { "name": "Storm", "hex": "#33414D" },
-      { "name": "Silver", "hex": "#8A98A3" }
+      {
+        "name": "Aqua",
+        "hex": "#1E9AAE"
+      },
+      {
+        "name": "Lagoon",
+        "hex": "#2FA39A"
+      },
+      {
+        "name": "Meadow",
+        "hex": "#3F8F63"
+      },
+      {
+        "name": "Bliss",
+        "hex": "#6FA83C"
+      },
+      {
+        "name": "Harbour",
+        "hex": "#2B6B99"
+      },
+      {
+        "name": "Sky",
+        "hex": "#4C89C8"
+      },
+      {
+        "name": "Deep sea",
+        "hex": "#14607A"
+      },
+      {
+        "name": "Steel",
+        "hex": "#5E7A8A"
+      },
+      {
+        "name": "Slate",
+        "hex": "#44515C"
+      },
+      {
+        "name": "Storm",
+        "hex": "#33414D"
+      },
+      {
+        "name": "Silver",
+        "hex": "#8A98A3"
+      }
     ]
   },
   "type": {
-    "display": { "stack": "'Segoe UI', 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, sans-serif", "weight": "600", "tracking": "0em", "transform": "none" },
-    "body": { "stack": "'Segoe UI', 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, sans-serif", "weight": "400", "lineHeight": 1.5 },
-    "mono": { "stack": "Consolas, 'Lucida Console', monospace" },
+    "display": {
+      "stack": "'Segoe UI', 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, sans-serif",
+      "weight": "600",
+      "tracking": "0em",
+      "transform": "none",
+      "style": "normal"
+    },
+    "body": {
+      "stack": "'Segoe UI', 'Lucida Grande', 'Lucida Sans Unicode', Tahoma, sans-serif",
+      "weight": "400",
+      "lineHeight": 1.5
+    },
+    "mono": {
+      "stack": "Consolas, 'Lucida Console', monospace"
+    },
     "baseSize": 16,
     "scale": 1.22
   },
-  "shape": { "radiusSm": 8, "radiusMd": 12, "radiusLg": 18, "border": 1 },
-  "space": { "unit": 8, "density": 1.1 },
+  "shape": {
+    "corner": "round",
+    "radiusSm": 8,
+    "radiusMd": 12,
+    "radiusLg": 18,
+    "border": 1,
+    "borderStyle": "solid"
+  },
+  "space": {
+    "unit": 8,
+    "density": 1.1
+  },
   "elevation": {
     "shadow": "0 2px 6px rgba(14,58,68,.16)",
     "shadowLg": "0 10px 28px rgba(14,58,68,.22)"
   },
-  "motion": { "speed": 220, "easing": "cubic-bezier(.2,.8,.3,1)", "character": "Glide — things arrive like they're on water, with a soft overshoot and no bounce." },
+  "motion": {
+    "speed": 220,
+    "easing": "cubic-bezier(.2,.8,.3,1)",
+    "entrance": "rise",
+    "stagger": 50,
+    "hover": "lift",
+    "ambient": "shimmer",
+    "character": "Glide — things arrive like they're on water, with a soft overshoot and no bounce."
+  },
   "texture": {
     "kind": "sheen",
     "a": "#D8F0F4",
@@ -73,5 +145,15 @@
     "alpha": 0.85,
     "notes": "Swimming-pool checker under a diagonal gloss sweep. Orb knobs (radial highlight), aqua glass-rim borders."
   },
-  "notes": "Seeded from Bureau's Aero style (web/js/look.js + docs/STYLES.md)."
+  "notes": "Seeded from Bureau's Aero style (web/js/look.js + docs/STYLES.md).",
+  "effects": {
+    "gloss": 0.6,
+    "glass": 8,
+    "grain": 0
+  },
+  "decor": {
+    "ornament": "◈",
+    "dividers": "line",
+    "underline": "solid"
+  }
 }
