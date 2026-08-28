@@ -33,12 +33,16 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return Math.round(r.width) === innerWidth && Math.round(r.height) === innerHeight;
   });
 
-  // — the front is emblems and the activity, and nothing else —
+  // — the front is emblems and the activity, and nothing else. A definition
+  //   card may also carry its meaning and a speak button, but those live
+  //   inside the word group; nothing from the back leaks forward. —
   const frontIsBare = await page.evaluate(() => {
     const f = document.querySelector('.card.top .front');
     const kids = [...f.children].filter(el => !el.classList.contains('stamp'));
+    const word = kids[1];
     return kids.length === 2 && kids[0].classList.contains('marks') &&
-           kids[1].classList.contains('t') &&
+           word.classList.contains('word') && word.firstElementChild.classList.contains('t') &&
+           [...word.children].every(el => el.matches('.t, .def, .speak')) &&
            !f.querySelector('.taglist, .kicker, .why, .odds, .facts');
   });
   const emblems = await page.locator('.card.top .marks .mark').count();
@@ -136,12 +140,14 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     ACT.S.packs.core = true;
     const back = ACT.pool().length;
     const other = PACKS.find(p => p.id !== 'core');
+    ACT.S.packs[other.id] = false;
+    const without = ACT.pool().length;
     ACT.S.packs[other.id] = true;
     const withExtra = ACT.pool().length;
     ACT.S.packs[other.id] = other.on;
     ACT.redeal();
     return { shipsMoreThanOne: PACKS.length > 1, off: off === before - core.items.length,
-             back: back === before, adds: withExtra === before + other.items.length };
+             back: back === before, adds: withExtra === without + other.items.length };
   });
 
   // — the dock reaches everything —
