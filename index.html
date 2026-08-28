@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Aesthetics studio</title>
+<title>Aesthetics</title>
 <link rel="icon" href="data:,">
-<link rel="stylesheet" href="css/editor.css">
+<link rel="stylesheet" href="css/studio.css">
 </head>
 <body>
 <header class="top">
@@ -14,6 +14,7 @@
     <p id="subtitle" class="hint"></p>
   </div>
   <div class="topbtns">
+    <button id="plainbtn" data-act="plain" title="Give the editor a neutral room when an aesthetic is too loud to work inside">Plain room</button>
     <button id="darkbtn" data-act="dark" hidden>After dark</button>
     <button id="revert" data-act="revert" hidden>Revert to file</button>
     <button id="deletebtn" data-act="delete" hidden>Delete</button>
@@ -30,30 +31,64 @@
   <main id="form" class="col-form"></main>
 
   <aside class="col-side">
-    <!-- The preview never changes shape; the aesthetic paints it. -->
-    <section id="preview" class="preview">
+    <!-- The demo: a small site that never changes shape — the aesthetic is
+         what changes. Everything with data-stag arrives with the entrance. -->
+    <section id="demo" class="demo">
       <div class="pv-room">
-        <div class="pv-app">
-          <div class="pv-bar">
-            <span class="pv-name">—</span>
-            <button class="pv-btn pv-primary">Begin</button>
+        <nav class="pv-bar" data-stag>
+          <span class="pv-brand pv-name">—</span>
+          <span class="pv-links">
+            <a class="pv-link" href="#demo">Rooms</a>
+            <a class="pv-link" href="#demo">Letters</a>
+          </span>
+          <button class="pv-btn pv-primary">Begin</button>
+        </nav>
+
+        <section class="pv-hero" data-stag>
+          <h2 class="pv-h1">A room in this place</h2>
+          <p class="pv-tagline">—</p>
+          <p class="pv-story"></p>
+          <div class="pv-chips"></div>
+          <div class="pv-row">
+            <button class="pv-btn pv-primary">Keep it</button>
+            <button class="pv-btn">Not today</button>
+            <a class="pv-link" href="#demo">or read on</a>
           </div>
-          <div class="pv-card">
-            <h2 class="pv-h">A room in this place</h2>
-            <p class="pv-tagline hint-none">—</p>
-            <p class="pv-story"></p>
-            <div class="pv-chips"></div>
-            <div class="pv-row">
-              <button class="pv-btn pv-primary">Keep it</button>
-              <button class="pv-btn">Not today</button>
-            </div>
-            <input class="pv-input" value="Something typed here" readonly>
-            <p class="pv-mono">code, if the place has any</p>
-          </div>
-          <div class="pv-toast">On the list</div>
+        </section>
+
+        <div class="pv-grid">
+          <article class="pv-card" data-stag>
+            <h3 class="pv-h3">First</h3>
+            <p class="pv-card-copy" data-fallback="A card with something worth keeping on it."></p>
+          </article>
+          <article class="pv-card" data-stag>
+            <h3 class="pv-h3">Second</h3>
+            <p class="pv-card-copy" data-fallback="Another, arriving a beat behind the first."></p>
+          </article>
+          <article class="pv-card" data-stag>
+            <h3 class="pv-h3">Third</h3>
+            <p class="pv-card-copy" data-fallback="The stagger you can feel is the Motion section."></p>
+          </article>
         </div>
+
+        <form class="pv-form" data-stag onsubmit="return false">
+          <input class="pv-input" placeholder="Something typed here">
+          <button class="pv-btn pv-primary">Send</button>
+        </form>
+
+        <div class="pv-divider" data-stag><span class="pv-orn"></span></div>
+
+        <footer class="pv-footer" data-stag>
+          <span class="pv-name">—</span>
+          <span class="pv-mono">every pixel above is a token</span>
+        </footer>
+
+        <div class="pv-toast" data-stag>On the list</div>
       </div>
-      <div class="pv-swatches"></div>
+      <div class="demobar">
+        <div class="pv-swatches"></div>
+        <button class="mini" data-act="replay" title="Run the entrance again">↻ Entrance</button>
+      </div>
     </section>
 
     <section class="export">
@@ -66,7 +101,7 @@
         <button class="mini" data-act="download">Download</button>
       </div>
       <textarea id="out" class="mono" readonly spellcheck="false"></textarea>
-      <p class="hint">The JSON is the aesthetic. Commit it to <code>aesthetics/library/</code>
+      <p class="hint">The JSON is the aesthetic. Commit it to <code>library/</code>
         (or hand it to a session) and it is kept; the guide is the same thing written
         out for reading.</p>
     </section>

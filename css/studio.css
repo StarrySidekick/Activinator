@@ -1,0 +1,374 @@
+/* The studio wears the aesthetic. Every colour, face, radius and shadow in
+   this file comes off the tokens the painter sets on <html> (--v-*), so
+   choosing an aesthetic restyles the entire page — the editor is the demo.
+
+   Two tiers: the demo site (.pv-*) drinks the tokens straight; the editor
+   chrome around it drinks them through --c-*, a thin mapping that the
+   plain-room toggle (data-plain on <html>) can re-point at neutral greys
+   when an aesthetic is too loud to work inside. The demo stays painted
+   either way — plain is for the tools, never the picture. */
+
+:root {
+  /* sane first paint before the painter runs; apply() overwrites all of it */
+  --v-bg: #F4F1EA; --v-surface: #FCFAF5; --v-ink: #26221C; --v-inksoft: #5C564C;
+  --v-line: #8A8478; --v-accent: #5A6382; --v-glow: #9FB2D8;
+  --v-display: Georgia, serif; --v-body: Georgia, serif;
+  --v-mono: ui-monospace, Menlo, monospace;
+  --v-display-weight: 600; --v-display-style: normal;
+  --v-display-tracking: 0em; --v-display-transform: none;
+  --v-body-weight: 400; --v-leading: 1.5; --v-size: 16px;
+  --v-h1: 31px; --v-h2: 25px; --v-h3: 20px;
+  --v-r-sm: 4px; --v-r-md: 8px; --v-r-lg: 14px; --v-cut: 8px; --v-cut-lg: 14px;
+  --v-bw: 1px; --v-bstyle: solid; --v-gap: 8px;
+  --v-shadow: 0 1px 3px rgba(0,0,0,.12); --v-shadow-lg: 0 8px 24px rgba(0,0,0,.16);
+  --v-gloss: 0; --v-glass: 0px; --v-grain: 0;
+  --v-ornament: '·'; --v-speed: 180ms; --v-ease: ease-out; --v-stagger: 40ms;
+  --v-backdrop: #F4F1EA;
+
+  /* the chrome mapping */
+  --c-bg: color-mix(in srgb, var(--v-bg) 86%, var(--v-surface));
+  --c-surface: var(--v-surface);
+  --c-ink: var(--v-ink);
+  --c-inksoft: var(--v-inksoft);
+  --c-line: color-mix(in srgb, var(--v-line) 42%, var(--v-surface));
+  --c-accent: var(--v-accent);
+  --c-font: var(--v-body);
+  --c-display: var(--v-display);
+  --c-r: var(--v-r-md);
+}
+html[data-plain] {
+  --c-bg: #f2f2f4; --c-surface: #ffffff; --c-ink: #24262b; --c-inksoft: #75777e;
+  --c-line: #dfdfe4; --c-accent: #4a5058; --c-r: 8px;
+  --c-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --c-display: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0 }
+html { -webkit-text-size-adjust: 100% }
+body {
+  font: 14px/1.45 var(--c-font);
+  color: var(--c-ink); background: var(--c-bg);
+  transition: background-color .35s, color .35s;
+}
+button { font: inherit; cursor: pointer }
+h1 { font-family: var(--c-display); font-size: 19px; font-weight: 650 }
+.hint { color: var(--c-inksoft); font-size: 12px; font-weight: 400 }
+.mono { font-family: var(--v-mono); font-size: 12px }
+code { font-family: var(--v-mono); font-size: 12px; background: color-mix(in srgb, var(--c-ink) 8%, transparent); padding: 0 3px; border-radius: 3px }
+
+.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px; background: var(--c-surface);
+  border-bottom: 1px solid var(--c-line);
+  position: sticky; top: 0; z-index: 5;
+  transition: background-color .35s;
+}
+.topbtns { display: flex; gap: 8px; flex-wrap: wrap }
+.topbtns button, .mini {
+  background: var(--c-surface); border: 1px solid color-mix(in srgb, var(--c-line) 60%, var(--c-inksoft));
+  border-radius: calc(var(--c-r) * .75); padding: 5px 11px; color: var(--c-ink);
+}
+.topbtns button:hover, .mini:hover { border-color: var(--c-inksoft) }
+#darkbtn.on, #plainbtn.on { background: var(--c-ink); color: var(--c-surface); border-color: var(--c-ink) }
+
+.cols {
+  display: grid; grid-template-columns: 200px minmax(320px, 1fr) minmax(380px, 560px);
+  gap: 16px; padding: 16px; align-items: start; max-width: 1560px; margin: 0 auto;
+}
+
+/* ---- the list ---------------------------------------------------------- */
+.col-list { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 68px }
+.who {
+  display: flex; align-items: center; gap: 8px; text-align: left;
+  background: none; border: 1px solid transparent;
+  border-radius: var(--c-r); padding: 8px 10px; color: var(--c-ink);
+}
+.who:hover { background: color-mix(in srgb, var(--c-ink) 7%, transparent) }
+.who.on { background: var(--c-surface); border-color: var(--c-line) }
+.who .dot { width: 10px; height: 10px; border-radius: 50%; flex: none; border: 1px solid rgba(0,0,0,.15) }
+.who-name { font-weight: 550 }
+.who-tags { margin-left: auto; color: var(--c-inksoft); font-size: 11px; white-space: nowrap }
+
+/* ---- the form ---------------------------------------------------------- */
+.sec {
+  background: var(--c-surface); border: 1px solid var(--c-line);
+  border-radius: var(--c-r); margin-bottom: 10px;
+  transition: background-color .35s;
+}
+.sec summary {
+  padding: 10px 14px; font-weight: 600; cursor: pointer; list-style: none;
+  display: flex; align-items: baseline; gap: 10px; font-family: var(--c-display);
+}
+.sec summary::-webkit-details-marker { display: none }
+.sec summary::before { content: '▸'; color: var(--c-inksoft); font-size: 11px }
+.sec[open] summary::before { content: '▾' }
+.sec summary .hint { font-weight: 400; font-family: var(--c-font) }
+.fields { padding: 4px 14px 14px; display: grid; gap: 12px }
+
+.field { display: grid; gap: 4px }
+.field label { font-size: 12px; font-weight: 600; color: var(--c-ink); display: flex; gap: 8px; align-items: baseline }
+.field input[type=text], .field textarea, .field select {
+  font: inherit; border: 1px solid color-mix(in srgb, var(--c-line) 60%, var(--c-inksoft));
+  border-radius: calc(var(--c-r) * .75); padding: 6px 9px;
+  background: color-mix(in srgb, var(--c-surface) 92%, var(--c-bg)); color: var(--c-ink); width: 100%;
+}
+.field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible {
+  outline: 2px solid var(--c-accent); outline-offset: 1px;
+}
+.field textarea { resize: vertical }
+.field input.mono, .field textarea.mono { font-family: var(--v-mono); font-size: 12px }
+.rangerow { display: flex; gap: 10px; align-items: center }
+.rangerow input { flex: 1; accent-color: var(--c-accent) }
+.rangerow output { min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; color: var(--c-inksoft); font-size: 12px }
+.colorrow, .swrow { display: flex; gap: 8px; align-items: center }
+input[type=color] {
+  width: 34px; height: 30px; padding: 2px;
+  border: 1px solid color-mix(in srgb, var(--c-line) 60%, var(--c-inksoft));
+  border-radius: calc(var(--c-r) * .75); background: var(--c-surface); flex: none;
+}
+.hex { width: 90px !important; flex: none }
+.swrow input[type=text]:not(.hex) { flex: 1 }
+.swrow .who-name { font-size: 12px; flex: 1 }
+.mini.wide { width: 100%; margin-top: 2px }
+.checkrow { display: flex; gap: 8px; align-items: center; font-weight: 400 !important }
+
+/* ---- the demo site ----------------------------------------------------- */
+.col-side { position: sticky; top: 68px; display: grid; gap: 12px }
+.demo {
+  border: 1px solid var(--c-line); border-radius: var(--c-r);
+  overflow: hidden; background: var(--c-surface);
+}
+
+.pv-room {
+  position: relative; background: var(--v-backdrop);
+  padding: calc(var(--v-gap) * 2.25);
+  display: grid; gap: calc(var(--v-gap) * 1.5);
+  transition: background .35s;
+}
+.pv-room > * { position: relative; z-index: 1 }
+
+/* grain: film over the whole room, sitting under the content */
+.pv-room::before {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  opacity: var(--v-grain); mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+}
+
+/* the ambient layer: what the room does when nothing is happening */
+.pv-room::after {
+  content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+}
+html[data-ambient='drift'] .pv-room { animation: amb-drift 80s linear infinite }
+@keyframes amb-drift { to { background-position: 256px 256px } }
+html[data-ambient='twinkle'] .pv-room::after {
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255,255,255,.9) 1px, transparent 1.8px),
+    radial-gradient(circle at 78% 12%, rgba(255,255,255,.8) 1px, transparent 1.7px),
+    radial-gradient(circle at 40% 70%, rgba(255,255,255,.7) 1px, transparent 1.6px),
+    radial-gradient(circle at 90% 55%, rgba(255,255,255,.8) 1px, transparent 1.8px),
+    radial-gradient(circle at 60% 30%, rgba(255,255,255,.6) 1px, transparent 1.5px);
+  animation: amb-twinkle 3.2s ease-in-out infinite alternate;
+}
+@keyframes amb-twinkle { from { opacity: .15 } to { opacity: .95 } }
+html[data-ambient='shimmer'] .pv-room::after {
+  background: linear-gradient(115deg, transparent 42%, rgba(255,255,255,.28) 50%, transparent 58%);
+  background-size: 300% 100%;
+  animation: amb-shimmer 7s var(--v-ease) infinite;
+}
+@keyframes amb-shimmer { from { background-position: 120% 0 } to { background-position: -60% 0 } }
+
+/* surfaces */
+.pv-bar {
+  display: flex; align-items: center; gap: var(--v-gap);
+  background: color-mix(in srgb, var(--v-surface) 82%, transparent);
+  -webkit-backdrop-filter: blur(var(--v-glass)); backdrop-filter: blur(var(--v-glass));
+  color: var(--v-ink);
+  border: var(--v-bw) var(--v-bstyle) var(--v-line); border-radius: var(--v-r-md);
+  padding: calc(var(--v-gap) * .75) var(--v-gap); box-shadow: var(--v-shadow);
+}
+.pv-brand { margin-right: auto }
+.pv-links { display: flex; gap: var(--v-gap) }
+.pv-name {
+  font-family: var(--v-display); font-weight: var(--v-display-weight);
+  font-style: var(--v-display-style);
+  letter-spacing: var(--v-display-tracking); text-transform: var(--v-display-transform);
+  font-size: var(--v-h3);
+}
+.pv-hero, .pv-card {
+  position: relative; background: var(--v-surface); color: var(--v-ink);
+  border: var(--v-bw) var(--v-bstyle) var(--v-line);
+  padding: calc(var(--v-gap) * 1.5);
+  font-family: var(--v-body); font-weight: var(--v-body-weight);
+  font-size: var(--v-size); line-height: var(--v-leading);
+  display: grid; gap: var(--v-gap);
+}
+.pv-hero { border-radius: var(--v-r-lg); box-shadow: var(--v-shadow-lg) }
+.pv-card { border-radius: var(--v-r-md); box-shadow: var(--v-shadow); font-size: calc(var(--v-size) * .88) }
+.pv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--v-gap) }
+.pv-h1, .pv-h3 {
+  font-family: var(--v-display); font-weight: var(--v-display-weight);
+  font-style: var(--v-display-style);
+  letter-spacing: var(--v-display-tracking); text-transform: var(--v-display-transform);
+  line-height: 1.15;
+}
+.pv-h1 { font-size: var(--v-h1) }
+.pv-h3 { font-size: calc(var(--v-size) * 1.05) }
+.pv-tagline { color: var(--v-inksoft); font-style: italic }
+.pv-story { color: var(--v-inksoft); font-size: calc(var(--v-size) * .92) }
+.pv-chips { display: flex; gap: calc(var(--v-gap) * .5); flex-wrap: wrap }
+.pv-chip {
+  border: var(--v-bw) var(--v-bstyle) var(--v-line); border-radius: var(--v-r-sm);
+  color: var(--v-inksoft); padding: 2px 8px; font-size: calc(var(--v-size) * .8);
+  font-family: var(--v-body);
+}
+.pv-row { display: flex; gap: calc(var(--v-gap) * .75); flex-wrap: wrap; align-items: center }
+
+/* gloss: the wet highlight, strength from the token */
+.pv-btn, .pv-hero, .pv-card { overflow: hidden }
+.pv-btn::after, .pv-hero::after, .pv-card::after {
+  content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255,255,255, calc(var(--v-gloss) * .5)), rgba(255,255,255,0) 55%);
+}
+
+.pv-btn {
+  position: relative;
+  font-family: var(--v-body); font-size: calc(var(--v-size) * .95);
+  background: var(--v-surface); color: var(--v-accent);
+  border: var(--v-bw) var(--v-bstyle) var(--v-accent); border-radius: var(--v-r-md);
+  padding: calc(var(--v-gap) * .6) calc(var(--v-gap) * 1.4);
+  transition: transform var(--v-speed) var(--v-ease), box-shadow var(--v-speed) var(--v-ease), filter var(--v-speed) var(--v-ease);
+}
+.pv-primary { background: var(--v-accent); color: var(--v-surface); border-color: var(--v-accent) }
+
+/* on touch: what the pointer does to a button (and, gently, a card) */
+html[data-hover='lift'] .pv-btn:hover { transform: translateY(-2px); box-shadow: var(--v-shadow) }
+html[data-hover='lift'] .pv-card:hover { transform: translateY(-2px); box-shadow: var(--v-shadow-lg) }
+html[data-hover='glow'] .pv-btn:hover { box-shadow: 0 0 0 3px color-mix(in srgb, var(--v-glow) 50%, transparent), 0 0 18px color-mix(in srgb, var(--v-glow) 55%, transparent) }
+html[data-hover='glow'] .pv-card:hover { box-shadow: 0 0 0 2px color-mix(in srgb, var(--v-glow) 40%, transparent), var(--v-shadow) }
+html[data-hover='tilt'] .pv-btn:hover { transform: rotate(-1.5deg) scale(1.03) }
+html[data-hover='tilt'] .pv-card:hover { transform: rotate(-.6deg) scale(1.01) }
+html[data-hover='press'] .pv-btn:hover { filter: brightness(1.05) }
+html[data-hover='press'] .pv-btn:active { transform: translateY(2px); box-shadow: 0 0 0 0 transparent }
+.pv-card { transition: transform var(--v-speed) var(--v-ease), box-shadow var(--v-speed) var(--v-ease) }
+
+/* links */
+.pv-link {
+  color: var(--v-accent); font-family: var(--v-body); font-size: calc(var(--v-size) * .92);
+  text-decoration-line: underline; text-decoration-thickness: from-font;
+  text-underline-offset: 3px; text-decoration-color: color-mix(in srgb, var(--v-accent) 65%, transparent);
+}
+html[data-underline='dotted'] .pv-link { text-decoration-style: dotted }
+html[data-underline='wavy'] .pv-link { text-decoration-style: wavy }
+html[data-underline='none'] .pv-link { text-decoration-line: none }
+.pv-link:hover { text-decoration-color: var(--v-accent) }
+
+.pv-form { display: flex; gap: calc(var(--v-gap) * .75) }
+.pv-input {
+  flex: 1; font: inherit; font-family: var(--v-body); font-size: calc(var(--v-size) * .95);
+  background: color-mix(in srgb, var(--v-bg) 45%, var(--v-surface));
+  color: var(--v-ink); border: var(--v-bw) var(--v-bstyle) var(--v-line);
+  border-radius: var(--v-r-sm); padding: calc(var(--v-gap) * .6) var(--v-gap);
+}
+.pv-input::placeholder { color: var(--v-inksoft) }
+.pv-input:focus-visible { outline: 2px solid var(--v-glow); outline-offset: 1px }
+
+/* dividers: the aesthetic's signature horizontal rule. The ornament rides a
+   little carrier span so the glyph can come from a token via `content`. */
+.pv-divider { display: flex; align-items: center; gap: var(--v-gap); color: var(--v-inksoft) }
+.pv-orn { display: none; font-size: calc(var(--v-size) * 1.1); line-height: 1 }
+.pv-orn::before { content: var(--v-ornament) }
+html[data-dividers='none'] .pv-divider { display: none }
+html[data-dividers='line'] .pv-divider { border-top: var(--v-bw) var(--v-bstyle) var(--v-line) }
+html[data-dividers='double'] .pv-divider { border-top: calc(var(--v-bw) * 3) double var(--v-line) }
+html[data-dividers='ornament'] .pv-divider::before,
+html[data-dividers='ornament'] .pv-divider::after {
+  content: ''; flex: 1; border-top: var(--v-bw) var(--v-bstyle) var(--v-line);
+}
+html[data-dividers='ornament'] .pv-orn { display: block }
+
+.pv-footer {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--v-gap);
+  color: var(--v-inksoft);
+}
+.pv-footer .pv-name { font-size: var(--v-size) }
+.pv-mono { font-family: var(--v-mono); font-size: calc(var(--v-size) * .78); color: var(--v-inksoft) }
+.pv-toast {
+  justify-self: center; background: var(--v-ink); color: var(--v-bg);
+  border-radius: var(--v-r-lg); padding: calc(var(--v-gap) * .5) calc(var(--v-gap) * 1.5);
+  font-family: var(--v-body); font-size: calc(var(--v-size) * .9);
+  box-shadow: var(--v-shadow);
+}
+
+/* cut corners: the chamfer is a clip, so radius drops to zero and the
+   chamfer size rides the radius tokens. A clip also clips the shadow —
+   carve depth with borders in a cut-corner aesthetic. */
+html[data-corner='cut'] .pv-btn,
+html[data-corner='cut'] .pv-chip,
+html[data-corner='cut'] .pv-input,
+html[data-corner='cut'] .pv-bar,
+html[data-corner='cut'] .pv-toast {
+  border-radius: 0;
+  clip-path: polygon(var(--v-cut) 0, calc(100% - var(--v-cut)) 0, 100% var(--v-cut),
+    100% calc(100% - var(--v-cut)), calc(100% - var(--v-cut)) 100%, var(--v-cut) 100%,
+    0 calc(100% - var(--v-cut)), 0 var(--v-cut));
+}
+html[data-corner='cut'] .pv-hero,
+html[data-corner='cut'] .pv-card {
+  border-radius: 0;
+  clip-path: polygon(var(--v-cut-lg) 0, calc(100% - var(--v-cut-lg)) 0, 100% var(--v-cut-lg),
+    100% calc(100% - var(--v-cut-lg)), calc(100% - var(--v-cut-lg)) 100%, var(--v-cut-lg) 100%,
+    0 calc(100% - var(--v-cut-lg)), 0 var(--v-cut-lg));
+}
+
+/* entrances: how things arrive. Elements marked data-stag hide until the
+   painter grants .arrived; the delay is set inline as index × stagger. */
+html:not([data-enter='none']) .pv-room [data-stag]:not(.arrived) { opacity: 0 }
+html[data-enter] .pv-room [data-stag].arrived {
+  animation-duration: calc(var(--v-speed) * 2 + 120ms);
+  animation-timing-function: var(--v-ease);
+  animation-fill-mode: both;
+}
+html[data-enter='fade'] .pv-room [data-stag].arrived { animation-name: enter-fade }
+html[data-enter='rise'] .pv-room [data-stag].arrived { animation-name: enter-rise }
+html[data-enter='drop'] .pv-room [data-stag].arrived { animation-name: enter-drop }
+html[data-enter='turn'] .pv-room [data-stag].arrived { animation-name: enter-turn }
+html[data-enter='grow'] .pv-room [data-stag].arrived { animation-name: enter-grow }
+@keyframes enter-fade { from { opacity: 0 } }
+@keyframes enter-rise { from { opacity: 0; transform: translateY(16px) } }
+@keyframes enter-drop { from { opacity: 0; transform: translateY(-14px) } to { transform: none } }
+@keyframes enter-turn { from { opacity: 0; transform: rotate(-4deg) scale(.94) } }
+@keyframes enter-grow { from { opacity: 0; transform: scale(.88) } }
+
+.demobar {
+  display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  background: var(--c-surface); border-top: 1px solid var(--c-line);
+}
+.pv-swatches { display: flex; gap: 4px; flex-wrap: wrap; flex: 1 }
+.pv-sw { width: 20px; height: 20px; border-radius: 5px; border: 1px solid rgba(0,0,0,.15); flex: none }
+
+/* ---- the exports ------------------------------------------------------- */
+.export { display: grid; gap: 8px }
+.tabs { display: flex; gap: 6px; align-items: center }
+.tabs .spacer { flex: 1 }
+.tabs [data-tab] {
+  background: none; border: 1px solid transparent; border-radius: calc(var(--c-r) * .75);
+  padding: 4px 10px; color: var(--c-inksoft);
+}
+.tabs [data-tab].on { background: var(--c-surface); border-color: var(--c-line); color: var(--c-ink); font-weight: 600 }
+#out {
+  width: 100%; height: 240px; resize: vertical; color: var(--c-ink);
+  border: 1px solid var(--c-line); border-radius: var(--c-r); padding: 10px;
+  background: var(--c-surface); white-space: pre; overflow: auto;
+}
+
+@media (max-width: 1120px) {
+  .cols { grid-template-columns: 1fr }
+  .col-list { position: static; flex-direction: row; flex-wrap: wrap }
+  .col-side { position: static }
+  .pv-grid { grid-template-columns: 1fr }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important }
+  .pv-room [data-stag] { opacity: 1 !important }
+}

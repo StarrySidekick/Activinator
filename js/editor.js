@@ -1,15 +1,15 @@
-/* The studio: a list of aesthetics, a form generated from the schema, a live
-   preview, and the three exports.
+/* The studio: a list of aesthetics, a form generated from the schema, and the
+   demo — which is the whole page, because the aesthetic is painted onto the
+   document root and everything reads its tokens.
 
-   The committed files in library/ are the source of truth, exactly as the
-   packs are for the deck. The studio never writes them — it can't, it is a
-   static page — so edits live in localStorage as a working copy per id, and
-   shipping a change means exporting the JSON and committing it (or telling a
-   session to). Revert throws the working copy away and the file shows
-   through again. */
+   The committed files in library/ are the source of truth. The studio never
+   writes them — it can't, it is a static page — so edits live in localStorage
+   as a working copy per id, and shipping a change means exporting the JSON
+   and committing it (or telling a session to). Revert throws the working copy
+   away and the file shows through again. */
 
 import { SECTIONS, ROLES, blank, upgrade, get, set } from './schema.js';
-import { apply, fill } from './preview.js';
+import { apply, fill, replay } from './preview.js';
 import { asJSON, asCSS, asGuide } from './export.js';
 
 const KEY = 'aestheticsStudio.v1';
@@ -18,7 +18,7 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 
 let LIB = {};            // id → aesthetic, as committed
 let ORDER = [];          // library order, then anything born here
-let S = { edits: {}, order: [], selected: null, dark: false, tab: 'guide' };
+let S = { edits: {}, order: [], selected: null, dark: false, plain: false, tab: 'guide' };
 
 function load () {
   try { S = { ...S, ...(JSON.parse(localStorage.getItem(KEY)) || {}) }; }
@@ -124,18 +124,19 @@ function renderForm () {
     </details>`).join('');
 }
 
-/* ---- preview & exports ------------------------------------------------- */
+/* ---- painting & exports ------------------------------------------------ */
 
 function refresh () {
   const a = current();
-  const pv = $('#preview');
-  apply(pv, a, S.dark);
-  fill(pv, a);
+  apply(document.documentElement, a, S.dark);
+  document.documentElement.toggleAttribute('data-plain', !!S.plain);
+  fill($('#demo'), a);
   $('#title').textContent = a.name;
   $('#subtitle').textContent = a.tagline || '';
   $('#revert').hidden = !(edited(S.selected) && LIB[S.selected]);
   $('#darkbtn').hidden = !a.color.darkRoles;
   $('#darkbtn').classList.toggle('on', S.dark && !!a.color.darkRoles);
+  $('#plainbtn').classList.toggle('on', !!S.plain);
   renderExport();
 }
 
@@ -163,18 +164,19 @@ function download () {
 
 function onInput (e) {
   const t = e.target;
+  if (!t.dataset.sw && !t.dataset.path) return;
   const a = editable();
   if (t.dataset.sw) {                       // palette rows
     const i = +t.dataset.i;
     a.color.palette[i][t.dataset.sw] = t.value;
     syncTwin(t);
-  } else if (t.dataset.path) {
+  } else {
     let v = t.value;
     if (t.dataset.kind === 'lines') v = v.split('\n').map((x) => x.trim()).filter(Boolean);
     else if (t.type === 'range') { v = +v; const o = t.parentElement.querySelector('output'); if (o) o.textContent = t.value + (unitOf(t.dataset.path) || ''); }
     set(a, t.dataset.path, v);
     if (t.type === 'color' || t.classList.contains('hex')) syncTwin(t);
-  } else return;
+  }
   save();
   renderList();      // cheap, and the first edit has to raise the ·edited flag
   refresh();
@@ -216,6 +218,10 @@ function onClick (e) {
       break;
     case 'dark':
       S.dark = !S.dark; save(); refresh(); return;
+    case 'plain':
+      S.plain = !S.plain; save(); refresh(); return;
+    case 'replay':
+      replay($('#demo')); return;
     case 'revert':
       if (!confirm('Throw away every change to this aesthetic and go back to the committed file?')) return;
       delete S.edits[S.selected]; save(); boot2(); return;
@@ -270,11 +276,15 @@ function boot2 () {
   const a = current();
   $('#deletebtn').hidden = !!LIB[S.selected];
   renderList(); renderForm(); refresh();
+  replay($('#demo'));
   if (a && a.color.darkRoles == null) S.dark = false;
 }
 
 async function boot () {
   load();
+  /* working copies saved under an older format get the new fields filled in,
+     so a control never comes up reading `undefined` */
+  for (const id of Object.keys(S.edits)) S.edits[id] = upgrade(S.edits[id]);
   let index = [];
   try {
     index = await (await fetch('library/index.json')).json();
@@ -290,7 +300,6 @@ async function boot () {
   document.addEventListener('click', onClick);
   document.addEventListener('change', (e) => {
     if (e.target.id === 'file') onImport(e);
-    if (e.target.dataset.act === 'dark-toggle') onClick(e);
   });
   boot2();
 }

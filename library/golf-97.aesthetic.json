@@ -6,7 +6,12 @@
   "tagline": "A CD-ROM golf course, rendered with total sincerity",
   "lineage": "New — not yet defined anywhere but here.",
   "story": "DRAFT — a sketch to rewrite in your own words. The guess: a late-nineties sports sim on a beige tower PC. Mown stripes on the fairway, a flag that is exactly red, an interface of confident plastic bevels and Verdana, and a scorecard that takes itself completely seriously. The sky is the blue the box art promised.",
-  "mood": ["sincere", "sunlit", "plastic", "orderly"],
+  "mood": [
+    "sincere",
+    "sunlit",
+    "plastic",
+    "orderly"
+  ],
   "principles": [
     "Bevels, not shadows: a surface is raised or sunken, never floating.",
     "The palette is a golf course photographed at noon — grass, sand, sky, one red flag.",
@@ -25,7 +30,11 @@
   ],
   "voice": {
     "tone": "Announcer-polite, slightly formal, delighted by par.",
-    "samples": ["On the card", "Nice lie", "You're away"]
+    "samples": [
+      "On the card",
+      "Nice lie",
+      "You're away"
+    ]
   },
   "color": {
     "roles": {
@@ -39,33 +48,96 @@
     },
     "darkRoles": null,
     "palette": [
-      { "name": "Fairway", "hex": "#2E7D3A" },
-      { "name": "Rough", "hex": "#4E6B34" },
-      { "name": "Sand", "hex": "#D8C084" },
-      { "name": "Sky", "hex": "#7FB3D8" },
-      { "name": "Flag", "hex": "#C23B2E" },
-      { "name": "Bark", "hex": "#6B4A2A" },
-      { "name": "Water", "hex": "#2B6B99" },
-      { "name": "Tee", "hex": "#F2EFE2" },
-      { "name": "Scorecard", "hex": "#F5EEC9" },
-      { "name": "Umbra", "hex": "#33402E" },
-      { "name": "Plastic", "hex": "#C9C4B4" }
+      {
+        "name": "Fairway",
+        "hex": "#2E7D3A"
+      },
+      {
+        "name": "Rough",
+        "hex": "#4E6B34"
+      },
+      {
+        "name": "Sand",
+        "hex": "#D8C084"
+      },
+      {
+        "name": "Sky",
+        "hex": "#7FB3D8"
+      },
+      {
+        "name": "Flag",
+        "hex": "#C23B2E"
+      },
+      {
+        "name": "Bark",
+        "hex": "#6B4A2A"
+      },
+      {
+        "name": "Water",
+        "hex": "#2B6B99"
+      },
+      {
+        "name": "Tee",
+        "hex": "#F2EFE2"
+      },
+      {
+        "name": "Scorecard",
+        "hex": "#F5EEC9"
+      },
+      {
+        "name": "Umbra",
+        "hex": "#33402E"
+      },
+      {
+        "name": "Plastic",
+        "hex": "#C9C4B4"
+      }
     ]
   },
   "type": {
-    "display": { "stack": "Verdana, Tahoma, 'DejaVu Sans', sans-serif", "weight": "700", "tracking": "0em", "transform": "none" },
-    "body": { "stack": "Verdana, Tahoma, 'DejaVu Sans', sans-serif", "weight": "400", "lineHeight": 1.45 },
-    "mono": { "stack": "'Courier New', monospace" },
+    "display": {
+      "stack": "Verdana, Tahoma, 'DejaVu Sans', sans-serif",
+      "weight": "700",
+      "tracking": "0em",
+      "transform": "none",
+      "style": "normal"
+    },
+    "body": {
+      "stack": "Verdana, Tahoma, 'DejaVu Sans', sans-serif",
+      "weight": "400",
+      "lineHeight": 1.45
+    },
+    "mono": {
+      "stack": "'Courier New', monospace"
+    },
     "baseSize": 14,
     "scale": 1.2
   },
-  "shape": { "radiusSm": 0, "radiusMd": 2, "radiusLg": 4, "border": 2 },
-  "space": { "unit": 6, "density": 0.95 },
+  "shape": {
+    "corner": "round",
+    "radiusSm": 0,
+    "radiusMd": 2,
+    "radiusLg": 4,
+    "border": 2,
+    "borderStyle": "solid"
+  },
+  "space": {
+    "unit": 6,
+    "density": 0.95
+  },
   "elevation": {
     "shadow": "inset -1px -1px 0 rgba(0,0,0,.22), inset 1px 1px 0 rgba(255,255,255,.75)",
     "shadowLg": "inset -2px -2px 0 rgba(0,0,0,.25), inset 2px 2px 0 rgba(255,255,255,.85)"
   },
-  "motion": { "speed": 80, "easing": "linear", "character": "Instant. Screens cut, nothing tweens — the machine had no frames to spare." },
+  "motion": {
+    "speed": 80,
+    "easing": "linear",
+    "entrance": "none",
+    "stagger": 0,
+    "hover": "press",
+    "ambient": "none",
+    "character": "Instant. Screens cut, nothing tweens — the machine had no frames to spare."
+  },
   "texture": {
     "kind": "checker",
     "a": "#BFD8A6",
@@ -73,5 +145,15 @@
     "alpha": 1,
     "notes": "Mown-stripe fairway checker. The shadows are bevels: light from the top-left, always."
   },
-  "notes": "DRAFT seeded as a starting point — every value here is a guess for the editor to correct, especially the story."
+  "notes": "DRAFT seeded as a starting point — every value here is a guess for the editor to correct, especially the story.",
+  "effects": {
+    "gloss": 0.25,
+    "glass": 0,
+    "grain": 0
+  },
+  "decor": {
+    "ornament": "▪",
+    "dividers": "double",
+    "underline": "solid"
+  }
 }

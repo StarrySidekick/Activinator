@@ -25,6 +25,9 @@ export const ROLES = [
 ];
 
 export const TEXTURES = ['none', 'checker', 'stars', 'sheen', 'grain'];
+export const ENTRANCES = ['none', 'fade', 'rise', 'drop', 'turn', 'grow'];
+export const HOVERS = ['none', 'lift', 'glow', 'tilt', 'press'];
+export const AMBIENTS = ['none', 'drift', 'twinkle', 'shimmer'];
 
 /* A blank aesthetic — every path the format has, with quiet defaults. Doubles
    as the upgrade net: anything an older file lacks is filled from here. */
@@ -51,19 +54,25 @@ export function blank (id = 'untitled') {
       palette: [],
     },
     type: {
-      display: { stack: 'Georgia, serif', weight: '600', tracking: '0em', transform: 'none' },
+      display: { stack: 'Georgia, serif', weight: '600', style: 'normal', tracking: '0em', transform: 'none' },
       body: { stack: 'Georgia, serif', weight: '400', lineHeight: 1.5 },
       mono: { stack: 'ui-monospace, "SF Mono", Menlo, Consolas, monospace' },
       baseSize: 16,
       scale: 1.25,
     },
-    shape: { radiusSm: 4, radiusMd: 8, radiusLg: 14, border: 1 },
+    shape: { corner: 'round', radiusSm: 4, radiusMd: 8, radiusLg: 14, border: 1, borderStyle: 'solid' },
     space: { unit: 8, density: 1 },
     elevation: {
       shadow: '0 1px 3px rgba(0,0,0,.12)',
       shadowLg: '0 8px 24px rgba(0,0,0,.16)',
     },
-    motion: { speed: 180, easing: 'ease-out', character: '' },
+    effects: { gloss: 0, glass: 0, grain: 0 },
+    decor: { ornament: '', dividers: 'line', underline: 'solid' },
+    motion: {
+      speed: 180, easing: 'ease-out',
+      entrance: 'fade', hover: 'lift', stagger: 40, ambient: 'none',
+      character: '',
+    },
     texture: { kind: 'none', a: '#FFFFFF', b: '#EEEEEE', alpha: 1, notes: '' },
     notes: '',
   };
@@ -121,6 +130,7 @@ export const SECTIONS = [
   { id: 'type', title: 'Type', blurb: 'The faces and the scale.', fields: [
     { path: 'type.display.stack', label: 'Display face', kind: 'text', mono: true },
     { path: 'type.display.weight', label: 'Display weight', kind: 'select', options: ['300', '400', '500', '600', '700', '800'] },
+    { path: 'type.display.style', label: 'Display posture', kind: 'select', options: ['normal', 'italic'] },
     { path: 'type.display.tracking', label: 'Display tracking', kind: 'text', hint: 'e.g. 0em, .04em' },
     { path: 'type.display.transform', label: 'Display case', kind: 'select', options: ['none', 'uppercase', 'lowercase', 'capitalize'] },
     { path: 'type.body.stack', label: 'Body face', kind: 'text', mono: true },
@@ -130,26 +140,42 @@ export const SECTIONS = [
     { path: 'type.baseSize', label: 'Base size', kind: 'range', min: 13, max: 20, step: 1, unit: 'px' },
     { path: 'type.scale', label: 'Scale ratio', kind: 'range', min: 1.05, max: 1.5, step: 0.01, hint: 'each heading step is this much bigger' },
   ]},
-  { id: 'shape', title: 'Shape & space', blurb: 'How much the corners give, how the page breathes.', fields: [
+  { id: 'shape', title: 'Shape & space', blurb: 'How the corners give, how the page breathes.', fields: [
+    { path: 'shape.corner', label: 'Corners', kind: 'select', options: ['round', 'cut'], hint: 'cut = chamfered, the corner clipped off straight' },
     { path: 'shape.radiusSm', label: 'Radius, small', kind: 'range', min: 0, max: 24, step: 1, unit: 'px' },
     { path: 'shape.radiusMd', label: 'Radius, medium', kind: 'range', min: 0, max: 32, step: 1, unit: 'px' },
     { path: 'shape.radiusLg', label: 'Radius, large', kind: 'range', min: 0, max: 48, step: 1, unit: 'px' },
     { path: 'shape.border', label: 'Border width', kind: 'range', min: 0, max: 4, step: 0.5, unit: 'px' },
+    { path: 'shape.borderStyle', label: 'Border style', kind: 'select', options: ['solid', 'double', 'dashed', 'dotted'] },
     { path: 'space.unit', label: 'Space unit', kind: 'range', min: 4, max: 12, step: 1, unit: 'px' },
     { path: 'space.density', label: 'Density', kind: 'range', min: 0.75, max: 1.5, step: 0.05, hint: 'multiplies every gap' },
   ]},
-  { id: 'depth', title: 'Depth & texture', blurb: 'Whether things cast shadows, and what the room is made of.', fields: [
-    { path: 'elevation.shadow', label: 'Shadow', kind: 'text', mono: true, hint: 'a box-shadow, or 0 0 0 transparent for none' },
+  { id: 'depth', title: 'Depth & effects', blurb: 'Whether things cast shadows, and what the light does to them.', fields: [
+    { path: 'elevation.shadow', label: 'Shadow', kind: 'text', mono: true, hint: 'a box-shadow; write a zero shadow for none, never the word none' },
     { path: 'elevation.shadowLg', label: 'Shadow, lifted', kind: 'text', mono: true },
+    { path: 'effects.gloss', label: 'Gloss', kind: 'range', min: 0, max: 1, step: 0.05, hint: 'a wet highlight across buttons and cards' },
+    { path: 'effects.glass', label: 'Glass', kind: 'range', min: 0, max: 20, step: 1, unit: 'px', hint: 'frosted blur behind the bar' },
+    { path: 'effects.grain', label: 'Grain', kind: 'range', min: 0, max: 1, step: 0.05, hint: 'film grain over the whole room' },
+  ]},
+  { id: 'texture', title: 'Backdrop', blurb: 'What the room is made of.', fields: [
     { path: 'texture.kind', label: 'Backdrop', kind: 'select', options: TEXTURES },
     { path: 'texture.a', label: 'Backdrop colour A', kind: 'color' },
     { path: 'texture.b', label: 'Backdrop colour B', kind: 'color' },
     { path: 'texture.alpha', label: 'Backdrop strength', kind: 'range', min: 0, max: 1, step: 0.05 },
     { path: 'texture.notes', label: 'Texture notes', kind: 'textarea', rows: 2, hint: 'for textures no parameter can say — weave, gloss, hand-drawn things' },
   ]},
-  { id: 'motion', title: 'Motion', blurb: 'How the place moves.', fields: [
+  { id: 'decor', title: 'Decor', blurb: 'The small signatures: dividers, links, an ornament.', fields: [
+    { path: 'decor.ornament', label: 'Ornament', kind: 'text', hint: 'one character — ❦ ✦ ⁂ ❋ — used in dividers and flourishes' },
+    { path: 'decor.dividers', label: 'Dividers', kind: 'select', options: ['none', 'line', 'double', 'ornament'] },
+    { path: 'decor.underline', label: 'Links', kind: 'select', options: ['solid', 'dotted', 'wavy', 'none'], hint: 'how a link underlines itself' },
+  ]},
+  { id: 'motion', title: 'Motion', blurb: 'How the place moves — arrival, touch, and the air itself.', fields: [
     { path: 'motion.speed', label: 'Speed', kind: 'range', min: 0, max: 600, step: 10, unit: 'ms' },
     { path: 'motion.easing', label: 'Easing', kind: 'text', mono: true },
+    { path: 'motion.entrance', label: 'Entrance', kind: 'select', options: ENTRANCES, hint: 'how things arrive on screen' },
+    { path: 'motion.stagger', label: 'Stagger', kind: 'range', min: 0, max: 200, step: 5, unit: 'ms', hint: 'the delay between one arrival and the next' },
+    { path: 'motion.hover', label: 'On touch', kind: 'select', options: HOVERS, hint: 'what a button does under the pointer' },
+    { path: 'motion.ambient', label: 'Ambient', kind: 'select', options: AMBIENTS, hint: 'what the backdrop does when nothing is happening' },
     { path: 'motion.character', label: 'Character', kind: 'textarea', rows: 2, hint: 'e.g. “nothing bounces; things settle like paper”' },
   ]},
   { id: 'notes', title: 'Notes', blurb: 'Anything the other sections could not hold.', fields: [

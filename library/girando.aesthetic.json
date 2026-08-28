@@ -6,7 +6,12 @@
   "tagline": "Turning, warm, a piazza at golden hour",
   "lineage": "New — not yet defined anywhere but here.",
   "story": "DRAFT — a sketch to rewrite in your own words. The guess, from the name (girando: turning): a warm place in motion. A carousel slowing down in a southern square, terracotta and ochre catching the last hour of sun, shutters half closed, everything a little circular — things arrive by turning in rather than sliding.",
-  "mood": ["warm", "turning", "golden", "unhurried"],
+  "mood": [
+    "warm",
+    "turning",
+    "golden",
+    "unhurried"
+  ],
   "principles": [
     "Warmth first: every colour is lit by a low sun.",
     "Motion curves — things rotate or arc into place, nothing tracks straight.",
@@ -25,7 +30,11 @@
   ],
   "voice": {
     "tone": "Easy, welcoming, a little musical.",
-    "samples": ["On the list", "Come back around", "Slowly, slowly"]
+    "samples": [
+      "On the list",
+      "Come back around",
+      "Slowly, slowly"
+    ]
   },
   "color": {
     "roles": {
@@ -39,33 +48,96 @@
     },
     "darkRoles": null,
     "palette": [
-      { "name": "Terracotta", "hex": "#C2563A" },
-      { "name": "Ochre", "hex": "#D89B3E" },
-      { "name": "Shutter", "hex": "#3F7D78" },
-      { "name": "Olive", "hex": "#7A7A3C" },
-      { "name": "Stucco", "hex": "#E8CFA8" },
-      { "name": "Vine", "hex": "#5A7A45" },
-      { "name": "Dusk", "hex": "#8A5A72" },
-      { "name": "Stone", "hex": "#A89880" },
-      { "name": "Awning", "hex": "#B03A2E" },
-      { "name": "Sky late", "hex": "#E2A46B" },
-      { "name": "Shadow", "hex": "#5C4636" }
+      {
+        "name": "Terracotta",
+        "hex": "#C2563A"
+      },
+      {
+        "name": "Ochre",
+        "hex": "#D89B3E"
+      },
+      {
+        "name": "Shutter",
+        "hex": "#3F7D78"
+      },
+      {
+        "name": "Olive",
+        "hex": "#7A7A3C"
+      },
+      {
+        "name": "Stucco",
+        "hex": "#E8CFA8"
+      },
+      {
+        "name": "Vine",
+        "hex": "#5A7A45"
+      },
+      {
+        "name": "Dusk",
+        "hex": "#8A5A72"
+      },
+      {
+        "name": "Stone",
+        "hex": "#A89880"
+      },
+      {
+        "name": "Awning",
+        "hex": "#B03A2E"
+      },
+      {
+        "name": "Sky late",
+        "hex": "#E2A46B"
+      },
+      {
+        "name": "Shadow",
+        "hex": "#5C4636"
+      }
     ]
   },
   "type": {
-    "display": { "stack": "'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif", "weight": "600", "tracking": ".01em", "transform": "none" },
-    "body": { "stack": "'Gill Sans', 'Gill Sans MT', Seravek, 'Trebuchet MS', sans-serif", "weight": "400", "lineHeight": 1.55 },
-    "mono": { "stack": "ui-monospace, Menlo, monospace" },
+    "display": {
+      "stack": "'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif",
+      "weight": "600",
+      "tracking": ".01em",
+      "transform": "none",
+      "style": "italic"
+    },
+    "body": {
+      "stack": "'Gill Sans', 'Gill Sans MT', Seravek, 'Trebuchet MS', sans-serif",
+      "weight": "400",
+      "lineHeight": 1.55
+    },
+    "mono": {
+      "stack": "ui-monospace, Menlo, monospace"
+    },
     "baseSize": 16,
     "scale": 1.28
   },
-  "shape": { "radiusSm": 8, "radiusMd": 16, "radiusLg": 28, "border": 1 },
-  "space": { "unit": 9, "density": 1.15 },
+  "shape": {
+    "corner": "round",
+    "radiusSm": 8,
+    "radiusMd": 16,
+    "radiusLg": 28,
+    "border": 1,
+    "borderStyle": "solid"
+  },
+  "space": {
+    "unit": 9,
+    "density": 1.15
+  },
   "elevation": {
     "shadow": "0 2px 6px rgba(92,70,54,.18)",
     "shadowLg": "0 12px 30px rgba(92,70,54,.24)"
   },
-  "motion": { "speed": 320, "easing": "cubic-bezier(.35,.9,.35,1)", "character": "Everything turns in — small rotations on entry, long easings, a carousel slowing rather than a machine stopping." },
+  "motion": {
+    "speed": 320,
+    "easing": "cubic-bezier(.35,.9,.35,1)",
+    "entrance": "turn",
+    "stagger": 90,
+    "hover": "tilt",
+    "ambient": "drift",
+    "character": "Everything turns in — small rotations on entry, long easings, a carousel slowing rather than a machine stopping."
+  },
   "texture": {
     "kind": "grain",
     "a": "#F4E6D2",
@@ -73,5 +145,15 @@
     "alpha": 0.6,
     "notes": "Faint stucco grain; sunlight rather than pattern."
   },
-  "notes": "DRAFT seeded as a starting point — every value here is a guess for the editor to correct, especially the story."
+  "notes": "DRAFT seeded as a starting point — every value here is a guess for the editor to correct, especially the story.",
+  "effects": {
+    "gloss": 0.15,
+    "glass": 0,
+    "grain": 0.2
+  },
+  "decor": {
+    "ornament": "❋",
+    "dividers": "ornament",
+    "underline": "wavy"
+  }
 }
