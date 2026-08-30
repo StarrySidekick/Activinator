@@ -345,11 +345,30 @@ there is nothing to deal against, so nothing is labelled.
 
 **The card is the screen.** Full bleed, no radius, no edge. The two behind it
 sit back rather than beside it and step forward as the one above leaves; an
-offset would show as a misaligned edge against the screen itself. One button
+offset would show as a misaligned edge against the screen itself. One mark
 sits in each corner so that none of them is ever over the middle of it — where
 you go and what you look for along the top, what you make and what you take
 back along the bottom — and undo appears only when there is something to take
 back, because a dead button is furniture.
+
+**The dock sleeps, and it is printed rather than built.** Four things in the
+corners of a full-bleed card are four things in front of the one thing you are
+meant to be looking at, so they fade out; any touch brings them back for a few
+seconds and a verdict puts them away again, since you have moved on. They are
+woken once on launch so the app never opens on a screen with nothing on it. The
+corners stay live while the marks are invisible and the first tap on one only
+wakes it — letting that tap fall through to the card instead would mean
+reaching for the menu and flipping over the card you were deciding about.
+
+They are marks, not buttons: solid silhouettes on the paper, the way a suit is
+printed in the corner of a playing card, with no disc, no rule and no shadow.
+A chrome button drawn over a full-bleed card is a second design arguing with
+the first one. The hub is the app's own mark — the two fanned cards off the
+icon — and one ink colour cannot show two overlapping cards, so the front one
+is cut off the back with a stroke in the colour of whatever is behind it: paper
+over a card, ink over the screen that ends a round. The other three are a
+magnifier, an arrow curling back, and the nib the `writing` tag uses, because
+the same drawing should mean the same thing.
 
 **An activity's id comes from its title, never from its place in the list.**
 It was `'s' + index`, which meant inserting one activity silently re-pointed

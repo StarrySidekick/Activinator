@@ -4,7 +4,8 @@
 import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId, remember,
          donePass, undonePass } from './state.js';
 import { learn } from './taste.js';
-import { render, reset as redeal, goRound, say, takeBack, more, toast, top } from './deck.js';
+import { render, reset as redeal, goRound, say, takeBack, more, toast, top,
+         wake, sleep, awake } from './deck.js';
 import { deal, cycle } from './deal.js';
 import { PACKS } from './data.js';
 import { wire as wireSwipe } from './swipe.js';
@@ -113,10 +114,20 @@ const act = (name, el) => {
 };
 
 const wire = () => {
+  /* Any touch wakes the dock. Whether it was asleep is read here, before the
+     wake, because pointerdown comes before click and the click needs to know
+     which of the two taps it is. */
+  let wasAsleep = true;
+  document.addEventListener('pointerdown', () => { wasAsleep = !awake(); wake(); }, true);
+
   document.addEventListener('click', (e) => {
     const el = e.target.closest('[data-act]'); if (!el) return;
     if (el.dataset.act === 'nerve') return;          // the slider is an input event
-    e.preventDefault(); act(el.dataset.act, el);
+    e.preventDefault();
+    // The first tap on a sleeping dock only wakes it: pressing a mark you
+    // cannot see is not something you meant to do.
+    if (wasAsleep && el.closest('.dock')) return;
+    act(el.dataset.act, el);
   });
 
   document.addEventListener('input', (e) => {
@@ -132,6 +143,7 @@ const wire = () => {
   /* A keyboard is a Mac, and on a Mac the arrows are the swipe. */
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input,textarea')) return;
+    wake();
     const k = { ArrowRight:'like', ArrowLeft:'dislike', ArrowUp:'skip' }[e.key];
     if (k) { e.preventDefault(); return say(k); }
     if (e.key === 'z' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); return takeBack(); }
@@ -145,10 +157,12 @@ const wire = () => {
 load();
 wire();
 redeal();
+wake();          // shown once on opening, then out of the way
 
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
 
 /* One handle for the console and for the smoke test. */
-window.ACT = { S, render, redeal, goRound, say, takeBack, top, pool, deal, cycle, PACKS, panels:P, save };
+window.ACT = { S, render, redeal, goRound, say, takeBack, top, pool, deal, cycle, wake, sleep,
+               PACKS, panels:P, save };

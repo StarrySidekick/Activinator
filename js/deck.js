@@ -13,6 +13,22 @@ let Q = [];
 
 const now = () => new Date().toISOString();
 
+/* — the dock sleeps —
+   Four marks in the corners of a full-bleed card are four things in front of
+   the one thing you are meant to be looking at. They fade out, any touch brings
+   them back, and a verdict puts them away again — you have moved on. They are
+   woken once at launch so that the app never opens on a screen with nothing on
+   it, and boot.js swallows the first tap on one, so a mark you cannot see is
+   never a button you press by accident. */
+const DOZE = 4200;
+let dozer = null;
+const sleep = () => { clearTimeout(dozer); document.body.classList.remove('awake'); };
+const wake = () => {
+  document.body.classList.add('awake');
+  clearTimeout(dozer); dozer = setTimeout(sleep, DOZE);
+};
+const awake = () => document.body.classList.contains('awake');
+
 const toast = (msg) => {
   const t = $('#toast'); if (!msg) return;
   t.textContent = msg; t.classList.add('on');
@@ -114,6 +130,8 @@ const render = () => {
   els.forEach((el, i) => { el.style.zIndex = 10 - i; });
   place(els);
   $('.dock .undo').classList.toggle('on', !!getUndo());
+  /* No card under the marks means no paper for them to be ink on. */
+  document.body.classList.toggle('bare', !Q.length);
 };
 
 const top = () => Q[0];
@@ -150,6 +168,7 @@ const say = (v) => {
     setTimeout(() => render(), 340);
   } else render();
 
+  sleep();
   toast(v === 'like' ? 'Like' : v === 'dislike' ? 'Don’t like'
       : v === 'never' ? 'Out of the pool' : '');
 };
@@ -176,4 +195,5 @@ const more = () => {
   render();
 };
 
-export { Q, render, refill, reset, restack, goRound, say, takeBack, more, toast, top };
+export { Q, render, refill, reset, restack, goRound, say, takeBack, more, toast, top,
+         wake, sleep, awake };

@@ -15,6 +15,9 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   page.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
   const shot = async n => { await page.waitForTimeout(300); await page.screenshot({ path:`test/shots/${n}.png` }); };
+  // The dock sleeps, so pressing one of its marks means waking it first — which
+  // is what a finger does by touching the screen at all.
+  const dock = async (sel) => { await page.evaluate(() => ACT.wake()); await page.click(sel); };
 
   await page.goto(URL);
   await page.waitForTimeout(700);
@@ -74,7 +77,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
 
   // — undo takes the learning back with it, not just the card —
   const wBefore = await page.evaluate(() => JSON.stringify(ACT.S.w));
-  await page.click('[data-act="undo"]');
+  await dock('[data-act="undo"]');
   await page.waitForTimeout(400);
   const undone = await page.evaluate(() => Object.keys(ACT.S.seen).length === 0);
   const backAgain = (await page.locator('.card.top .t').innerText()) === first;
@@ -192,8 +195,28 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return gone && !ACT.S.pass.done.includes(t) && ACT.top().id === t;
   });
 
+  // — the marks sleep, and the first tap on a sleeping one only wakes it: a
+  //   mark you cannot see is not a button you meant to press —
+  await page.evaluate(() => ACT.sleep());
+  await page.waitForTimeout(350);
+  const hiddenDock = await page.evaluate(() =>
+    getComputedStyle(document.querySelector('.dock .menu')).opacity === '0');
+  await shot('10-dock-asleep');
+  await page.click('[data-act="menu"]'); await page.waitForTimeout(300);
+  const firstTapOnlyWakes = await page.locator('.panel').count() === 0 &&
+    await page.evaluate(() => document.body.classList.contains('awake'));
+  await page.click('[data-act="menu"]'); await page.waitForTimeout(350);
+  const secondTapOpens = await page.locator('.panel').count() === 1;
+  await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
+  // and a verdict puts them away again
+  await page.evaluate(() => ACT.wake());
+  await page.evaluate(() => ACT.say('skip'));
+  await page.waitForTimeout(420);
+  const verdictSleeps = await page.evaluate(() => !document.body.classList.contains('awake'));
+  const dockSleeps = { hiddenDock, firstTapOnlyWakes, secondTapOpens, verdictSleeps };
+
   // — the dock reaches everything —
-  await page.click('[data-act="menu"]'); await page.waitForTimeout(400);
+  await dock('[data-act="menu"]'); await page.waitForTimeout(400);
   await shot('04-menu');
   const menuOpen = await page.locator('.panel h2').innerText() === 'Activinator';
   await page.click('[data-act="ctx"]'); await page.waitForTimeout(400);
@@ -204,7 +227,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
   // — all activities, searchable, and liking one there is the same act —
-  await page.click('[data-act="browse"]'); await page.waitForTimeout(400);
+  await dock('[data-act="browse"]'); await page.waitForTimeout(400);
   const allRows = await page.locator('.brow').count();
   await page.fill('[data-in="q"]', 'graveyard');
   await page.waitForTimeout(300);
@@ -219,14 +242,14 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   // — swipe a dozen so taste has something to show —
   for (let i = 0; i < 14; i++) { await page.click('#deck'); await page.waitForTimeout(60);
     await page.evaluate(i => ACT.say(i % 3 ? 'like' : 'dislike'), i); await page.waitForTimeout(120); }
-  await page.click('[data-act="menu"]'); await page.waitForTimeout(300);
+  await dock('[data-act="menu"]'); await page.waitForTimeout(300);
   await page.click('[data-act="taste"]'); await page.waitForTimeout(400);
   const bars = await page.locator('.bar').count();
   await shot('07-taste');
   await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
   // — writing your own: it needs enough tags to be filterable at all —
-  await page.click('[data-act="add"]'); await page.waitForTimeout(400);
+  await dock('[data-act="add"]'); await page.waitForTimeout(400);
   await page.fill('[data-in="t"]', 'Walk the whole canal path');
   await page.click('[data-act="savemine"]'); await page.waitForTimeout(250);
   const refusedBare = await page.evaluate(() => ACT.S.mine.length === 0);
@@ -238,7 +261,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   const mine = await page.evaluate(() => ACT.S.mine.length === 1 && ACT.pool().some(c => c.src === 'mine'));
 
   // — and it comes back out as a row a pack would accept —
-  await page.click('[data-act="menu"]'); await page.waitForTimeout(300);
+  await dock('[data-act="menu"]'); await page.waitForTimeout(300);
   await page.click('[data-act="packs"]'); await page.waitForTimeout(400);
   const mineRow = await page.evaluate(() => {
     const t = document.querySelector('.pbody textarea');
@@ -277,7 +300,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('11-rewritten');
 
   // — and everything judged or rewritten comes back out as pack rows —
-  await page.click('[data-act="menu"]'); await page.waitForTimeout(300);
+  await dock('[data-act="menu"]'); await page.waitForTimeout(300);
   await page.click('[data-act="curate"]'); await page.waitForTimeout(400);
   await shot('12-curate');
   const lines = (await page.evaluate(() => document.querySelector('.pbody textarea').value)).split('\n');
@@ -329,7 +352,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, corners, packs, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
-    refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, prefilled, rewritten, curation,
+    refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, dockSleeps, prefilled, rewritten, curation,
     editPersisted, unedited, defEditable, persisted, swReady, offline, errors: errs });
   await browser.close();
   const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && corners && flipped &&
@@ -338,6 +361,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
     mine && persisted && swReady && offline && prefilled && editPersisted && unedited &&
     defEditable && undoRound && Object.values(rounds).every(Boolean) &&
+    Object.values(dockSleeps).every(Boolean) &&
     Object.values(rewritten).every(Boolean) && Object.values(curation).every(Boolean) &&
     packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && rowIsPackShaped && !errs.length;
   process.exit(ok ? 0 : 1);
