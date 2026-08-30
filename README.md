@@ -196,12 +196,15 @@ property of the pack because taste is one weight per tag and nothing else — th
 question packs can be switched off, but "you go for being asked something" is a
 thing the model can only learn if the cards say so.
 
-### The pack being curated
-
-`packs/candidates.csv` is ten new activities for every label in the vocabulary,
-none of them judged yet. Switch every other pack off and the deck deals nothing
-but candidates, which is the fastest way through them. What survives should be
-merged into `core` and the rest deleted — see Curating.
+**A pack is a kind of thing, never a stage of one.** Activities, questions,
+words, quotes, Italian, tableaus, visualizations: switching one off is saying
+"not that sort of card today", which is the only thing the switch should mean.
+There was a `candidates` pack for a while — ten new activities for every label
+in the vocabulary, held apart until they had been judged — and it was a
+misreading of what curating needs. Curating reads every card in every pack, so
+nothing has to be held anywhere to be curated; those 346 activities are in
+`core` with the rest of them, and the ones that do not earn their place get
+swiped left and cut in the next compile.
 
 ## Curating
 
@@ -213,7 +216,7 @@ truth and nothing in the app writes to them.
 Menu → Curate is every card you have judged or rewritten, as one file:
 
     verdict,pack,title,minutes,cost,tags,definition,was
-    keep,candidates,Draw everybody on the bus,45,free,create visualart drawing engaging indoors,,
+    keep,core,Draw everybody on the bus,45,free,create visualart drawing engaging indoors,,
 
 `keep` is a swipe right, `cut` a swipe left, `out` is "never again", and `edit`
 is one you rewrote but have not judged yet. A skip is not a verdict and is not

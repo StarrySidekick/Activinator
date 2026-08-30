@@ -1,154 +1,184 @@
 title,minutes,cost,tags,definition
 Essere,10,free,learn engaging anywhere,"to be
-presente: sono, sei, è, siamo, siete, sono
-imperfetto: ero, eri, era, eravamo, eravate, erano
-futuro: sarò, sarai, sarà, saremo, sarete, saranno
-passato prossimo: sono stato"
+presente (I am): sono, sei, è, siamo, siete, sono
+imperfetto (I was): ero, eri, era, eravamo, eravate, erano
+futuro (I will be): sarò, sarai, sarà, saremo, sarete, saranno
+passato prossimo (I have been): sono stato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Avere,10,free,learn engaging anywhere,"to have
-presente: ho, hai, ha, abbiamo, avete, hanno
-imperfetto: avevo, avevi, aveva, avevamo, avevate, avevano
-futuro: avrò, avrai, avrà, avremo, avrete, avranno
-passato prossimo: ho avuto"
+presente (I have): ho, hai, ha, abbiamo, avete, hanno
+imperfetto (I had): avevo, avevi, aveva, avevamo, avevate, avevano
+futuro (I will have): avrò, avrai, avrà, avremo, avrete, avranno
+passato prossimo (I have had): ho avuto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Andare,10,free,learn engaging anywhere,"to go
-presente: vado, vai, va, andiamo, andate, vanno
-imperfetto: andavo, andavi, andava, andavamo, andavate, andavano
-futuro: andrò, andrai, andrà, andremo, andrete, andranno
-passato prossimo: sono andato"
+presente (I go): vado, vai, va, andiamo, andate, vanno
+imperfetto (I used to go): andavo, andavi, andava, andavamo, andavate, andavano
+futuro (I will go): andrò, andrai, andrà, andremo, andrete, andranno
+passato prossimo (I have gone): sono andato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Fare,10,free,learn engaging anywhere,"to do; to make
-presente: faccio, fai, fa, facciamo, fate, fanno
-imperfetto: facevo, facevi, faceva, facevamo, facevate, facevano
-futuro: farò, farai, farà, faremo, farete, faranno
-passato prossimo: ho fatto"
+presente (I do): faccio, fai, fa, facciamo, fate, fanno
+imperfetto (I was doing): facevo, facevi, faceva, facevamo, facevate, facevano
+futuro (I will do): farò, farai, farà, faremo, farete, faranno
+passato prossimo (I have done): ho fatto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Dire,10,free,learn engaging anywhere,"to say; to tell
-presente: dico, dici, dice, diciamo, dite, dicono
-imperfetto: dicevo, dicevi, diceva, dicevamo, dicevate, dicevano
-futuro: dirò, dirai, dirà, diremo, direte, diranno
-passato prossimo: ho detto"
+presente (I say): dico, dici, dice, diciamo, dite, dicono
+imperfetto (I was saying): dicevo, dicevi, diceva, dicevamo, dicevate, dicevano
+futuro (I will say): dirò, dirai, dirà, diremo, direte, diranno
+passato prossimo (I have said): ho detto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Potere,10,free,learn engaging anywhere,"to be able to; can
-presente: posso, puoi, può, possiamo, potete, possono
-imperfetto: potevo, potevi, poteva, potevamo, potevate, potevano
-futuro: potrò, potrai, potrà, potremo, potrete, potranno
-passato prossimo: ho potuto"
+presente (I can): posso, puoi, può, possiamo, potete, possono
+imperfetto (I could): potevo, potevi, poteva, potevamo, potevate, potevano
+futuro (I will be able to): potrò, potrai, potrà, potremo, potrete, potranno
+passato prossimo (I have been able to): ho potuto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Volere,10,free,learn engaging anywhere,"to want
-presente: voglio, vuoi, vuole, vogliamo, volete, vogliono
-imperfetto: volevo, volevi, voleva, volevamo, volevate, volevano
-futuro: vorrò, vorrai, vorrà, vorremo, vorrete, vorranno
-passato prossimo: ho voluto"
+presente (I want): voglio, vuoi, vuole, vogliamo, volete, vogliono
+imperfetto (I wanted): volevo, volevi, voleva, volevamo, volevate, volevano
+futuro (I will want): vorrò, vorrai, vorrà, vorremo, vorrete, vorranno
+passato prossimo (I have wanted): ho voluto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Dovere,10,free,learn engaging anywhere,"to have to; must
-presente: devo, devi, deve, dobbiamo, dovete, devono
-imperfetto: dovevo, dovevi, doveva, dovevamo, dovevate, dovevano
-futuro: dovrò, dovrai, dovrà, dovremo, dovrete, dovranno
-passato prossimo: ho dovuto"
+presente (I must): devo, devi, deve, dobbiamo, dovete, devono
+imperfetto (I had to): dovevo, dovevi, doveva, dovevamo, dovevate, dovevano
+futuro (I will have to): dovrò, dovrai, dovrà, dovremo, dovrete, dovranno
+passato prossimo (I have had to): ho dovuto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Sapere,10,free,learn engaging anywhere,"to know a fact; to know how
-presente: so, sai, sa, sappiamo, sapete, sanno
-imperfetto: sapevo, sapevi, sapeva, sapevamo, sapevate, sapevano
-futuro: saprò, saprai, saprà, sapremo, saprete, sapranno
-passato prossimo: ho saputo"
+presente (I know): so, sai, sa, sappiamo, sapete, sanno
+imperfetto (I knew): sapevo, sapevi, sapeva, sapevamo, sapevate, sapevano
+futuro (I will know): saprò, saprai, saprà, sapremo, saprete, sapranno
+passato prossimo (I found out): ho saputo
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Conoscere,10,free,learn engaging anywhere,"to know a person or place; to be acquainted with
-presente: conosco, conosci, conosce, conosciamo, conoscete, conoscono
-imperfetto: conoscevo, conoscevi, conosceva, conoscevamo, conoscevate, conoscevano
-futuro: conoscerò, conoscerai, conoscerà, conosceremo, conoscerete, conosceranno
-passato prossimo: ho conosciuto"
+presente (I know): conosco, conosci, conosce, conosciamo, conoscete, conoscono
+imperfetto (I knew): conoscevo, conoscevi, conosceva, conoscevamo, conoscevate, conoscevano
+futuro (I will know): conoscerò, conoscerai, conoscerà, conosceremo, conoscerete, conosceranno
+passato prossimo (I met): ho conosciuto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Stare,10,free,learn engaging anywhere,"to stay; to be (of states and health)
-presente: sto, stai, sta, stiamo, state, stanno
-imperfetto: stavo, stavi, stava, stavamo, stavate, stavano
-futuro: starò, starai, starà, staremo, starete, staranno
-passato prossimo: sono stato"
+presente (I stay): sto, stai, sta, stiamo, state, stanno
+imperfetto (I was staying): stavo, stavi, stava, stavamo, stavate, stavano
+futuro (I will stay): starò, starai, starà, staremo, starete, staranno
+passato prossimo (I have stayed): sono stato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Dare,10,free,learn engaging anywhere,"to give
-presente: do, dai, dà, diamo, date, danno
-imperfetto: davo, davi, dava, davamo, davate, davano
-futuro: darò, darai, darà, daremo, darete, daranno
-passato prossimo: ho dato"
+presente (I give): do, dai, dà, diamo, date, danno
+imperfetto (I was giving): davo, davi, dava, davamo, davate, davano
+futuro (I will give): darò, darai, darà, daremo, darete, daranno
+passato prossimo (I have given): ho dato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Venire,10,free,learn engaging anywhere,"to come
-presente: vengo, vieni, viene, veniamo, venite, vengono
-imperfetto: venivo, venivi, veniva, venivamo, venivate, venivano
-futuro: verrò, verrai, verrà, verremo, verrete, verranno
-passato prossimo: sono venuto"
+presente (I come): vengo, vieni, viene, veniamo, venite, vengono
+imperfetto (I was coming): venivo, venivi, veniva, venivamo, venivate, venivano
+futuro (I will come): verrò, verrai, verrà, verremo, verrete, verranno
+passato prossimo (I have come): sono venuto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Uscire,10,free,learn engaging anywhere,"to go out
-presente: esco, esci, esce, usciamo, uscite, escono
-imperfetto: uscivo, uscivi, usciva, uscivamo, uscivate, uscivano
-futuro: uscirò, uscirai, uscirà, usciremo, uscirete, usciranno
-passato prossimo: sono uscito"
+presente (I go out): esco, esci, esce, usciamo, uscite, escono
+imperfetto (I used to go out): uscivo, uscivi, usciva, uscivamo, uscivate, uscivano
+futuro (I will go out): uscirò, uscirai, uscirà, usciremo, uscirete, usciranno
+passato prossimo (I have gone out): sono uscito
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Mangiare,10,free,learn engaging anywhere,"to eat
-presente: mangio, mangi, mangia, mangiamo, mangiate, mangiano
-imperfetto: mangiavo, mangiavi, mangiava, mangiavamo, mangiavate, mangiavano
-futuro: mangerò, mangerai, mangerà, mangeremo, mangerete, mangeranno
-passato prossimo: ho mangiato"
+presente (I eat): mangio, mangi, mangia, mangiamo, mangiate, mangiano
+imperfetto (I was eating): mangiavo, mangiavi, mangiava, mangiavamo, mangiavate, mangiavano
+futuro (I will eat): mangerò, mangerai, mangerà, mangeremo, mangerete, mangeranno
+passato prossimo (I have eaten): ho mangiato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Bere,10,free,learn engaging anywhere,"to drink
-presente: bevo, bevi, beve, beviamo, bevete, bevono
-imperfetto: bevevo, bevevi, beveva, bevevamo, bevevate, bevevano
-futuro: berrò, berrai, berrà, berremo, berrete, berranno
-passato prossimo: ho bevuto"
+presente (I drink): bevo, bevi, beve, beviamo, bevete, bevono
+imperfetto (I was drinking): bevevo, bevevi, beveva, bevevamo, bevevate, bevevano
+futuro (I will drink): berrò, berrai, berrà, berremo, berrete, berranno
+passato prossimo (I have drunk): ho bevuto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Parlare,10,free,learn engaging anywhere,"to speak; to talk
-presente: parlo, parli, parla, parliamo, parlate, parlano
-imperfetto: parlavo, parlavi, parlava, parlavamo, parlavate, parlavano
-futuro: parlerò, parlerai, parlerà, parleremo, parlerete, parleranno
-passato prossimo: ho parlato"
+presente (I speak): parlo, parli, parla, parliamo, parlate, parlano
+imperfetto (I was speaking): parlavo, parlavi, parlava, parlavamo, parlavate, parlavano
+futuro (I will speak): parlerò, parlerai, parlerà, parleremo, parlerete, parleranno
+passato prossimo (I have spoken): ho parlato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Vedere,10,free,learn engaging anywhere,"to see
-presente: vedo, vedi, vede, vediamo, vedete, vedono
-imperfetto: vedevo, vedevi, vedeva, vedevamo, vedevate, vedevano
-futuro: vedrò, vedrai, vedrà, vedremo, vedrete, vedranno
-passato prossimo: ho visto"
+presente (I see): vedo, vedi, vede, vediamo, vedete, vedono
+imperfetto (I was seeing): vedevo, vedevi, vedeva, vedevamo, vedevate, vedevano
+futuro (I will see): vedrò, vedrai, vedrà, vedremo, vedrete, vedranno
+passato prossimo (I have seen): ho visto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Sentire,10,free,learn engaging anywhere,"to hear; to feel
-presente: sento, senti, sente, sentiamo, sentite, sentono
-imperfetto: sentivo, sentivi, sentiva, sentivamo, sentivate, sentivano
-futuro: sentirò, sentirai, sentirà, sentiremo, sentirete, sentiranno
-passato prossimo: ho sentito"
+presente (I hear): sento, senti, sente, sentiamo, sentite, sentono
+imperfetto (I was hearing): sentivo, sentivi, sentiva, sentivamo, sentivate, sentivano
+futuro (I will hear): sentirò, sentirai, sentirà, sentiremo, sentirete, sentiranno
+passato prossimo (I have heard): ho sentito
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Prendere,10,free,learn engaging anywhere,"to take; to catch; to have (food or drink)
-presente: prendo, prendi, prende, prendiamo, prendete, prendono
-imperfetto: prendevo, prendevi, prendeva, prendevamo, prendevate, prendevano
-futuro: prenderò, prenderai, prenderà, prenderemo, prenderete, prenderanno
-passato prossimo: ho preso"
+presente (I take): prendo, prendi, prende, prendiamo, prendete, prendono
+imperfetto (I was taking): prendevo, prendevi, prendeva, prendevamo, prendevate, prendevano
+futuro (I will take): prenderò, prenderai, prenderà, prenderemo, prenderete, prenderanno
+passato prossimo (I have taken): ho preso
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Mettere,10,free,learn engaging anywhere,"to put; to place
-presente: metto, metti, mette, mettiamo, mettete, mettono
-imperfetto: mettevo, mettevi, metteva, mettevamo, mettevate, mettevano
-futuro: metterò, metterai, metterà, metteremo, metterete, metteranno
-passato prossimo: ho messo"
+presente (I put): metto, metti, mette, mettiamo, mettete, mettono
+imperfetto (I was putting): mettevo, mettevi, metteva, mettevamo, mettevate, mettevano
+futuro (I will put): metterò, metterai, metterà, metteremo, metterete, metteranno
+passato prossimo (I have put): ho messo
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Leggere,10,free,learn engaging anywhere,"to read
-presente: leggo, leggi, legge, leggiamo, leggete, leggono
-imperfetto: leggevo, leggevi, leggeva, leggevamo, leggevate, leggevano
-futuro: leggerò, leggerai, leggerà, leggeremo, leggerete, leggeranno
-passato prossimo: ho letto"
+presente (I read): leggo, leggi, legge, leggiamo, leggete, leggono
+imperfetto (I was reading): leggevo, leggevi, leggeva, leggevamo, leggevate, leggevano
+futuro (I will read): leggerò, leggerai, leggerà, leggeremo, leggerete, leggeranno
+passato prossimo (I have read): ho letto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Scrivere,10,free,learn engaging anywhere,"to write
-presente: scrivo, scrivi, scrive, scriviamo, scrivete, scrivono
-imperfetto: scrivevo, scrivevi, scriveva, scrivevamo, scrivevate, scrivevano
-futuro: scriverò, scriverai, scriverà, scriveremo, scriverete, scriveranno
-passato prossimo: ho scritto"
+presente (I write): scrivo, scrivi, scrive, scriviamo, scrivete, scrivono
+imperfetto (I was writing): scrivevo, scrivevi, scriveva, scrivevamo, scrivevate, scrivevano
+futuro (I will write): scriverò, scriverai, scriverà, scriveremo, scriverete, scriveranno
+passato prossimo (I have written): ho scritto
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Dormire,10,free,learn engaging anywhere,"to sleep
-presente: dormo, dormi, dorme, dormiamo, dormite, dormono
-imperfetto: dormivo, dormivi, dormiva, dormivamo, dormivate, dormivano
-futuro: dormirò, dormirai, dormirà, dormiremo, dormirete, dormiranno
-passato prossimo: ho dormito"
+presente (I sleep): dormo, dormi, dorme, dormiamo, dormite, dormono
+imperfetto (I was sleeping): dormivo, dormivi, dormiva, dormivamo, dormivate, dormivano
+futuro (I will sleep): dormirò, dormirai, dormirà, dormiremo, dormirete, dormiranno
+passato prossimo (I have slept): ho dormito
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Capire,10,free,learn engaging anywhere,"to understand
-presente: capisco, capisci, capisce, capiamo, capite, capiscono
-imperfetto: capivo, capivi, capiva, capivamo, capivate, capivano
-futuro: capirò, capirai, capirà, capiremo, capirete, capiranno
-passato prossimo: ho capito"
+presente (I understand): capisco, capisci, capisce, capiamo, capite, capiscono
+imperfetto (I understood): capivo, capivi, capiva, capivamo, capivate, capivano
+futuro (I will understand): capirò, capirai, capirà, capiremo, capirete, capiranno
+passato prossimo (I have understood): ho capito
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Finire,10,free,learn engaging anywhere,"to finish
-presente: finisco, finisci, finisce, finiamo, finite, finiscono
-imperfetto: finivo, finivi, finiva, finivamo, finivate, finivano
-futuro: finirò, finirai, finirà, finiremo, finirete, finiranno
-passato prossimo: ho finito"
+presente (I finish): finisco, finisci, finisce, finiamo, finite, finiscono
+imperfetto (I was finishing): finivo, finivi, finiva, finivamo, finivate, finivano
+futuro (I will finish): finirò, finirai, finirà, finiremo, finirete, finiranno
+passato prossimo (I have finished): ho finito
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Cercare,10,free,learn engaging anywhere,"to look for; to try
-presente: cerco, cerchi, cerca, cerchiamo, cercate, cercano
-imperfetto: cercavo, cercavi, cercava, cercavamo, cercavate, cercavano
-futuro: cercherò, cercherai, cercherà, cercheremo, cercherete, cercheranno
-passato prossimo: ho cercato"
+presente (I look for): cerco, cerchi, cerca, cerchiamo, cercate, cercano
+imperfetto (I was looking for): cercavo, cercavi, cercava, cercavamo, cercavate, cercavano
+futuro (I will look for): cercherò, cercherai, cercherà, cercheremo, cercherete, cercheranno
+passato prossimo (I have looked for): ho cercato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Trovare,10,free,learn engaging anywhere,"to find
-presente: trovo, trovi, trova, troviamo, trovate, trovano
-imperfetto: trovavo, trovavi, trovava, trovavamo, trovavate, trovavano
-futuro: troverò, troverai, troverà, troveremo, troverete, troveranno
-passato prossimo: ho trovato"
+presente (I find): trovo, trovi, trova, troviamo, trovate, trovano
+imperfetto (I was finding): trovavo, trovavi, trovava, trovavamo, trovavate, trovavano
+futuro (I will find): troverò, troverai, troverà, troveremo, troverete, troveranno
+passato prossimo (I have found): ho trovato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Pensare,10,free,learn engaging anywhere,"to think
-presente: penso, pensi, pensa, pensiamo, pensate, pensano
-imperfetto: pensavo, pensavi, pensava, pensavamo, pensavate, pensavano
-futuro: penserò, penserai, penserà, penseremo, penserete, penseranno
-passato prossimo: ho pensato"
+presente (I think): penso, pensi, pensa, pensiamo, pensate, pensano
+imperfetto (I was thinking): pensavo, pensavi, pensava, pensavamo, pensavate, pensavano
+futuro (I will think): penserò, penserai, penserà, penseremo, penserete, penseranno
+passato prossimo (I have thought): ho pensato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Chiacchierare,10,free,learn engaging anywhere,"to chat; to chatter
-presente: chiacchiero, chiacchieri, chiacchiera, chiacchieriamo, chiacchierate, chiacchierano
-imperfetto: chiacchieravo, chiacchieravi, chiacchierava, chiacchieravamo, chiacchieravate, chiacchieravano
-futuro: chiacchiererò, chiacchiererai, chiacchiererà, chiacchiereremo, chiacchiererete, chiacchiereranno
-passato prossimo: ho chiacchierato"
+presente (I chat): chiacchiero, chiacchieri, chiacchiera, chiacchieriamo, chiacchierate, chiacchierano
+imperfetto (I was chatting): chiacchieravo, chiacchieravi, chiacchierava, chiacchieravamo, chiacchieravate, chiacchieravano
+futuro (I will chat): chiacchiererò, chiacchiererai, chiacchiererà, chiacchiereremo, chiacchiererete, chiacchiereranno
+passato prossimo (I have chatted): ho chiacchierato
+presente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro"
 Allora,5,free,learn casual anywhere,so; well then
 Magari,5,free,learn casual anywhere,if only; I wish; maybe
 Boh,5,free,learn funny casual anywhere,I don't know; no idea (informal)

@@ -32,11 +32,11 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
      meant to be looking at, and every one of them but this was a quick link
      into it.
 
-     It is a mark, not a button — a solid silhouette on the paper, the way a
-     suit is printed in the corner of a playing card, with no disc, no rule and
-     no shadow. The hub is the app's own mark, and one ink colour cannot show
-     two overlapping cards, so the front one is cut off the back with a stroke
-     in the colour of whatever is behind it.
+     It is printed rather than built — a solid silhouette on the paper, the way
+     a suit is printed in the corner of a playing card, with no disc, no rule
+     and no shadow. A gear, because it is the one control in the app and it
+     should say what it is without having to be learned. The drawn marks are
+     the vocabulary; this is not part of it.
 
      It sits outside #frame rather than in it. The deck carries a `perspective`
      and the cards are `preserve-3d`, and a 3D rendering context sorts what it
@@ -54,10 +54,8 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 body.reading .settings, body.bare .settings{opacity:1; pointer-events:auto; transform:none}
 .settings:active{transform:scale(.92)}
 .settings svg{width:25px;height:25px;fill:currentColor;overflow:visible}
-.settings .infront{stroke:var(--paper-2);stroke-width:1.7;paint-order:stroke fill}
 /* With no card under it there is no paper for it to be ink on. */
 body.bare .settings{color:var(--dim)}
-body.bare .settings .infront{stroke:var(--ink)}
 
 #toast{
   position:fixed; left:50%; bottom:calc(var(--bot) + 74px); transform:translateX(-50%) translateY(8px);
