@@ -114,6 +114,11 @@
 .stat{display:flex;gap:18px;font-size:13px;color:var(--dim);margin-bottom:4px}
 .stat b{display:block;font-family:var(--serif);font-size:24px;color:#e9e6df;font-weight:400}
 
+/* How far round the deck you are. The card's own meter is drawn for cream
+   paper and vanishes on a panel, so the panel has its own. */
+.rounds{height:6px;border-radius:3px;background:#23262f;overflow:hidden;margin:2px 0 0}
+.rounds i{display:block;height:100%;background:var(--yes);border-radius:3px}
+
 input[type=range]{width:100%;accent-color:var(--yes)}
 .field{
   width:100%;background:#20232e;border:1px solid #2c3040;border-radius:11px;

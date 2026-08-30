@@ -5,8 +5,8 @@
 import { SEEDS, PACKS, TAGS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 
 const KEY = 'activinator.v1';
-const APP_VERSION = '0.12';
-const DATA_V = 4;
+const APP_VERSION = '0.13';
+const DATA_V = 5;
 
 /* `w` is the taste model: one weight per tag, plus a bias. `seen` is the last
    thing you said about each activity — nothing leaves the pool because of it,
@@ -19,6 +19,7 @@ const fresh = () => ({
   recent: [],                  // ids, most recent first
   mine: [],                    // activities you wrote yourself
   edits: {},                   // id -> {t, tags, min, cost}: a pack card, rewritten
+  pass: { n: 1, done: [] },    // which time round the deck you are, and what it has already dealt
   ctx: { who:'', where:'', time:'' },
   packs: Object.fromEntries(PACKS.map(p => [p.id, p.on])),
   nerve: 0.3
@@ -100,6 +101,14 @@ const migrate = (o) => {
     [id, { ...e, tags: (e.tags || []).map(t => RENAMED[t] || t).filter(t => t in TAGS) }]));
   o.recent = [];               // ids changed shape; what you saw last week is not worth keeping
 
+  /* Before this the deck had no idea it had ever dealt a card: it ranked the
+     pool and picked at random from the top of it, so the same card came round
+     again long before the deck ran out. A saved state from then starts its
+     first round here rather than pretending to be part-way through one. */
+  const pass = o.pass || {};
+  o.pass = { n: Number(pass.n) > 0 ? Math.floor(pass.n) : 1,
+             done: Array.isArray(pass.done) ? pass.done.filter(x => typeof x === 'string') : [] };
+
   /* A filter is ephemeral, and one saved under the old vocabulary means
      nothing under this one. Anything unrecognised goes back to "no filter"
      rather than being carried forward as a word the deck cannot answer. */
@@ -162,11 +171,28 @@ const byId = id => pool().find(c => c.id === id);
 const baseById = id => SEEDS.find(a => a.id === id) || S.mine.find(a => a.id === id);
 
 /* What you have been shown lately, so it does not come straight back. Nothing
-   is removed from the pool by this — it only sinks for a while. */
+   is removed from the pool by this — it only sinks for a while, and it is what
+   keeps the first cards of a new round from being the last of the old one. */
 const RECENT_N = 40;
 const remember = (id) => {
   S.recent = [id, ...S.recent.filter(x => x !== id)].slice(0, RECENT_N);
 };
+
+/* — the round —
+   A card leaves the round the moment you say something about it, and the dealer
+   will not deal it again until the round is over. That is the whole of "it does
+   not repeat until you have been through everything": ranking decides the order
+   within a round, and the round decides that there is an end to it.
+
+   It is what you have *said something about*, not what has been dealt, so the
+   two or three sitting in the hand when you close the app are still to come. */
+const donePass = (id) => { if (!S.pass.done.includes(id)) S.pass.done.push(id); };
+const undonePass = (id) => { S.pass.done = S.pass.done.filter(x => x !== id); };
+
+/* Going round again keeps `recent`, so the round does not open with the cards
+   it just closed on. Everything else about you is untouched: a round is about
+   what you have been shown, never about what you think. */
+const newPass = () => { S.pass = { n: S.pass.n + 1, done: [] }; save(); return S.pass; };
 
 const exportJSON = () => JSON.stringify(S, null, 1);
 const importJSON = (txt) => {
@@ -176,7 +202,7 @@ const importJSON = (txt) => {
 };
 
 export { S, KEY, APP_VERSION, DATA_V, RECENT_N, fresh, load, save, all, pool, packOn, byId,
-         baseById, remember, exportJSON, importJSON };
+         baseById, remember, donePass, undonePass, newPass, exportJSON, importJSON };
 export const setUndo = v => { undo = v; };
 export const getUndo = () => undo;
 export const reset = () => { S = fresh(); save(); return S; };

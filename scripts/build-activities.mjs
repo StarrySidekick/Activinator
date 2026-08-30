@@ -22,6 +22,10 @@
 // Every row must name exactly one place and exactly one how-hard. Anything
 // else is refused with the file and line, because a bad row that builds is a
 // card that quietly never gets dealt.
+//
+// Two rows with the same title are refused as well — the id comes from the
+// title. Two rows that merely say nearly the same thing are reported at the end
+// and build anyway: some of those pairs are deliberate.
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { TAGS, GROUPS, DURATIONS, COSTS, durationOf, idOf } from '../js/vocab.js';
 
@@ -98,6 +102,40 @@ const build = (meta) => {
 const index = JSON.parse(read('index.json'));
 const packs = index.map(build).filter(Boolean);
 
+/* Identical titles are refused above, because the id comes from the title and
+   two rows sharing one would be the same card twice. Near-identical titles
+   build perfectly and are the same card to a reader — which is what a repeat
+   feels like from the deck, whatever the dealer is doing. So they are reported
+   rather than refused: some are deliberate pairs ("the hardest thing about
+   being human" wants "the best thing" beside it), and only somebody reading
+   them can tell which is which. */
+const STOP = new Set(('a an and are as at be been by can could did do does for from get go had has have'
+  + ' how if in into is it its just like made make no not of off on once one only or out over own so'
+  + ' some something somebody than that the their them then there they this to too until up use very'
+  + ' was way we were what when where which while who why will with would you your').split(' '));
+const keyWords = (t) => new Set(t.toLowerCase().replace(/[^a-z0-9]+/g, ' ').split(' ')
+  .filter(w => w.length > 2 && !STOP.has(w)));
+
+/* A title with one word left after the small ones are dropped matches anything
+   containing that word — `Niente` against `Fa niente` is a hundred per cent and
+   tells nobody anything. Two identical titles are refused by the build itself,
+   so nothing is lost by leaving the very short ones out of this. */
+const comparable = (w) => w.size >= 2;
+
+const near = () => {
+  const rows = packs.flatMap(p => p.items.map(a => ({ t: a.t, at: titles.get(a.t), w: keyWords(a.t) })))
+    .filter(r => comparable(r.w));
+  const out = [];
+  for (let i = 0; i < rows.length; i++) for (let j = i + 1; j < rows.length; j++) {
+    const A = rows[i].w, B = rows[j].w;
+    let both = 0; for (const x of A) if (B.has(x)) both++;
+    if (!both) continue;
+    const same = both / (A.size + B.size - both);
+    if (same >= 0.6) out.push({ same, a: rows[i], b: rows[j] });
+  }
+  return out.sort((x, y) => y.same - x.same);
+};
+
 if (errors.length) {
   console.error(`\n${errors.length} problem${errors.length > 1 ? 's' : ''} in packs/:\n`);
   for (const e of errors) console.error('  ' + e);
@@ -114,6 +152,15 @@ ${p.items.map(a => `    {id:'${a.id}',t:${JSON.stringify(a.t)},tags:${JSON.strin
   ]},`).join('\n')}
 ];
 `;
+const dupes = near();
+const sayDupes = () => {
+  if (!dupes.length) return;
+  console.error(`\n${dupes.length} pair${dupes.length > 1 ? 's' : ''} of cards say nearly the same thing:\n`);
+  for (const { same, a, b } of dupes)
+    console.error(`  ${Math.round(same * 100)}%  ${a.at}  ${a.t}\n        ${b.at}  ${b.t}`);
+  console.error('\nDeliberate pairs are fine — this is a read-through, not an error.\n');
+};
+
 const target = new URL('../js/activities.js', import.meta.url);
 
 /* `--check` builds and compares instead of writing, so a CSV edited without a
@@ -126,9 +173,11 @@ if (process.argv.includes('--check')) {
     process.exit(1);
   }
   console.log(`js/activities.js is up to date (${packs.reduce((n, p) => n + p.items.length, 0)} activities)`);
+  sayDupes();
   process.exit(0);
 }
 
 writeFileSync(target, out);
 console.log(packs.map(p => `${p.items.length.toString().padStart(4)}  ${p.id}${p.on ? '' : '  (off by default)'}`).join('\n'));
 console.log(`${packs.reduce((n, p) => n + p.items.length, 0)} activities → js/activities.js`);
+sayDupes();

@@ -5,6 +5,7 @@
 import { S, save, APP_VERSION, all, pool, packOn, byId, baseById, exportJSON, importJSON } from './state.js';
 import { TAGS, GROUPS, PACKS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 import { opinions } from './taste.js';
+import { cycle } from './deal.js';
 import { reset as redeal, restack, toast } from './deck.js';
 import { esc, emblemRow, markHTML, lengthOf } from './cards.js';
 
@@ -140,6 +141,7 @@ const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are 
   const bar = (o) => `<div class="bar ${o.v < 0 ? 'down' : ''}"><span class="bl">${markHTML(o.tag)}${esc(o.label)}</span>
     <span class="bt"><i style="${o.v > 0 ? 'left:50%' : 'right:50%;left:auto'};width:${Math.round(Math.abs(o.v) / max * 48)}%"></i></span></div>`;
   const n = v => Object.values(S.seen).filter(s => s.v === v).length;
+  const c = cycle();
   return `
   <div class="prow"><div class="stat">
     <span><b>${S.swipes}</b>swipes</span>
@@ -148,6 +150,12 @@ const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are 
     <span><b>${n('never')}</b>out</span>
   </div>${S.swipes < 12 ? `<p class="pnote">Under a dozen swipes it is mostly guessing, and it
     deals almost at random on purpose. Keep going.</p>` : ''}</div>
+
+  <div class="prow"><p class="plabel">Round ${c.n}</p>
+    <div class="rounds"><i style="width:${c.total ? Math.round(c.gone / c.total * 100) : 0}%"></i></div>
+    <p class="pnote">${c.gone} of ${c.total} this time round, ${c.left} to go. Nothing comes
+    back until you have been through the lot — and then the deck says so and waits. What you
+    have asked for filters the deck; it does not shorten the round.</p></div>
 
   ${up.length ? `<div class="prow"><p class="plabel">You go for</p>${up.map(bar).join('')}</div>` : ''}
   ${down.length ? `<div class="prow"><p class="plabel">You pass on</p>${down.map(bar).join('')}</div>` : ''}

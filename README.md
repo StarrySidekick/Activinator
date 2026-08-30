@@ -39,7 +39,9 @@ The smoke test exercises dealing, the full-bleed card, the four corners, the bar
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
 leaves the pool but "never again" does, the context filter, the dock, search,
 liking from the browser, writing your own, rewriting the card in front of you,
-the curation export, persistence across a reload and an offline reload. Screenshots land in `test/shots/` — look
+the curation export, that a whole round deals everything exactly once and then
+says so, that undo puts a card back into the round, persistence across a reload
+and an offline reload. Screenshots land in `test/shots/` — look
 at them, this is a visual app and a passing assertion doesn't mean it looks
 right.
 
@@ -112,6 +114,13 @@ The build refuses anything else, with the file and the line. That is the point
 of it: a bad row that builds is a card that quietly never gets dealt. It earned
 its keep on the first run by catching an unquoted comma in a title of mine and
 a tag that had been removed from the vocabulary two versions earlier.
+
+Two rows with the same title are refused, because the id comes from the title.
+Two rows that merely say *nearly* the same thing build fine and are the same
+card to a reader — which is what a repeat feels like, whatever the dealer is
+doing — so the build prints them at the end with their files and lines and
+carries on. It is a read-through, not an error: some of those pairs are
+deliberate, and only somebody reading them can tell which.
 
 `node scripts/build-activities.mjs --check` rebuilds and compares instead of
 writing, so a CSV edited without a rebuild fails the tests rather than shipping
@@ -293,8 +302,40 @@ verdict is worth ±0.8 on the ranking — and it can surface again months later
 when you are a different mood. A swipe up is not a soft no at all: it passes
 the card on without saying anything about it, teaches nothing, and carries no
 weight. The only thing that takes an activity out for good is "never again", on
-the back of the card. What keeps a hand from repeating is recency: the last
-forty things you were shown sink by up to 2.6 and then wear off completely.
+the back of the card.
+
+**It deals in rounds, and a round ends on a screen you have to answer.** Say
+anything about a card — like, don't like, even skip — and it is out until the
+round is over. Ranking decides what comes first; the round decides that there
+is an end to it, and that everything gets there once. When there is nothing
+left, the deck says *that is the whole deck* and waits: going round again is a
+button, because a deck that quietly reshuffles is a deck you cannot tell you
+have finished. `S.pass` is the whole of it — which round you are on, and the
+ids it has already dealt. Menu → what it thinks you are like shows how far
+round you are.
+
+It did not used to, and the symptom was cards coming back within a few dozen
+swipes on a deck that takes all day to get through. Both draws picked at
+**random from a wide slice** of the ranking — the top quarter of sixteen
+hundred cards is four hundred, and random draws from four hundred repeat inside
+about twenty-five. Worse, the card you had just swiped was eligible again the
+moment it left the hand: only the ranking sank it, and the wildcard draw sorts
+by how well a tag is known and never reads the ranking at all. So the thing you
+had just said no to could come straight back, labelled *a wildcard*.
+
+Recency survives all that, doing the one job the round cannot: the last forty
+you were shown are kept out of the **next** round's opening hand, so going
+round again does not start with the cards it just ended on. It is a soft bar —
+if honouring it would leave too little to deal, it is dropped, because an empty
+hand is worse than a card you saw a while ago.
+
+**Running out of things that fit is not the end of a round.** Ask for twenty
+minutes and you can exhaust everything quick long before the round is done; the
+deck says so, counts what is still to come, and offers the filter first. Going
+round anyway is there and says what it costs, because it would throw away
+everything you got through outside the filter. The round belongs to the deck,
+not to the filter — which is also why the progress bar does not move when you
+change your mind about the afternoon.
 
 **A share of every hand is dealt against what it knows.** `S.nerve` (a slider,
 default 30%) is how often the dealer picks from the activities whose tags it
@@ -374,7 +415,7 @@ would disagree about what you think.
 | `data.js` | Joins the two, so everything else imports one place for both. |
 | `state.js` | The one localStorage key, the shape, the rewrites, export/import. Nothing else touches storage. |
 | `taste.js` | The model: `scoreOf`, `learn`, `unlearn`, `opinions`, `reasons`. |
-| `deal.js` | What gets dealt next — filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
+| `deal.js` | What gets dealt next — the round, filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
 | `cards.js` | How a card is printed: `cardHTML`, the accent colour, the wording of a length. The front is the title and nothing else; the back carries everything the app knows. |
 | `deck.js` | The hand, the verdicts, undo, the stack, the empty deck. |
 | `swipe.js` | Pointer drag, the two stamps, and the tap that flips. Right is like, left is not, up is neither — which is why up has no stamp. |

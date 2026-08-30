@@ -44,7 +44,8 @@ const V3 = {
   packs:{ core:false, winter:true }   // winter shipped then and does not exist now
 };
 
-// v0.9 onwards: a rewrite is kept beside the card it rewrites. A vocabulary
+// v0.9–0.12: a rewrite is kept beside the card it rewrites, and the deck has
+// no idea it has ever dealt anything. A vocabulary
 // change has to reach into it the same way it reaches into the weights — an
 // edit carrying a tag that no longer means anything would put that tag back
 // into the pool by the side door.
@@ -135,6 +136,7 @@ const boot = async (browser, state) => {
     cards: document.querySelectorAll('#deck .card').length,
     v: ACT.S.v,
     editsEmpty: ACT.S.edits && Object.keys(ACT.S.edits).length === 0,
+    roundOne: ACT.S.pass.n === 1 && ACT.S.pass.done.length === 0,
     packKept: ACT.S.packs.core === false,          // an opinion about a pack survives
     goneDropped: !('winter' in ACT.S.packs),       // a pack that no longer exists leaves
     newPackDefaulted: ACT.PACKS.filter(p => p.id !== 'core')
@@ -149,6 +151,9 @@ const boot = async (browser, state) => {
     const c = ACT.pool().find(a => a.id === id) || {};
     return {
       orphanKept: !!ACT.S.edits.ZZZ,
+      // a state from before the deck dealt in rounds starts round one, whole
+      roundOne: ACT.S.pass.n === 1 && ACT.S.pass.done.length === 0 &&
+                ACT.cycle().left === ACT.cycle().total,
       applied: c.t === 'Walk as far as you can get in half an hour' && c.edit === true,
       wasKept: c.was === 'Walk to the furthest point you can reach in thirty minutes',
       renamed: (c.tags || []).includes('friends'),     // social was renamed, not dropped
@@ -179,16 +184,17 @@ const boot = async (browser, state) => {
   };
   console.log(JSON.stringify(out, null, 1));
   await browser.close();
-  const v1ok = out.v1.cards === 3 && out.v1.v === 4 && out.v1.ctxReset && out.v1.seenDropped &&
+  const v1ok = out.v1.cards === 3 && out.v1.v === 5 && out.v1.ctxReset && out.v1.seenDropped &&
     out.v1.keptWeight && out.v1.renamedWeight && out.v1.droppedWeight && out.v1.listGone &&
     out.v1.mineDealable && out.v1.mineHasWhere && out.v1.mineHasDuration && out.v1.mineHasCost &&
     out.v1.mineRenamed && out.v1.packsDefaulted && !a.errs.length;
-  const v2ok = out.v2.cards >= 0 && out.v2.v === 4 && out.v2.remapped && out.v2.noPositionalIds &&
+  const v2ok = out.v2.cards >= 0 && out.v2.v === 5 && out.v2.remapped && out.v2.noPositionalIds &&
     out.v2.neverStillOut && out.v2.packKept && out.v2.newPackDefaulted && !b.errs.length;
-  const v3ok = out.v3.cards === 3 && out.v3.v === 4 && out.v3.editsEmpty && out.v3.packKept &&
+  const v3ok = out.v3.cards === 3 && out.v3.v === 5 && out.v3.editsEmpty && out.v3.roundOne &&
+    out.v3.packKept &&
     out.v3.goneDropped && out.v3.newPackDefaulted && out.v3.ctxKept && out.v3.curates &&
     !c.errs.length;
-  const v4ok = out.v4.orphanKept && out.v4.applied && out.v4.wasKept && out.v4.renamed &&
+  const v4ok = out.v4.orphanKept && out.v4.roundOne && out.v4.applied && out.v4.wasKept && out.v4.renamed &&
     out.v4.cleaned && out.v4.inCuration && !d.errs.length;
   process.exit(v1ok && v2ok && v3ok && v4ok ? 0 : 1);
 })();

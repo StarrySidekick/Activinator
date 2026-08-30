@@ -152,6 +152,46 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
              back: back === before, adds: withExtra === without + other.items.length };
   });
 
+  // — it deals in rounds: everything once, then it says so and waits. It used
+  //   not to — both draws picked at random from a wide slice of the ranking, so
+  //   the same card came back within a few dozen swipes. —
+  const rounds = await page.evaluate(async () => {
+    const packs = JSON.stringify(ACT.S.packs), pass = JSON.stringify(ACT.S.pass);
+    const seenWas = JSON.stringify(ACT.S.seen), recentWas = JSON.stringify(ACT.S.recent);
+    for (const k of Object.keys(ACT.S.packs)) ACT.S.packs[k] = (k === 'q-partner');
+    ACT.S.pass = { n:1, done:[] }; ACT.S.seen = {}; ACT.redeal();
+
+    const total = ACT.pool().length, dealt = [];
+    let guard = 0;
+    while (ACT.top() && guard++ < 400) { dealt.push(ACT.top().id); ACT.say(guard % 4 ? 'like' : 'dislike'); }
+    await new Promise(r => setTimeout(r, 420));
+
+    const n = ACT.S.pass.n;
+    const out = {
+      wholeDeck: total > 20 && dealt.length === total,
+      noRepeats: new Set(dealt).size === dealt.length,
+      saysSo: /whole deck/.test((document.querySelector('.empty h2') || {}).textContent || ''),
+      // it waits to be asked rather than reshuffling behind you
+      waits: ACT.S.pass.n === n,
+      goesRound: (ACT.goRound(), ACT.S.pass.n === n + 1 && ACT.cycle().left === total && !!ACT.top())
+    };
+    ACT.S.packs = JSON.parse(packs); ACT.S.pass = JSON.parse(pass);
+    ACT.S.seen = JSON.parse(seenWas); ACT.S.recent = JSON.parse(recentWas);
+    ACT.redeal();
+    return out;
+  });
+
+  // — undo puts the card back into the round as well as into the hand —
+  const undoRound = await page.evaluate(async () => {
+    const t = ACT.top().id;
+    ACT.say('dislike');
+    await new Promise(r => setTimeout(r, 400));
+    const gone = ACT.S.pass.done.includes(t);
+    ACT.takeBack();
+    await new Promise(r => setTimeout(r, 200));
+    return gone && !ACT.S.pass.done.includes(t) && ACT.top().id === t;
+  });
+
   // — the dock reaches everything —
   await page.click('[data-act="menu"]'); await page.waitForTimeout(400);
   await shot('04-menu');
@@ -258,7 +298,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await page.reload(); await page.waitForTimeout(700);
   const persisted = await page.evaluate(() => ACT.S.swipes > 10 && ACT.S.mine.length === 1);
   const editPersisted = await page.evaluate(([id, t]) =>
-    ACT.S.v === 4 && ACT.pool().find(c => c.id === id).t === t, [editId, 'A better way of putting it']);
+    ACT.S.v === 5 && ACT.pool().find(c => c.id === id).t === t, [editId, 'A better way of putting it']);
 
   // — and a rewrite can be taken back off, leaving the pack's own words —
   await page.evaluate(id => ACT.panels.editPanel(id), editId);
@@ -289,15 +329,15 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, corners, packs, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
-    refusedBare, mine, mineRow, rowIsPackShaped, prefilled, rewritten, curation, editPersisted,
-    unedited, defEditable, persisted, swReady, offline, errors: errs });
+    refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, prefilled, rewritten, curation,
+    editPersisted, unedited, defEditable, persisted, swReady, offline, errors: errs });
   await browser.close();
   const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && corners && flipped &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
     mine && persisted && swReady && offline && prefilled && editPersisted && unedited &&
-    defEditable &&
+    defEditable && undoRound && Object.values(rounds).every(Boolean) &&
     Object.values(rewritten).every(Boolean) && Object.values(curation).every(Boolean) &&
     packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && rowIsPackShaped && !errs.length;
   process.exit(ok ? 0 : 1);

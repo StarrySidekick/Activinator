@@ -5,7 +5,19 @@
 
    Ranking alone collapses — tell an app what you like twenty times and it will
    spend the rest of its life showing you that — so a fixed share of every hand
-   is dealt against what it knows, and says so on its face. */
+   is dealt against what it knows, and says so on its face.
+
+   **It deals in rounds.** Ranking says what comes first; the round says that
+   everything comes once. A card you have said something about is out until the
+   round ends, and the round ends when there is nothing left in it — which is a
+   screen you have to answer, not a silent reshuffle.
+
+   It did not used to. Both draws picked at random from a wide slice of the
+   ranking — the top quarter of sixteen hundred cards is four hundred — and the
+   wildcard draw sorted by how well a tag was known and so did not even look at
+   what you had just been shown. The card you swiped a minute ago was eligible
+   again the moment it left the hand, and repeats turned up within a few dozen
+   swipes on a deck it would take all day to get through. */
 import { S, pool } from './state.js';
 import { DURATIONS } from './data.js';
 import { scoreOf, chanceOf, reasons, warm } from './taste.js';
@@ -47,6 +59,21 @@ const fits = (c) => {
 };
 
 const live = (c) => (S.seen[c.id] || {}).v !== 'never';
+
+/* Where the round stands. The round belongs to the deck rather than to the
+   filter: `total` and `left` count everything switched on, because "how far
+   through the deck am I" should not change when you say you only have twenty
+   minutes. `fits` and `fitsLeft` are the same question about what can actually
+   be dealt this minute, which is what tells an empty screen which of the two
+   things has happened. */
+const cycle = () => {
+  const done = new Set(S.pass.done);
+  const there = pool().filter(live);
+  const here = there.filter(fits);
+  const left = there.filter(c => !done.has(c.id)).length;
+  return { n: S.pass.n, total: there.length, left, gone: there.length - left,
+           fits: here.length, fitsLeft: here.filter(c => !done.has(c.id)).length };
+};
 
 /* A dealt card is a seed plus the sentence explaining why it is in front of
    you, and nothing else. */
@@ -96,13 +123,31 @@ const rand = a => a[(Math.random() * a.length) | 0];
    individually right. */
 const deal = (want = 6, exclude = []) => {
   const skip = new Set(exclude);
-  const all = pool().filter(c => live(c) && fits(c) && !skip.has(c.id));
+  const done = new Set(S.pass.done);
+  /* The round is the hard part of this filter: a card you have said something
+     about is not dealt again until the round is over, however well it scores.
+     Nothing here starts a new round — an empty hand is a question for the
+     screen to ask, because a deck that quietly reshuffles is a deck you cannot
+     tell you have finished. */
+  const all = pool().filter(c => live(c) && fits(c) && !skip.has(c.id) && !done.has(c.id));
   if (!all.length) return [];
 
-  const ranked = all.map(c => ({ c, s: weightOf(c) })).sort((a, b) => b.s - a.s);
+  /* What you were just shown is out of the next hand as well as the last one.
+     Sinking it in the ranking was not enough: the wildcard draw sorts by how
+     well a tag is known and never reads the ranking at all, which is how the
+     card you swiped a minute ago came back labelled "a wildcard". Inside a
+     round the round itself covers this; it is the first hand after going round
+     again that needs it. A soft bar — if honouring it would leave too little to
+     deal from, it is dropped, because an empty hand is worse than a card you
+     saw a while ago. */
+  const back = new Set(S.recent);
+  const notLately = all.filter(c => !back.has(c.id));
+  const draw = notLately.length >= Math.max(want, 8) ? notLately : all;
+
+  const ranked = draw.map(c => ({ c, s: weightOf(c) })).sort((a, b) => b.s - a.s);
   const cold = !warm();
   const nerve = cold ? 0.85 : S.nerve;
-  const strangers = all.slice().sort(fresher);
+  const strangers = draw.slice().sort(fresher);
 
   const out = [];
   const used = new Set();
@@ -140,4 +185,4 @@ const deal = (want = 6, exclude = []) => {
   return out;
 };
 
-export { deal, fits, live, why, durationOfCard };
+export { deal, cycle, fits, live, why, durationOfCard };

@@ -156,3 +156,5 @@
   border:1px solid var(--ink-3); border-radius:12px; padding:11px 18px;
   font-size:13.5px; color:#cfd3de; background:#191b24;
 }
+/* The second way out of the end of a round is a way out, not the answer. */
+.empty button.quiet{border-color:transparent;background:none;color:var(--dim);padding:4px 8px}

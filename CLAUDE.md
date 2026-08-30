@@ -23,7 +23,7 @@ change and **look at the screenshots** in `test/shots/` — this is a visual app
 and a passing assertion doesn't mean it looks right. Add a case to
 `test/upgrade.mjs` whenever the saved shape changes.
 
-## The three rules easiest to forget
+## The four rules easiest to forget
 
 - After changing anything in `js/`, `css/` or `index.html`, bump `CACHE` in
   `sw.js` **and** `APP_VERSION` in `js/state.js`. A new file must also join
@@ -32,6 +32,11 @@ and a passing assertion doesn't mean it looks right. Add a case to
   hand. The packs are the source of truth. Nothing in the app writes to them
   either: Menu → Curate exports what has been kept, cut and rewritten, and a
   session edits the CSVs by it. See "Curating" in the README.
+- The deck deals in **rounds**: anything you have said something about is out
+  until the round ends, and the end of a round is a screen with a button, never
+  a silent reshuffle. Anything that gives a verdict must mark the round
+  (`donePass`) and anything that takes one back must unmark it. See "It deals
+  in rounds" in the README.
 - `sw.js` reaps only `activinator-` caches. The app shares the
   `starrysidekick.github.io` origin with Bureau, and a cache store belongs to
   the origin, not to a scope — the general filter wiped Bureau's shell once.

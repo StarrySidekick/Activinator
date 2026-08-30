@@ -1,10 +1,11 @@
 /* Activinator — the entry point and the one listener set.
    Everything routes through act(): to add something the app can do, add a
    data-act and a case here. Nothing binds a listener inside a render. */
-import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId, remember } from './state.js';
+import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId, remember,
+         donePass, undonePass } from './state.js';
 import { learn } from './taste.js';
-import { render, reset as redeal, say, takeBack, more, toast, top } from './deck.js';
-import { deal } from './deal.js';
+import { render, reset as redeal, goRound, say, takeBack, more, toast, top } from './deck.js';
+import { deal, cycle } from './deal.js';
 import { PACKS } from './data.js';
 import { wire as wireSwipe } from './swipe.js';
 import * as P from './panels.js';
@@ -54,6 +55,7 @@ const act = (name, el) => {
 
     case 'like': case 'dislike': case 'skip': return say(name);
     case 'undo':  return takeBack();
+    case 'newpass': return goRound();
     case 'more':  return more();
     case 'never': return say('never');
 
@@ -69,8 +71,12 @@ const act = (name, el) => {
       const c = byId(id); if (!c) return;
       const want = name === 'blike' ? 'like' : 'dislike';
       const had = (S.seen[id] || {}).v;
-      if (had === want) delete S.seen[id];
-      else { learn(c, want === 'like' ? 1 : 0, 1); S.seen[id] = { v:want, at:new Date().toISOString() }; }
+      /* Judging one here counts exactly as judging it on a card, which means it
+         is out of this round too — or the deck would deal you the thing you
+         just made your mind up about. */
+      if (had === want) { delete S.seen[id]; undonePass(id); }
+      else { learn(c, want === 'like' ? 1 : 0, 1); S.seen[id] = { v:want, at:new Date().toISOString() };
+             donePass(id); }
       save(); redeal();
       const box = document.getElementById('browerows');
       if (box) return P.browseSearch(document.querySelector('[data-in="q"]').value);
@@ -145,4 +151,4 @@ if ('serviceWorker' in navigator) {
 }
 
 /* One handle for the console and for the smoke test. */
-window.ACT = { S, render, redeal, say, takeBack, top, pool, deal, PACKS, panels:P, save };
+window.ACT = { S, render, redeal, goRound, say, takeBack, top, pool, deal, cycle, PACKS, panels:P, save };
