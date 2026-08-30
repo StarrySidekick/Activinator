@@ -13,21 +13,22 @@ let Q = [];
 
 const now = () => new Date().toISOString();
 
-/* — the dock sleeps —
-   Four marks in the corners of a full-bleed card are four things in front of
-   the one thing you are meant to be looking at. They fade out, any touch brings
-   them back, and a verdict puts them away again — you have moved on. They are
-   woken once at launch so that the app never opens on a screen with nothing on
-   it, and boot.js swallows the first tap on one, so a mark you cannot see is
-   never a button you press by accident. */
-const DOZE = 4200;
-let dozer = null;
-const sleep = () => { clearTimeout(dozer); document.body.classList.remove('awake'); };
-const wake = () => {
-  document.body.classList.add('awake');
-  clearTimeout(dozer); dozer = setTimeout(sleep, DOZE);
+/* Two states the frame is in, and the one button reads both: `reading` is a
+   card turned over, `bare` is no card at all. Kept on the body rather than
+   worked out with :has(), because the one way to the menu is not a thing to
+   hang on a selector this app cannot test on the device it runs on. */
+const know = () => {
+  const el = $('#deck .card.top');
+  document.body.classList.toggle('reading', !!el && el.classList.contains('flip'));
+  document.body.classList.toggle('bare', !Q.length);
+  /* Safari tints its own bars with the theme colour, which is the band above
+     and below the card in a tab. The screen's colour is the card's. */
+  const m = document.querySelector('meta[name="theme-color"]');
+  if (m) m.content = Q.length ? '#F5F0E4' : '#14151c';
 };
-const awake = () => document.body.classList.contains('awake');
+
+/* The tap that turns a card over, from anywhere that has one. */
+const flip = (el) => { if (!el) return; el.classList.toggle('flip'); know(); };
 
 const toast = (msg) => {
   const t = $('#toast'); if (!msg) return;
@@ -57,13 +58,17 @@ const restack = () => {
   render();
 };
 
-/* The two behind the top card fan out behind it, so the deck reads as a deck.
-   Written inline rather than as classes: a drag overwrites the top card's
-   transform every frame and must not have to fight a stylesheet. */
-/* Full-bleed cards cannot fan sideways — an offset would show as a misaligned
-   edge against the screen. They sit back instead, and step forward as the one
-   above them leaves. */
-const FAN = ['translate(0,0)', 'scale(.965)', 'scale(.93)'];
+/* The hand is stacked dead flat: every card in it is the screen, and the only
+   motion is the top one leaving. Written inline rather than as classes because
+   a drag overwrites the top card's transform every frame and must not have to
+   fight a stylesheet.
+
+   They used to sit back a little — `scale(.965)`, `scale(.93)` — so the deck
+   would read as a deck. But a card that is smaller than the screen is a card
+   with the dark room around it, and the moment the top one moves you see that
+   as a band along the top and the bottom. The depth was never visible except
+   as the thing that broke the full bleed. */
+const FAN = ['translate(0,0)', 'translate(0,0)', 'translate(0,0)'];
 const place = (els) => {
   els.forEach((el, i) => {
     el.classList.toggle('top', i === 0);
@@ -129,9 +134,7 @@ const render = () => {
   const els = [...deck.querySelectorAll('.card')].reverse();
   els.forEach((el, i) => { el.style.zIndex = 10 - i; });
   place(els);
-  $('.dock .undo').classList.toggle('on', !!getUndo());
-  /* No card under the marks means no paper for them to be ink on. */
-  document.body.classList.toggle('bare', !Q.length);
+  know();
 };
 
 const top = () => Q[0];
@@ -165,16 +168,23 @@ const say = (v) => {
     const rest = [...document.querySelectorAll('#deck .card:not(.gone)')];
     rest.forEach(r => r.classList.add('rest'));
     place(rest);
+    /* The card that is leaving may have been turned over, and the hand behind
+       it is hidden while one is. Ask again now rather than at the end of the
+       animation, or the card flying off leaves nothing behind it. */
+    know();
     setTimeout(() => render(), 340);
   } else render();
 
-  sleep();
   toast(v === 'like' ? 'Like' : v === 'dislike' ? 'Don’t like'
       : v === 'never' ? 'Out of the pool' : '');
 };
 
 /* Undo has to take the learning back with it, or it is a lie: the card returns
-   and the weights it moved stay moved. */
+   and the weights it moved stay moved.
+
+   It is a swipe down now rather than a button — the opposite of the way the
+   card left, which is the only direction it could sensibly be. So it comes
+   back the way it went: down from the top, rather than appearing. */
 const takeBack = () => {
   const u = getUndo(); if (!u) return;
   unlearn(u.mark);
@@ -183,6 +193,16 @@ const takeBack = () => {
   undonePass(u.card.id);
   Q.unshift(u.card);
   setUndo(null); save(); render();
+
+  const el = $('#deck .card.top');
+  if (el) {
+    el.style.transition = 'none';
+    el.style.transform = `translate(0,${-window.innerHeight}px) rotate(-2deg)`;
+    el.getBoundingClientRect();          // reflow, or the next frame has nothing to animate from
+    el.style.transition = '';
+    el.classList.add('rest');
+    el.style.transform = 'translate(0,0)';
+  }
   toast('Back it comes');
 };
 
@@ -195,5 +215,4 @@ const more = () => {
   render();
 };
 
-export { Q, render, refill, reset, restack, goRound, say, takeBack, more, toast, top,
-         wake, sleep, awake };
+export { Q, render, refill, reset, restack, goRound, say, takeBack, more, toast, top, flip, know };

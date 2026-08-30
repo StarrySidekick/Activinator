@@ -15,9 +15,18 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   page.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
   const shot = async n => { await page.waitForTimeout(300); await page.screenshot({ path:`test/shots/${n}.png` }); };
-  // The dock sleeps, so pressing one of its marks means waking it first — which
-  // is what a finger does by touching the screen at all.
-  const dock = async (sel) => { await page.evaluate(() => ACT.wake()); await page.click(sel); };
+  // There is one button in the app and it is on the back of the card, so
+  // reaching the menu means turning a card over first.
+  const reading = () => page.evaluate(() => document.body.classList.contains('reading'));
+  const menu = async () => {
+    // Turn a card over first — and go by the state the app is actually in
+    // rather than by one tap, since a tap during a card leaving does nothing.
+    for (let i = 0; i < 4 && !(await reading()); i++) {
+      await page.locator('.card.top').click();
+      await page.waitForTimeout(560);
+    }
+    await page.click('.settings'); await page.waitForTimeout(400);
+  };
 
   await page.goto(URL);
   await page.waitForTimeout(700);
@@ -75,10 +84,14 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   const moved = (await page.locator('.card.top .t').innerText()) !== first;
   const learned = await page.evaluate(() => Object.keys(ACT.S.w).length > 0);
 
-  // — undo takes the learning back with it, not just the card —
+  // — a swipe down takes the last card back, and takes the learning with it —
   const wBefore = await page.evaluate(() => JSON.stringify(ACT.S.w));
-  await dock('[data-act="undo"]');
-  await page.waitForTimeout(400);
+  const down = await page.locator('.card.top').boundingBox();
+  await page.mouse.move(down.x + down.width/2, down.y + down.height/2);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) { await page.mouse.move(down.x + down.width/2, down.y + down.height/2 + i*28); await page.waitForTimeout(12); }
+  await page.mouse.up();
+  await page.waitForTimeout(500);
   const undone = await page.evaluate(() => Object.keys(ACT.S.seen).length === 0);
   const backAgain = (await page.locator('.card.top .t').innerText()) === first;
   const unlearned = wBefore !== '{}' && await page.evaluate(() =>
@@ -123,13 +136,26 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return ok;
   });
 
-  // — one button per corner, and none of them over the middle of the card —
-  const corners = await page.evaluate(() => {
-    const at = (sel) => { const r = document.querySelector(sel).getBoundingClientRect();
-      return [r.left + r.width/2 < innerWidth/2 ? 'L' : 'R', r.top + r.height/2 < innerHeight/2 ? 'T' : 'B'].join(''); };
-    const seen = { menu:at('.dock .menu'), browse:at('.dock .browse'),
-                   undo:at('.dock .undo'), add:at('.dock .add') };
-    return new Set(Object.values(seen)).size === 4 ? seen : null;
+  // — one button in the whole app, on the back of the card, top right —
+  const oneButton = await page.evaluate(async () => {
+    // one piece of chrome in the whole app, and no dock left anywhere
+    const only = document.querySelectorAll('body > button[data-act]').length === 1 &&
+                 !document.querySelector('.dock');
+    const hidden = getComputedStyle(document.querySelector('.settings')).opacity === '0';
+    ACT.flip(document.querySelector('.card.top'));
+    await new Promise(r => setTimeout(r, 550));
+    const st = document.querySelector('.settings');
+    const r = st.getBoundingClientRect();
+    const out = { only, hidden,
+      shownWhenReading: getComputedStyle(st).opacity === '1',
+      topRight: r.top < innerHeight / 2 && r.left + r.width / 2 > innerWidth / 2,
+      // and the rest of the hand is out of the way while a card is turned over
+      handHidden: [...document.querySelectorAll('#deck .card:not(.top)')]
+        .every(c => getComputedStyle(c).visibility === 'hidden') };
+    ACT.flip(document.querySelector('.card.top'));
+    await new Promise(r => setTimeout(r, 550));
+    out.hiddenAgain = getComputedStyle(st).opacity === '0';
+    return out;
   });
 
   // — a pack switched off leaves the pool; switched back on it returns, and
@@ -195,28 +221,8 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return gone && !ACT.S.pass.done.includes(t) && ACT.top().id === t;
   });
 
-  // — the marks sleep, and the first tap on a sleeping one only wakes it: a
-  //   mark you cannot see is not a button you meant to press —
-  await page.evaluate(() => ACT.sleep());
-  await page.waitForTimeout(350);
-  const hiddenDock = await page.evaluate(() =>
-    getComputedStyle(document.querySelector('.dock .menu')).opacity === '0');
-  await shot('10-dock-asleep');
-  await page.click('[data-act="menu"]'); await page.waitForTimeout(300);
-  const firstTapOnlyWakes = await page.locator('.panel').count() === 0 &&
-    await page.evaluate(() => document.body.classList.contains('awake'));
-  await page.click('[data-act="menu"]'); await page.waitForTimeout(350);
-  const secondTapOpens = await page.locator('.panel').count() === 1;
-  await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
-  // and a verdict puts them away again
-  await page.evaluate(() => ACT.wake());
-  await page.evaluate(() => ACT.say('skip'));
-  await page.waitForTimeout(420);
-  const verdictSleeps = await page.evaluate(() => !document.body.classList.contains('awake'));
-  const dockSleeps = { hiddenDock, firstTapOnlyWakes, secondTapOpens, verdictSleeps };
-
-  // — the dock reaches everything —
-  await dock('[data-act="menu"]'); await page.waitForTimeout(400);
+  // — the one button reaches everything —
+  await menu();
   await shot('04-menu');
   const menuOpen = await page.locator('.panel h2').innerText() === 'Activinator';
   await page.click('[data-act="ctx"]'); await page.waitForTimeout(400);
@@ -227,7 +233,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
   // — all activities, searchable, and liking one there is the same act —
-  await dock('[data-act="browse"]'); await page.waitForTimeout(400);
+  await menu(); await page.click('[data-act="browse"]'); await page.waitForTimeout(400);
   const allRows = await page.locator('.brow').count();
   await page.fill('[data-in="q"]', 'graveyard');
   await page.waitForTimeout(300);
@@ -242,14 +248,14 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   // — swipe a dozen so taste has something to show —
   for (let i = 0; i < 14; i++) { await page.click('#deck'); await page.waitForTimeout(60);
     await page.evaluate(i => ACT.say(i % 3 ? 'like' : 'dislike'), i); await page.waitForTimeout(120); }
-  await dock('[data-act="menu"]'); await page.waitForTimeout(300);
+  await menu();
   await page.click('[data-act="taste"]'); await page.waitForTimeout(400);
   const bars = await page.locator('.bar').count();
   await shot('07-taste');
   await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
   // — writing your own: it needs enough tags to be filterable at all —
-  await dock('[data-act="add"]'); await page.waitForTimeout(400);
+  await menu(); await page.click('[data-act="add"]'); await page.waitForTimeout(400);
   await page.fill('[data-in="t"]', 'Walk the whole canal path');
   await page.click('[data-act="savemine"]'); await page.waitForTimeout(250);
   const refusedBare = await page.evaluate(() => ACT.S.mine.length === 0);
@@ -261,7 +267,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   const mine = await page.evaluate(() => ACT.S.mine.length === 1 && ACT.pool().some(c => c.src === 'mine'));
 
   // — and it comes back out as a row a pack would accept —
-  await dock('[data-act="menu"]'); await page.waitForTimeout(300);
+  await menu();
   await page.click('[data-act="packs"]'); await page.waitForTimeout(400);
   const mineRow = await page.evaluate(() => {
     const t = document.querySelector('.pbody textarea');
@@ -284,8 +290,10 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   //   something better first. —
   const was = await page.locator('.card.top .t').innerText();
   const editId = await page.evaluate(() => ACT.top().id);
-  await page.locator('.card.top').click();               // the button is on the back
-  await page.waitForTimeout(550);
+  // the buttons are on the back, and the menu may have left it turned already
+  if (await page.locator('.card.top.flip').count() === 0) {
+    await page.locator('.card.top').click(); await page.waitForTimeout(550);
+  }
   await page.click('.card.top [data-act="edit"]'); await page.waitForTimeout(400);
   const prefilled = await page.inputValue('[data-in="t"]') === was;
   await page.fill('[data-in="t"]', 'A better way of putting it');
@@ -300,7 +308,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('11-rewritten');
 
   // — and everything judged or rewritten comes back out as pack rows —
-  await dock('[data-act="menu"]'); await page.waitForTimeout(300);
+  await menu();
   await page.click('[data-act="curate"]'); await page.waitForTimeout(400);
   await shot('12-curate');
   const lines = (await page.evaluate(() => document.querySelector('.pbody textarea').value)).split('\n');
@@ -349,19 +357,19 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('09-offline');
   await ctx.setOffline(false);
 
-  console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, corners, packs, flipped, frontHidden,
+  console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, packs, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
-    refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, dockSleeps, prefilled, rewritten, curation,
+    refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, oneButton, prefilled, rewritten, curation,
     editPersisted, unedited, defEditable, persisted, swReady, offline, errors: errs });
   await browser.close();
-  const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && corners && flipped &&
+  const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && flipped &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
     mine && persisted && swReady && offline && prefilled && editPersisted && unedited &&
     defEditable && undoRound && Object.values(rounds).every(Boolean) &&
-    Object.values(dockSleeps).every(Boolean) &&
+    Object.values(oneButton).every(Boolean) &&
     Object.values(rewritten).every(Boolean) && Object.values(curation).every(Boolean) &&
     packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && rowIsPackShaped && !errs.length;
   process.exit(ok ? 0 : 1);

@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Activinator</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#14151c">
+<!-- Safari tints its own bars with this, which is the dark band above and
+     below the card when the app is opened in a tab rather than installed. The
+     card is the screen, so the screen's colour is the card's; deck.js swaps it
+     for the ink when there is no card to be paper. -->
+<meta name="theme-color" content="#F5F0E4">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,30 +25,18 @@
 <body>
 <div id="frame">
   <main id="deck"></main>
-  <!-- One button in each corner of a full-screen card, so none of them is ever
-       in the way of the middle of it: where you go and what you look for along
-       the top, what you make and what you take back along the bottom. -->
-  <!-- Drawn the way the tag marks are drawn: solid silhouettes, filled evenodd,
-       the shapes a suit is. The hub is the app's own mark — the two fanned
-       cards off the icon, the front one cut away from the back by a stroke in
-       the colour of whatever is behind it. They are hidden until you touch the
-       screen; see "The dock sleeps" in the README. -->
-  <nav class="dock">
-    <button class="menu" data-act="menu" aria-label="Menu"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <rect class="behind" x="7.9" y="5.4" width="8.2" height="12.4" rx="1.2" transform="rotate(17 12 17.8)"/>
-      <rect class="infront" x="7.9" y="5.4" width="8.2" height="12.4" rx="1.2" transform="rotate(-13 12 17.8)"/>
-    </svg></button>
-    <button class="browse" data-act="browse" aria-label="All activities"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <path fill-rule="evenodd" d="M10.6 2.8a7.8 7.8 0 1 0 0 15.6 7.8 7.8 0 0 0 0-15.6Zm0 2.7a5.1 5.1 0 1 1 0 10.2 5.1 5.1 0 0 1 0-10.2Z M15.7 17.2 17.5 15.4 21.8 19.7a1.3 1.3 0 0 1-1.8 1.8Z"/>
-    </svg></button>
-    <button class="undo" data-act="undo" aria-label="Undo"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <path fill-rule="evenodd" d="M3.8 13.2A8.2 8.2 0 0 1 20.2 13.2H17.4A5.4 5.4 0 0 0 6.6 13.2Z M1.9 13.2H8.5L5.2 18.9Z"/>
-    </svg></button>
-    <button class="add" data-act="add" aria-label="Write your own"><svg viewBox="0 0 24 24" aria-hidden="true">
-      <path fill-rule="evenodd" d="M12 22.4 6.9 12.6c-1-2-.6-4.6 1-6.6L12 1.6l4.1 4.4c1.6 2 2 4.6 1 6.6Z M12 7.3a1.7 1.7 0 1 0 0 3.4 1.7 1.7 0 0 0 0-3.4Z M11.3 11.6h1.4v7.6h-1.4Z"/>
-    </svg></button>
-  </nav>
 </div>
+<!-- One button in the whole app, and you only meet it once you have turned a
+     card over to read it. Everything else the corners used to reach was a
+     quick link into this menu anyway, and four marks on the face of a
+     full-bleed card were four things in front of the thing you are deciding
+     about. It is the app's own mark — the two fanned cards off the icon,
+     the front one cut off the back by a stroke in the colour of whatever is
+     behind it. -->
+<button class="settings" data-act="menu" aria-label="Menu"><svg viewBox="0 0 24 24" aria-hidden="true">
+  <rect class="behind" x="7.9" y="5.4" width="8.2" height="12.4" rx="1.2" transform="rotate(17 12 17.8)"/>
+  <rect class="infront" x="7.9" y="5.4" width="8.2" height="12.4" rx="1.2" transform="rotate(-13 12 17.8)"/>
+</svg></button>
 <div id="panelhost"></div>
 <div id="toast"></div>
 <script type="module" src="js/boot.js"></script>

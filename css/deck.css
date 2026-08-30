@@ -2,18 +2,18 @@
    A card is a printed card: cream stock, letterpress serif, a row of emblems
    at the head. It fills the screen, so three of them are stacked exactly on
    top of each other and only the top one listens. */
-/* The card is the screen. Nothing is laid out beside it — the dock floats over
-   the bottom of it — so the deck is the whole frame with the safe areas kept
-   clear of the type. */
+/* The card is the screen. Nothing is laid out beside it and nothing floats over
+   it, so the deck is the whole frame with the safe areas kept clear of the
+   type. */
 #deck{
   position:absolute; inset:0; perspective:1600px; touch-action:none;
 }
 
-/* The card is the screen — no radius, no inset, no edge. The two behind it sit
-   back rather than beside it, and step forward as the one above them leaves;
-   an offset would show as a misaligned edge against the screen itself. The
-   transform is written inline by deck.js so a drag can overwrite it every
-   frame without fighting a stylesheet. */
+/* The card is the screen — no radius, no inset, no edge, and neither has the
+   one behind it: the hand is stacked dead flat so that nothing but paper ever
+   reaches the top and bottom of the screen. The transform is written inline by
+   deck.js so a drag can overwrite it every frame without fighting a
+   stylesheet. */
 .card{
   position:absolute; inset:0; border-radius:0;
   transform-style:preserve-3d; will-change:transform;
@@ -26,7 +26,18 @@
   position:absolute; inset:0; transform-style:preserve-3d;
   transition:transform .5s cubic-bezier(.3,.9,.3,1);
 }
-.card.flip .cardin{transform:rotateY(180deg)}
+/* Turned the other way round. A card in the hand turns with its right edge
+   coming towards you — `rotateY(180deg)` swings the right edge away instead,
+   and it reads as the card going backwards. */
+.card.flip .cardin{transform:rotateY(-180deg)}
+
+/* Halfway through the turn the card is edge-on and there is nothing in front
+   of the rest of the hand, so the next card showed through — and since every
+   card in the hand is the same cream, it read as the card you were reading
+   somehow being behind itself. The hand is hidden for the length of the turn,
+   and what you see through the gap is the room. `visibility`, because deck.js
+   writes `opacity` inline on every card in the hand and inline wins. */
+body.reading #deck .card:not(.top){visibility:hidden}
 
 .face{
   position:absolute; inset:0; border-radius:0; overflow:hidden;
@@ -40,7 +51,9 @@
   background:var(--paper); color:var(--text);
   box-shadow:0 18px 40px -12px rgba(0,0,0,.65);
   display:flex; flex-direction:column;
-  padding:calc(var(--top) + 70px) 26px calc(var(--bot) + 72px);
+  /* Nothing sits over the card any more, so the type only keeps clear of the
+     notch and the home indicator. */
+  padding:calc(var(--top) + 30px) 26px calc(var(--bot) + 34px);
 }
 /* — the emblems, and then the activity. That is the whole front.
      The row stays in the flow: `.face>*` makes every direct child position
@@ -59,6 +72,9 @@
    just the title, so nothing moves. */
 .face.front .word{margin:auto 0}
 .face.back{transform:rotateY(180deg); background:var(--paper-2); overflow-y:auto}
+/* The one button sits in the top right of the back, so the kicker stops short
+   of it. */
+.face.back .kicker{padding-right:46px}
 .card .face.back{opacity:0}
 .card.flip .face.front{opacity:0}
 .card.flip .face.back{opacity:1}

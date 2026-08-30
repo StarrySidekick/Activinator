@@ -37,11 +37,11 @@ the saved shape changes.
 
 The smoke test exercises dealing, the full-bleed card, the four corners, the bare front and its emblems, the
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
-leaves the pool but "never again" does, the context filter, the dock, search,
+leaves the pool but "never again" does, the context filter, the one button, search,
 liking from the browser, writing your own, rewriting the card in front of you,
 the curation export, that a whole round deals everything exactly once and then
-says so, that undo puts a card back into the round, persistence across a reload
-and an offline reload. Screenshots land in `test/shots/` — look
+says so, that a swipe down puts a card back into the round, persistence across a
+reload and an offline reload. Screenshots land in `test/shots/` — look
 at them, this is a visual app and a passing assertion doesn't mean it looks
 right.
 
@@ -343,32 +343,43 @@ knows *least* about rather than from the top of the ranking. A wildcard says on
 its face that it is one — except on the first day, when it knows nothing and
 there is nothing to deal against, so nothing is labelled.
 
-**The card is the screen.** Full bleed, no radius, no edge. The two behind it
-sit back rather than beside it and step forward as the one above leaves; an
-offset would show as a misaligned edge against the screen itself. One mark
-sits in each corner so that none of them is ever over the middle of it — where
-you go and what you look for along the top, what you make and what you take
-back along the bottom — and undo appears only when there is something to take
-back, because a dead button is furniture.
+**The card is the screen.** Full bleed, no radius, no edge — and so is the one
+behind it. The hand is stacked dead flat. The two behind used to sit back a
+little, `scale(.965)` and `scale(.93)`, so the deck would read as a deck; but a
+card smaller than the screen is a card with the dark room around it, and the
+moment the top one moved you saw that as a band along the top and the bottom.
+The depth was never visible except as the thing breaking the full bleed.
 
-**The dock sleeps, and it is printed rather than built.** Four things in the
-corners of a full-bleed card are four things in front of the one thing you are
-meant to be looking at, so they fade out; any touch brings them back for a few
-seconds and a verdict puts them away again, since you have moved on. They are
-woken once on launch so the app never opens on a screen with nothing on it. The
-corners stay live while the marks are invisible and the first tap on one only
-wakes it — letting that tap fall through to the card instead would mean
-reaching for the menu and flipping over the card you were deciding about.
+**There is one button in the whole app, and you meet it only once you have
+turned a card over.** It is the app's own mark, top right of the back, and it
+opens the hub — which is where everything is. There were four marks in the
+corners before that, and every one of them but this was a quick link into that
+same hub: four things standing in front of the one thing you are deciding
+about. The front of a card is now the activity and nothing else at all.
 
-They are marks, not buttons: solid silhouettes on the paper, the way a suit is
-printed in the corner of a playing card, with no disc, no rule and no shadow.
-A chrome button drawn over a full-bleed card is a second design arguing with
-the first one. The hub is the app's own mark — the two fanned cards off the
-icon — and one ink colour cannot show two overlapping cards, so the front one
-is cut off the back with a stroke in the colour of whatever is behind it: paper
-over a card, ink over the screen that ends a round. The other three are a
-magnifier, an arrow curling back, and the nib the `writing` tag uses, because
-the same drawing should mean the same thing.
+It lives outside `#frame` rather than in it. The deck carries a `perspective`
+and the cards are `preserve-3d`, and a 3D rendering context sorts what it
+contains by depth rather than by the z-index of anything beside it — so the row
+of emblems at the head of the card took the taps meant for the button, whatever
+z-index it was given.
+
+**Undo is a swipe down**, the opposite of the way the card left, and the card
+comes back the way it went: down from the top rather than appearing. There is
+no undo button, so nothing has to sit on the card waiting to be needed. Up is
+unchanged — it passes the card on without saying anything about it.
+
+**The flip turns the other way round.** `rotateY(180deg)` swings the card's
+right edge away from you, which reads as the card going backwards; a card in
+the hand turns with its right edge coming towards you. And halfway through the
+turn the card is edge-on, so the rest of the hand showed through — every card
+being the same cream, it looked like the card you were reading was somehow
+behind itself. The hand is hidden for the length of the turn, and what you see
+through the gap is the room.
+
+Safari tints its own toolbars with `theme-color`, which is the band above and
+below the card when the app is opened in a tab rather than installed. The card
+is the screen, so the screen's colour is the card's — and deck.js swaps it for
+the ink when there is no card to be paper.
 
 **An activity's id comes from its title, never from its place in the list.**
 It was `'s' + index`, which meant inserting one activity silently re-pointed
@@ -437,7 +448,7 @@ would disagree about what you think.
 | `deal.js` | What gets dealt next — the round, filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
 | `cards.js` | How a card is printed: `cardHTML`, the accent colour, the wording of a length. The front is the title and nothing else; the back carries everything the app knows. |
 | `deck.js` | The hand, the verdicts, undo, the stack, the empty deck. |
-| `swipe.js` | Pointer drag, the two stamps, and the tap that flips. Right is like, left is not, up is neither — which is why up has no stamp. |
+| `swipe.js` | Pointer drag, the two stamps, and the tap that flips. Right is like, left is not, up is neither — which is why up has no stamp — and down is not about this card at all: it takes the last one back. |
 | `panels.js` | Every panel: the hub, right now, all activities, taste, write your own, rewrite this card, curate, backup. |
 | `boot.js` | One delegated listener set. To add an action, add a `data-act` and a case in `act()`. |
 

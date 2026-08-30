@@ -26,56 +26,38 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 
 #frame{ height:100dvh; position:relative; overflow:hidden }
 
-/* — the dock. One mark in each corner of a full-screen card, so that none of
-     them is ever over the middle of it: where you go and what you look for
-     along the top, what you make and what you take back along the bottom.
-     Undo joins them only when there is something to take back, because a dead
-     button is furniture.
+/* — the one button. It lives on the back of the card: the front is for
+     deciding and the back is for understanding, and the menu is neither. Four
+     marks in the corners were four things in front of the one thing you are
+     meant to be looking at, and every one of them but this was a quick link
+     into it.
 
-     They are marks rather than buttons — printed on the card the way a suit is
-     printed in the corner of a playing card, with no disc, no rule and no
-     shadow around them. A chrome button drawn over a full-bleed card is a
-     second design arguing with the first one.
+     It is a mark, not a button — a solid silhouette on the paper, the way a
+     suit is printed in the corner of a playing card, with no disc, no rule and
+     no shadow. The hub is the app's own mark, and one ink colour cannot show
+     two overlapping cards, so the front one is cut off the back with a stroke
+     in the colour of whatever is behind it.
 
-     And they sleep. Four things in the corners of the card are four things in
-     front of the one thing you are meant to be looking at, so they fade out and
-     any touch brings them back — `body.awake`, from deck.js. The tap area stays
-     the same size whether you can see the mark or not. — */
-.dock{position:absolute; inset:0; z-index:20; pointer-events:none}
-.dock button{
-  position:absolute; width:48px; height:48px;
-  display:flex; align-items:center; justify-content:center;
-  color:var(--text-2); pointer-events:auto;
-  opacity:0; transform:scale(.88);
-  transition:opacity .3s ease, transform .3s ease;
+     It sits outside #frame rather than in it. The deck carries a `perspective`
+     and the cards are `preserve-3d`, and a 3D rendering context sorts what it
+     contains by depth rather than by the z-index of anything beside it — so
+     the row of emblems at the head of the card took the taps meant for this,
+     whatever z-index it was given. — */
+.settings{
+  position:fixed; top:calc(var(--top) + 14px); right:12px; z-index:50;
+  width:46px; height:46px; display:flex; align-items:center; justify-content:center;
+  color:var(--text-2); opacity:0; pointer-events:none; transform:scale(.9);
+  transition:opacity .22s ease, transform .22s ease;
 }
-/* The corners stay live while the marks are asleep, and boot.js swallows that
-   first tap. Letting it fall through to the card instead would mean reaching
-   for the menu and flipping over the card you were deciding about. */
-body.awake .dock button{opacity:1; transform:none}
-body.awake .dock button:active{transform:scale(.9)}
-
-/* The marks are drawn, not stroked — the same silhouettes the tags use. The
-   front card of the hub mark is cut off the one behind it by a stroke in the
-   colour of the paper it is lying on, which is the only way one ink colour can
-   show two overlapping cards. */
-.dock svg{width:25px;height:25px;fill:currentColor;overflow:visible}
-.dock .infront{stroke:var(--paper);stroke-width:1.7;paint-order:stroke fill}
-
-.dock .menu  {top:calc(var(--top) + 8px); left:10px}
-.dock .browse{top:calc(var(--top) + 8px); right:10px}
-.dock .undo  {bottom:calc(var(--bot) + 10px); left:10px}
-.dock .add   {bottom:calc(var(--bot) + 10px); right:10px}
-/* Hidden with `visibility` rather than `display`, so it keeps its corner: the
-   smoke test measures where all four marks are, and a box of zeros reads as the
-   top-left one. */
-.dock .undo{visibility:hidden}
-.dock .undo.on{visibility:visible}
-
-/* With no card under them there is no paper to be ink on: on the screen that
-   ends a round the marks are the pale thing and the room is the dark one. */
-body.bare .dock button{color:var(--dim)}
-body.bare .dock .infront{stroke:var(--ink)}
+/* Reading a card, or looking at a screen with no card on it at all: the two
+   moments you are not in the middle of deciding something. */
+body.reading .settings, body.bare .settings{opacity:1; pointer-events:auto; transform:none}
+.settings:active{transform:scale(.92)}
+.settings svg{width:25px;height:25px;fill:currentColor;overflow:visible}
+.settings .infront{stroke:var(--paper-2);stroke-width:1.7;paint-order:stroke fill}
+/* With no card under it there is no paper for it to be ink on. */
+body.bare .settings{color:var(--dim)}
+body.bare .settings .infront{stroke:var(--ink)}
 
 #toast{
   position:fixed; left:50%; bottom:calc(var(--bot) + 74px); transform:translateX(-50%) translateY(8px);
