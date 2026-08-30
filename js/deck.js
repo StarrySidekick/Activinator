@@ -2,9 +2,9 @@
    A verdict lands the instant you let go — the state is written, the queue
    moves on — and the card flies off over the top of all that. Nothing waits
    for an animation, ever. */
-import { S, save, setUndo, getUndo, remember, pool } from './state.js';
-import { deal } from './deal.js';
-import { learn, unlearn } from './taste.js';
+import { S, save, setUndo, getUndo, remember, pool, byId } from './state.js';
+import { deal, why } from './deal.js';
+import { learn, unlearn, chanceOf } from './taste.js';
 import { cardHTML } from './cards.js';
 
 const $ = s => document.querySelector(s);
@@ -25,6 +25,20 @@ const refill = () => {
 };
 
 const reset = () => { Q = []; refill(); render(); };
+
+/* Rewriting a card must not deal a new hand: the whole point of an edit is that
+   you were about to swipe *this* one and wanted it to say something better
+   first. The hand keeps its order and each card is re-read from the pool, odds
+   and reason included — they were worked out from words that have changed. */
+const restack = () => {
+  Q = Q.map(c => {
+    const s = byId(c.id); if (!s) return c;
+    const card = { ...c, t:s.t, tags:s.tags, min:s.min, cost:s.cost, edit:s.edit, was:s.was };
+    card.why = why(card); card.odds = chanceOf(card);
+    return card;
+  });
+  render();
+};
 
 /* The two behind the top card fan out behind it, so the deck reads as a deck.
    Written inline rather than as classes: a drag overwrites the top card's
@@ -123,4 +137,4 @@ const more = () => {
   render();
 };
 
-export { Q, render, refill, reset, say, takeBack, more, toast, top };
+export { Q, render, refill, reset, restack, say, takeBack, more, toast, top };

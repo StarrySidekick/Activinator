@@ -9,6 +9,17 @@ import { PACKS } from './data.js';
 import { wire as wireSwipe } from './swipe.js';
 import * as P from './panels.js';
 
+/* There is no server, so every way out of the app is a file the browser makes
+   for itself. */
+const today = () => new Date().toISOString().slice(0, 10);
+const offer = (name, text, type) => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], { type }));
+  a.download = name;
+  a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  return toast('Downloaded');
+};
+
 const act = (name, el) => {
   const v = el && el.dataset.v, id = el && el.dataset.id;
   switch (name) {
@@ -18,8 +29,15 @@ const act = (name, el) => {
     case 'packs':  return P.packsPanel();
     case 'taste':  return P.tastePanel();
     case 'add':    return P.addPanel();
+    case 'curate': return P.curatePanel();
     case 'backup': return P.backupPanel();
     case 'closepanel': return P.closePanel();
+
+    /* Rewriting works on whatever card asked — the back of the top one has no
+       id to give, because there is only ever one card being decided about. */
+    case 'edit':     return P.editPanel(id || (top() || {}).id);
+    case 'saveedit': return P.saveEdit();
+    case 'unedit':   return P.unedit();
 
     case 'like': case 'dislike': case 'skip': return say(name);
     case 'undo':  return takeBack();
@@ -50,13 +68,10 @@ const act = (name, el) => {
       if (!el.dataset.sure) { el.dataset.sure = 1; el.innerHTML = 'Sure? Everything goes.<small>Tap again.</small>'; return; }
       wipeAll(); redeal(); P.closePanel(); return toast('Forgotten');
 
-    case 'download': {
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(new Blob([exportJSON()], { type:'application/json' }));
-      a.download = 'activinator-' + new Date().toISOString().slice(0, 10) + '.json';
-      a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-      return toast('Downloaded');
-    }
+    case 'download':
+      return offer('activinator-' + today() + '.json', exportJSON(), 'application/json');
+    case 'curatefile':
+      return offer('activinator-curation-' + today() + '.csv', P.curationCSV(), 'text/csv');
     case 'restore': {
       const t = document.querySelector('[data-in="restore"]');
       try { importJSON(t.value); redeal(); P.closePanel(); toast('Restored'); }
@@ -66,9 +81,12 @@ const act = (name, el) => {
 
     case 'togglepack': S.packs[id] = !S.packs[id]; break;
 
+    /* A draft is not saved and not dealt from, so picking a tag redraws the
+       panel and nothing else. Redealing here would shuffle the hand under a
+       card you are in the middle of rewriting. */
     case 'dtag':
       P.DRAFT.tags = P.DRAFT.tags.includes(v) ? P.DRAFT.tags.filter(t => t !== v) : P.DRAFT.tags.concat(v);
-      break;
+      return P.refreshPanel();
     case 'savemine': return P.saveMine();
     default: return;
   }
@@ -113,4 +131,4 @@ if ('serviceWorker' in navigator) {
 }
 
 /* One handle for the console and for the smoke test. */
-window.ACT = { S, render, redeal, say, takeBack, pool, deal, PACKS, panels:P, save };
+window.ACT = { S, render, redeal, say, takeBack, top, pool, deal, PACKS, panels:P, save };

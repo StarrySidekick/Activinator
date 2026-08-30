@@ -38,8 +38,8 @@ the saved shape changes.
 The smoke test exercises dealing, the full-bleed card, the four corners, the bare front and its emblems, the
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
 leaves the pool but "never again" does, the context filter, the dock, search,
-liking from the browser, writing your own, persistence across a reload and an
-offline reload. Screenshots land in `test/shots/` — look
+liking from the browser, writing your own, rewriting the card in front of you,
+the curation export, persistence across a reload and an offline reload. Screenshots land in `test/shots/` — look
 at them, this is a visual app and a passing assertion doesn't mean it looks
 right.
 
@@ -146,7 +146,54 @@ pack a saved state has never heard of takes the default it ships with, which is
 what lets a new pack arrive in an update without being silently disabled — and
 lets one you switched off stay off.
 
+`packs/candidates.csv` is the pack being curated: ten new activities for every
+label in the vocabulary, none of them judged yet. Switch every other pack off
+and the deck deals nothing but candidates, which is the fastest way through
+them. What survives should be merged into `core` and the rest deleted — see
+Curating.
+
 `packs/winter.csv` is an example pack, off by default. Delete it or fill it in.
+
+## Curating
+
+Swiping is how the deck learns about you. **Curating is how the packs learn**,
+and it is a separate act with a separate way out, because a verdict that lives
+only in localStorage is a verdict nobody can act on: the CSVs are the source of
+truth and nothing in the app writes to them.
+
+Menu → Curate is every card you have judged or rewritten, as one file:
+
+    verdict,pack,title,minutes,cost,tags,was
+    keep,candidates,Draw everybody on the bus,45,free,create visualart drawing engaging indoors,
+
+`keep` is a swipe right, `cut` a swipe left, `out` is "never again", and `edit`
+is one you rewrote but have not judged yet. A skip is not a verdict and is not
+in there. The middle four columns are exactly a pack row, so a keeper pastes
+into a CSV unedited; `was` is the title the pack still has, and it is filled in
+only for a rewrite — that is the row the new one replaces, since a rewritten
+title no longer matches anything in the file. Take it to a session, or edit the
+packs by it yourself.
+
+Switching a pack off hides its cards from the deck and changes nothing here.
+
+**Rewriting a card, on the back of it, is part of curating rather than a way of
+writing your own.** A card you would go for if it said something slightly
+different is not a card to swipe left on — left teaches the model something
+untrue about a whole set of tags, and leaves the sentence that was nearly right
+sitting in the pack. Rewrite it, swipe it, and the curation carries the new
+wording back.
+
+The rewrite is kept beside the card, in `S.edits`, under the id the *original*
+title gave it. So everything you have already said about that card survives
+being rewritten, the pack stays the source of truth for anyone who has not
+rewritten it, and the change can be exported as a change rather than as a new
+card. "Put it back as it was" throws the rewrite away; so does rewriting it
+into exactly what the pack already said.
+
+Rewriting does not deal a new hand. The point of an edit is that you were about
+to swipe *this* card, so the hand keeps its place and only the words change —
+odds and reason included, since both were worked out from words that just
+moved.
 
 ## How it works
 
@@ -158,12 +205,19 @@ space: the model learns one weight per tag and nothing else, which is why a tag
 like `screenfree` or `spooky` is worth adding and a tag like `nice` is not.
 
 **The vocabulary is grouped, and the groups mean different things.** `GROUPS`
-in `data.js` — nine of them: *doing* (create, organize, clean, repair, try,
+in `data.js` — ten of them: *doing* (create, organize, clean, repair, try,
 play, move, learn, kindness), *making* if you are (writing, visual art and its
 five kinds, music, acting, dancing, film), *experience* (watch, listen, read,
-travel, eat), *where*, *who*, *how hard* (casual→engaging→challenging, a scale,
-exactly one per activity), *mood* (adventurous, funny, mindful, spooky,
-nostalgic, romantic), *duration* and *cost*.
+travel, eat), *thinking* (question), *where*, *who*, *how hard*
+(casual→engaging→challenging, a scale, exactly one per activity), *mood*
+(adventurous, funny, mindful, spooky, nostalgic, romantic), *duration* and
+*cost*.
+
+**A question is a card that asks rather than tells.** *Thinking* is its own
+group because a prompt to work something out is not a thing to go and do and
+should not be learned as one: liking "decide which ten things you would keep"
+says something about sitting and thinking, not about being indoors on your own.
+It is one tag today and the group has room for more.
 
 Nesting is deliberate: a painting activity carries `create`, `visualart` and
 `painting`, so taste can learn that you like making things, or visual art
@@ -278,13 +332,13 @@ would disagree about what you think.
 | `vocab.js` | The tag vocabulary: tags, groups, marks, the three context questions. Its own module so the build can validate against it. |
 | `activities.js` | **Generated.** Every pack, built from `packs/*.csv`. Never edit it. |
 | `data.js` | Joins the two, so everything else imports one place for both. |
-| `state.js` | The one localStorage key, the shape, export/import. Nothing else touches storage. |
+| `state.js` | The one localStorage key, the shape, the rewrites, export/import. Nothing else touches storage. |
 | `taste.js` | The model: `scoreOf`, `learn`, `unlearn`, `opinions`, `reasons`. |
 | `deal.js` | What gets dealt next — filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
 | `cards.js` | How a card is printed: `cardHTML`, the accent colour, the wording of a length. The front is the title and nothing else; the back carries everything the app knows. |
 | `deck.js` | The hand, the verdicts, undo, the stack, the empty deck. |
 | `swipe.js` | Pointer drag, the two stamps, and the tap that flips. Right is like, left is not, up is neither — which is why up has no stamp. |
-| `panels.js` | Every panel: the hub, right now, all activities, taste, write your own, backup. |
+| `panels.js` | Every panel: the hub, right now, all activities, taste, write your own, rewrite this card, curate, backup. |
 | `boot.js` | One delegated listener set. To add an action, add a `data-act` and a case in `act()`. |
 
 Three stylesheets: `base.css` (the room), `deck.css` (the card), `panels.css`.

@@ -102,10 +102,12 @@
 .taglist li.up{background:rgba(111,143,94,.22);color:#3f5735}
 .taglist li.down{background:rgba(178,86,75,.18);color:#7d3a33}
 .backrow{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px;padding-top:20px}
-.backrow button{flex:1 1 40%}
+/* Three across on one line, which is what decides the size of the type here:
+   the labels are words rather than icons, and a third of a phone is what each
+   of them has. */
 .backrow button{
-  flex:1; border:1px solid rgba(0,0,0,.18); border-radius:12px; padding:11px 6px;
-  font-size:12.5px; font-weight:600; color:var(--text-2); background:rgba(255,255,255,.45);
+  flex:1 1 28%; border:1px solid rgba(0,0,0,.18); border-radius:12px; padding:11px 4px;
+  font-size:12px; font-weight:600; color:var(--text-2); background:rgba(255,255,255,.45);
 }
 .backrow button.never{color:var(--no);border-color:rgba(178,86,75,.35)}
 .meter{

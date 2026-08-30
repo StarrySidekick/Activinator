@@ -135,7 +135,9 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     const off = ACT.pool().length;
     ACT.S.packs.core = true;
     const back = ACT.pool().length;
-    const other = PACKS.find(p => p.id !== 'core');
+    // The pack that can be switched on is one that ships switched off, and
+    // there has to be one of those for this to say anything at all.
+    const other = PACKS.find(p => !p.on);
     ACT.S.packs[other.id] = true;
     const withExtra = ACT.pool().length;
     ACT.S.packs[other.id] = other.on;
@@ -208,9 +210,56 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   })();
   await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
+  // — rewriting the card in front of you. The hand must not move: the point of
+  //   an edit is that you were about to swipe this one and wanted it to say
+  //   something better first. —
+  const was = await page.locator('.card.top .t').innerText();
+  const editId = await page.evaluate(() => ACT.top().id);
+  await page.locator('.card.top').click();               // the button is on the back
+  await page.waitForTimeout(550);
+  await page.click('.card.top [data-act="edit"]'); await page.waitForTimeout(400);
+  const prefilled = await page.inputValue('[data-in="t"]') === was;
+  await page.fill('[data-in="t"]', 'A better way of putting it');
+  await shot('10-rewrite');
+  await page.click('[data-act="saveedit"]'); await page.waitForTimeout(450);
+  const rewritten = await page.evaluate(([id, t]) => ({
+    sameCard: ACT.top().id === id,                       // the hand did not move
+    stored: !!ACT.S.edits[id],
+    onCard: document.querySelector('.card.top .t').innerText === t,
+    inPool: ACT.pool().find(c => c.id === id).t === t
+  }), [editId, 'A better way of putting it']);
+  await shot('11-rewritten');
+
+  // — and everything judged or rewritten comes back out as pack rows —
+  await page.click('[data-act="menu"]'); await page.waitForTimeout(300);
+  await page.click('[data-act="curate"]'); await page.waitForTimeout(400);
+  await shot('12-curate');
+  const lines = (await page.evaluate(() => document.querySelector('.pbody textarea').value)).split('\n');
+  const row = lines.find(l => l.includes('A better way of putting it'));
+  const curation = {
+    head: lines[0] === 'verdict,pack,title,minutes,cost,tags,was',
+    keeps: lines.some(l => l.startsWith('keep,')),
+    cuts: lines.some(l => l.startsWith('cut,')),
+    // the title it used to have is the last column, because that is the row a
+    // rewrite replaces and a rewritten title no longer matches the CSV
+    rewrite: !!row && /^(edit|keep|cut|out),/.test(row) && row.includes(was),
+    // a skip is not a verdict, so it is not in here
+    noSkips: !lines.some(l => l.startsWith('skip,'))
+  };
+  await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
+
   // — it survives a reload, and it opens with the network off —
   await page.reload(); await page.waitForTimeout(700);
   const persisted = await page.evaluate(() => ACT.S.swipes > 10 && ACT.S.mine.length === 1);
+  const editPersisted = await page.evaluate(([id, t]) =>
+    ACT.S.v === 4 && ACT.pool().find(c => c.id === id).t === t, [editId, 'A better way of putting it']);
+
+  // — and a rewrite can be taken back off, leaving the pack's own words —
+  await page.evaluate(id => ACT.panels.editPanel(id), editId);
+  await page.waitForTimeout(400);
+  await page.click('[data-act="unedit"]'); await page.waitForTimeout(400);
+  const unedited = await page.evaluate(([id, t]) =>
+    !ACT.S.edits[id] && ACT.pool().find(c => c.id === id).t === t, [editId, was]);
   const swReady = await page.evaluate(() => navigator.serviceWorker.ready.then(r => !!r.active).catch(() => false));
   await ctx.setOffline(true);
   await page.reload(); await page.waitForTimeout(800);
@@ -221,13 +270,15 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, corners, packs, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
-    refusedBare, mine, mineRow, rowIsPackShaped, persisted, swReady, offline, errors: errs });
+    refusedBare, mine, mineRow, rowIsPackShaped, prefilled, rewritten, curation, editPersisted,
+    unedited, persisted, swReady, offline, errors: errs });
   await browser.close();
   const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && corners && flipped &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
-    mine && persisted && swReady && offline &&
+    mine && persisted && swReady && offline && prefilled && editPersisted && unedited &&
+    Object.values(rewritten).every(Boolean) && Object.values(curation).every(Boolean) &&
     packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && rowIsPackShaped && !errs.length;
   process.exit(ok ? 0 : 1);
 })();

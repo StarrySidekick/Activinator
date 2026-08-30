@@ -2,10 +2,10 @@
    One panel at a time, up from the bottom, over a deck that stays where it is.
    `body` is a function, not a string, so a panel can redraw itself from state
    after any change — no handler rebuilds a panel by hand. */
-import { S, save, APP_VERSION, pool, packOn, exportJSON, importJSON } from './state.js';
-import { TAGS, GROUPS, PACKS, WHO, WHERE, TIME, DURATIONS, COSTS } from './data.js';
+import { S, save, APP_VERSION, all, pool, packOn, byId, baseById, exportJSON, importJSON } from './state.js';
+import { TAGS, GROUPS, PACKS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 import { opinions } from './taste.js';
-import { reset as redeal, toast } from './deck.js';
+import { reset as redeal, restack, toast } from './deck.js';
 import { esc, emblemRow, markHTML, lengthOf } from './cards.js';
 
 const host = () => document.getElementById('panelhost');
@@ -45,6 +45,7 @@ const menuPanel = () => openPanel({ key:'menu', title:'Activinator', body: () =>
   <button class="pbtn" data-act="browse">All activities<small>${pool().length} of them, searchable</small></button>
   <button class="pbtn" data-act="packs">Packs<small>${PACKS.filter(p => packOn(p.id)).length} of ${PACKS.length} switched on</small></button>
   <button class="pbtn" data-act="add">Write your own<small>Anything it would never think of</small></button>
+  <button class="pbtn" data-act="curate">Curate<small>${curationRows().length} to take back to the packs</small></button>
   <button class="pbtn" data-act="taste">What it thinks you are like<small>${S.swipes} swipes in</small></button>
   <button class="pbtn" data-act="backup">Back it up<small>There is no server, so this is the only copy</small></button>
   <p class="pnote" style="text-align:center;color:var(--dim-2);margin-top:18px">Activinator ${esc(APP_VERSION)} —
@@ -91,13 +92,8 @@ const packsPanel = () => openPanel({ key:'packs', title:'Packs', back:'menu', bo
 /* What you have written, in the shape a pack is written in. Duration and cost
    are columns on the way out because they are columns on the way in — the tags
    for them are derived, and a row carrying both would be refused by the build. */
-const mineCSV = () => {
-  const q = (v) => /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
-  return S.mine.map(a => [
-    q(a.t), a.min, COSTS[a.cost] || 'free',
-    q(a.tags.filter(g => !DURATIONS.includes(g) && !COSTS.includes(g)).join(' '))
-  ].join(',')).join('\n');
-};
+const mineCSV = () => S.mine.map(a =>
+  [q(a.t), a.min, COSTS[a.cost] || 'free', q(packTags(a))].join(',')).join('\n');
 
 /* — everything there is, searchable. The deck decides what you see; this is
      for when you want to go and look. — */
@@ -167,20 +163,46 @@ const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are 
 } });
 
 /* — your own activities, in the same pool and scored the same way, which is
-     what stops "mine" being a second app. — */
-const DRAFT = { t:'', tags:[] };
+     what stops "mine" being a second app. Rewriting a card that came from a
+     pack is the same screen: a card is a title and a set of tags whoever wrote
+     it, and there is nothing else to ask about. — */
+const DRAFT = { id:null, t:'', tags:[], min:0 };
 const REP = { quick:3, short:20, medium:75, long:180, allday:480 };   // a band needs a number behind it
-const addPanel = () => openPanel({ key:'add', title:'Write your own', back:'menu', body: () => `
+
+const draftBody = (note, buttons) => `
   <div class="prow"><p class="plabel">The thing</p>
     <input class="field" data-in="t" placeholder="Walk the whole of the canal" value="${esc(DRAFT.t)}">
-    <p class="pnote">However you write it is how it reads on the card, so write the whole
-    thing — there is nowhere else for it to go.</p></div>
+    <p class="pnote">${note}</p></div>
   ${GROUPS.map(([name, keys]) => `<div class="prow"><p class="plabel">${esc(name)}</p>
     <div class="chips">${keys.map(k =>
       `<button data-act="dtag" data-v="${k}" class="${DRAFT.tags.includes(k) ? 'on' : ''}">${markHTML(k)}${esc(TAGS[k])}</button>`).join('')}</div></div>`).join('')}
   <p class="pnote">Tags are the only thing it learns from, and the emblems on the card are
-  these. Pick the ones that are actually true.</p>
-  <button class="pbtn" data-act="savemine">Put it in the deck</button>` });
+  these. Pick the ones that are actually true.</p>${buttons}`;
+
+const addPanel = () => {
+  Object.assign(DRAFT, { id:null, t:'', tags:[], min:0 });
+  openPanel({ key:'add', title:'Write your own', back:'menu', body: () => draftBody(
+    `However you write it is how it reads on the card, so write the whole thing — there
+     is nowhere else for it to go.`,
+    `<button class="pbtn" data-act="savemine">Put it in the deck</button>`) });
+};
+
+/* — rewriting a card before you swipe it. A card you would go for if it said
+     something slightly different is not a card to swipe left on: swiping left
+     teaches the model something untrue about a whole set of tags, and the pack
+     keeps the sentence that was nearly right. Rewrite it, swipe it, and the
+     curation carries the new wording back to the pack. — */
+const editPanel = (id) => {
+  const c = byId(id); if (!c) return;
+  Object.assign(DRAFT, { id, t:c.t, tags:c.tags.slice(), min:c.min });
+  openPanel({ key:'edit', title:'Rewrite this card', body: () => draftBody(
+    `Say it the way you would want to read it on the card. The id comes from the
+     original title, so everything you have already said about this one stays
+     attached to it.`,
+    `<button class="pbtn" data-act="saveedit">Use this instead</button>
+     ${S.edits[DRAFT.id] ? `<button class="pbtn warn" data-act="unedit">Put it back as
+       it was<small>${esc(baseById(DRAFT.id).t)}</small></button>` : ''}`) });
+};
 
 const backupPanel = () => openPanel({ key:'backup', title:'Back it up', back:'menu', body: () => `
   <div class="prow"><p class="plabel">Out</p>
@@ -195,21 +217,113 @@ const backupPanel = () => openPanel({ key:'backup', title:'Back it up', back:'me
    without being edited first. Anything less and it is invisible the moment you
    ask the deck for something, and teaches nothing either way. */
 const HARD = GROUPS.find(g => g[0] === 'How hard')[1];
+const has = keys => keys.some(k => DRAFT.tags.includes(k));
+
+/* `who` is a constraint rather than a description: a card names nobody unless
+   it needs somebody. Writing one from nothing asks for it anyway, because you
+   are describing a thing you have in mind and it is the question people forget
+   — but a rewrite must be allowed to leave it off, or every pack card that
+   answers to whoever you asked for would come back naming one person. */
+const complain = (needWho) => {
+  if (!DRAFT.t.trim()) return 'It needs a name';
+  if (!has(['anywhere','indoors','outdoors','home'])) return 'Say where';
+  if (needWho && !has(['solo','partner','friends','newpeople'])) return 'Say who with';
+  if (!has(HARD)) return 'Say how hard';
+  if (!has(DURATIONS)) return 'Say how long';
+  return null;
+};
+
 const saveMine = () => {
-  if (!DRAFT.t.trim()) return toast('It needs a name');
-  const has = keys => keys.some(k => DRAFT.tags.includes(k));
-  if (!has(['anywhere','indoors','outdoors','home'])) return toast('Say where');
-  if (!has(['solo','partner','friends','newpeople'])) return toast('Say who with');
-  if (!has(HARD)) return toast('Say how hard');
-  if (!has(DURATIONS)) return toast('Say how long');
+  const bad = complain(true); if (bad) return toast(bad);
   const tags = DRAFT.tags.slice();
   if (!has(COSTS)) tags.push('free');
   const dur = DURATIONS.find(d => tags.includes(d));
   S.mine.unshift({ id:'m' + Date.now().toString(36), t:DRAFT.t.trim(), tags,
     min: REP[dur], cost: Math.max(0, COSTS.findIndex(k => tags.includes(k))), src:'mine' });
-  Object.assign(DRAFT, { t:'', tags:[] });
+  Object.assign(DRAFT, { id:null, t:'', tags:[], min:0 });
   save(); redeal(); closePanel(); toast('In the deck');
 };
 
+/* A rewrite is kept beside the card it rewrites, under the id the original
+   title gave it. One that ends up saying exactly what the pack says is not a
+   rewrite at all, and it is thrown away rather than exported as a change. */
+const same = (a, b) => a.t === b.t && a.min === b.min && a.cost === b.cost &&
+  a.tags.length === b.tags.length && a.tags.every(t => b.tags.includes(t));
+
+const saveEdit = () => {
+  const base = baseById(DRAFT.id); if (!base) return closePanel();
+  const bad = complain(false); if (bad) return toast(bad);
+  const tags = DRAFT.tags.slice();
+  if (!has(COSTS)) tags.push(COSTS[base.cost] || 'free');
+  const dur = DURATIONS.find(d => tags.includes(d));
+  /* The minutes are kept unless the band you picked no longer covers them.
+     Working them out from the band every time would round every rewritten card
+     to the middle of it — an hour and a half quietly becoming seventy-five
+     minutes because you changed a word in the title. */
+  const next = { t: DRAFT.t.trim(), tags,
+    min: durationOf(DRAFT.min) === dur ? DRAFT.min : REP[dur],
+    cost: Math.max(0, COSTS.findIndex(k => tags.includes(k))) };
+  if (base.src === 'mine') Object.assign(S.mine.find(m => m.id === base.id), next);
+  else if (same(base, next)) delete S.edits[base.id];
+  else S.edits[base.id] = next;
+  save(); restack(); closePanel(); toast('Rewritten');
+};
+
+const unedit = () => {
+  delete S.edits[DRAFT.id];
+  save(); restack(); closePanel(); toast('Back as it was');
+};
+
+/* — curating. Swiping is how the deck learns; this is how the packs learn.
+     A verdict that lives only in localStorage is a verdict nobody can act on:
+     the packs are the source of truth, so everything you have judged or
+     rewritten has to be able to come back out in the shape they are written
+     in. A skip is not a verdict and is not here. — */
+const VERDICT = { like:'keep', dislike:'cut', never:'out' };
+const RANK = { keep:0, cut:1, out:2, edit:3 };
+const curationRows = () => all()
+  .map(c => {
+    const v = VERDICT[(S.seen[c.id] || {}).v] || (c.edit ? 'edit' : null);
+    return v ? { v, c } : null;
+  })
+  .filter(Boolean)
+  .sort((a, b) => RANK[a.v] - RANK[b.v] || a.c.t.localeCompare(b.c.t));
+
+/* The same four columns a pack is written in, with the verdict in front of them
+   and the title it used to have behind — that last one is how the next compile
+   finds the row a rewrite replaces, since a rewritten title is a different
+   string from the one in the CSV. */
+const q = (v) => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
+const packTags = (c) => c.tags.filter(g => !DURATIONS.includes(g) && !COSTS.includes(g)).join(' ');
+const curationCSV = () => ['verdict,pack,title,minutes,cost,tags,was',
+  ...curationRows().map(({ v, c }) => [v, c.pack || 'mine', q(c.t), c.min,
+    COSTS[c.cost] || 'free', q(packTags(c)), q(c.edit && c.was !== c.t ? c.was : '')].join(','))
+].join('\n');
+
+const curatePanel = () => openPanel({ key:'curate', title:'Curate', back:'menu', body: () => {
+  const rows = curationRows();
+  const n = v => rows.filter(r => r.v === v).length;
+  return `
+  <div class="prow"><div class="stat">
+    <span><b>${n('keep')}</b>keep</span>
+    <span><b>${n('cut')}</b>cut</span>
+    <span><b>${n('out')}</b>out</span>
+    <span><b>${n('edit')}</b>rewritten</span>
+  </div>
+  <p class="pnote">Right is keep, left is cut, never again is out, and rewritten is one
+  you have changed but not yet judged. Switching a pack off hides its cards from the
+  deck and changes nothing here.</p></div>
+  ${rows.length ? `<div class="prow"><p class="plabel">Out</p>
+    <button class="pbtn" data-act="curatefile">Download the curation</button>
+    <textarea class="field pickme" style="min-height:150px;font-size:11px" readonly>${esc(curationCSV())}</textarea>
+    <p class="pnote">One row per verdict, in the four columns a pack is written in with
+    the verdict in front. Take it to a session and the packs get edited by it: what kept
+    stays, what was cut or went out comes out, and a rewritten row replaces the one named
+    in the last column. Nothing here changes a pack on its own — the CSVs in packs/ are
+    still the only thing the deck is built from.</p></div>`
+  : `<p class="pnote">Nothing judged yet. Swipe a few and they turn up here.</p>`}`;
+} });
+
 export { openPanel, closePanel, refreshPanel, panelKey, menuPanel, ctxPanel, packsPanel, browsePanel,
-         browseSearch, tastePanel, addPanel, backupPanel, saveMine, ctxLine, DRAFT };
+         browseSearch, tastePanel, addPanel, editPanel, backupPanel, curatePanel, curationCSV,
+         curationRows, saveMine, saveEdit, unedit, ctxLine, DRAFT };

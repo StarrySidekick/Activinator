@@ -29,7 +29,9 @@ and a passing assertion doesn't mean it looks right. Add a case to
   `sw.js` **and** `APP_VERSION` in `js/state.js`. A new file must also join
   `SHELL` in `sw.js` or it won't be there offline.
 - `js/activities.js` is **generated** from `packs/*.csv` — never edit it by
-  hand. The packs are the source of truth.
+  hand. The packs are the source of truth. Nothing in the app writes to them
+  either: Menu → Curate exports what has been kept, cut and rewritten, and a
+  session edits the CSVs by it. See "Curating" in the README.
 - `sw.js` reaps only `activinator-` caches. The app shares the
   `starrysidekick.github.io` origin with Bureau, and a cache store belongs to
   the origin, not to a scope — the general filter wiped Bureau's shell once.
