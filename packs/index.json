@@ -1,5 +1,6 @@
 [
   { "id": "core",           "name": "Activities",     "note": "Things to actually go and do.", "on": true },
+  { "id": "candidates",     "name": "Candidates",     "note": "Ten a label, none of them judged yet.", "on": true },
 
   { "id": "questions",      "name": "Questions",      "note": "For yourself, for a friend, for anybody.", "on": true },
   { "id": "q-partner",      "name": "Ask a partner",  "note": "Questions for the two of you.", "on": true },

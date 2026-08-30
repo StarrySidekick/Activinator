@@ -68,7 +68,8 @@ const cardHTML = (c) => {
       </div>
     </div>
     <div class="face back">
-      <p class="kicker">${c.kind === 'wild' ? 'wildcard' : esc(TAGS[c.tags[0]] || 'what this is')}</p>
+      <p class="kicker">${c.kind === 'wild' ? 'wildcard' : esc(TAGS[c.tags[0]] || 'what this is')}${
+        c.edit ? `<span class="dot"></span><span class="k2">rewritten</span>` : ''}</p>
       <h3>${esc(c.t)}</h3>
       ${c.d ? `<p class="def">${esc(c.d)}</p>` : ''}
       <p class="pnote" style="color:var(--text-3);margin-top:8px">${esc(lengthOf(c.min))}</p>
@@ -83,6 +84,7 @@ const cardHTML = (c) => {
         ${r.map(x => esc(x.label) + (x.up ? '' : ' — against')).join(', ')}.</p>` : ''}
       <div class="backrow">
         <button data-act="more">More like this</button>
+        <button data-act="edit">Rewrite it</button>
         <button data-act="never" class="never">Never again</button>
       </div>
     </div>
