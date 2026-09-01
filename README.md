@@ -163,6 +163,14 @@ pack a saved state has never heard of takes the default it ships with, which is
 what lets a new pack arrive in an update without being silently disabled — and
 lets one you switched off stay off.
 
+**A pack says how its own deck is printed.** `mark`, `ink` and `back` in
+`packs/index.json` — the emblem on the card back, the colour it is printed in,
+and which of the eight repeating fields it is printed on. The emblem is one of
+the drawn marks, so the build refuses a pack that names a picture nobody has
+drawn. Menu → Decks lays them out as what they are: eight decks face down on a
+table, tap one to take it off or put it back. A list of names with tickboxes is
+a settings screen, and choosing what to be dealt is not a setting.
+
 Besides the core deck (named **Activities**) there are content packs where the
 card carries the content itself: **Words** (esoteric words with their
 definitions), **Quotes** (only lines verified as actually said or written by

@@ -3,7 +3,7 @@
    launch picks it up. A new file must also be added to SHELL or it will not be
    there offline. An already-open page finishes on the old assets, so a bump
    takes effect on the second launch, not the first. */
-const CACHE = 'activinator-v16';
+const CACHE = 'activinator-v17';
 const SHELL = [
   './', './index.html',
   './css/base.css', './css/deck.css', './css/panels.css',

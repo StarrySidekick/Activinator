@@ -75,11 +75,81 @@
 .imeta .nowtag{color:var(--now);font-weight:600}
 .item .del{color:var(--dim-2);font-size:17px;padding:2px 4px;flex:0 0 auto}
 
-/* A pack that is on is on, not finished — it borrows the list row and none of
-   what "done" means, or switching a pack on strikes its name through. */
-.item.pack.on .tick{background:var(--yes);border-color:var(--yes);color:#0f1410}
-.item.pack .itxt{text-decoration:none}
-.item.pack:not(.on) .itxt{color:var(--dim)}
+/* — the table of decks —
+   A deck is drawn as a deck: a stack of cards face down, in the ink that pack
+   is printed in, with one of the drawn marks as the emblem on the back. A list
+   of names with tickboxes is a settings screen; eight decks laid out on a table
+   is the thing you are actually choosing between.
+
+   The proportions are a real card's — 2.5 by 3.5 — because that is the shape
+   the eye reads as a playing card, and the corner radius is a percentage of
+   that so it stays right at any size. */
+.table{display:grid; grid-template-columns:1fr 1fr; gap:20px 16px; padding:6px 0 4px}
+.deck{
+  display:flex; flex-direction:column; align-items:center; gap:0;
+  padding:0; background:none; border:0; text-align:center;
+}
+.stack{position:relative; display:block; width:100%; aspect-ratio:2.5/3.5; margin-bottom:9px}
+
+/* The two behind are the rest of the deck: the same card, a degree or two off
+   true, showing along one edge the way a squared-up pile never quite is. */
+.stack i, .stack .face{
+  position:absolute; inset:0; border-radius:7% / 5%;
+  background:var(--paper); box-shadow:0 2px 6px -1px rgba(0,0,0,.55);
+}
+.stack i:nth-child(1){transform:rotate(-2.4deg) translate(-2px,2px)}
+.stack i:nth-child(2){transform:rotate(1.6deg) translate(2px,1px)}
+.stack .face{
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 8px 18px -6px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.25) inset;
+  /* A card back is a field of pattern inside a white margin, not a printed
+     rectangle to the edge — the margin is what stops it looking like a tile. */
+  padding:6.5%;
+}
+/* The field: the ink, the pattern, and a hairline keyline inside it. */
+.deck .face::before{
+  content:''; position:absolute; inset:6.5%; border-radius:4% / 3%;
+  background-color:var(--ink); background-image:var(--pattern);
+  box-shadow:0 0 0 1px rgba(255,255,255,.22) inset;
+}
+.deck .pip{
+  position:relative; z-index:1; width:34%; height:34%;
+  color:rgba(245,240,228,.92);
+}
+.deck .pip svg{width:100%;height:100%}
+
+.dname{font-family:var(--serif); font-size:15px; color:#e9e6df; line-height:1.2}
+.dcount{font-size:11.5px; color:var(--dim-2); margin-top:2px}
+
+/* Off is off the table: face down, squared up, and the colour gone out of it.
+   A deck you have put away is still a deck, so it is dimmed rather than
+   crossed out. */
+.deck.off .stack{opacity:.34; filter:saturate(.15)}
+.deck.off .stack i{transform:none}
+.deck.off .dname{color:var(--dim)}
+.deck.on .stack{transition:transform .16s}
+.deck:active .stack{transform:scale(.97)}
+
+/* — the backs. Eight fields, each a repeating print rather than a picture:
+     what a card back is, and cheap enough to be drawn by the stylesheet. — */
+.back-lattice  {--pattern:repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 1px,transparent 1px 7px),
+                          repeating-linear-gradient(-45deg,rgba(255,255,255,.16) 0 1px,transparent 1px 7px)}
+.back-rays     {--pattern:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.15) 0deg 6deg,transparent 6deg 12deg)}
+.back-pips     {--pattern:radial-gradient(circle at 50% 42%,rgba(255,255,255,.2) 2.4px,transparent 2.6px),
+                          radial-gradient(circle at 0% 92%,rgba(255,255,255,.2) 2.4px,transparent 2.6px),
+                          radial-gradient(circle at 100% 92%,rgba(255,255,255,.2) 2.4px,transparent 2.6px);
+                --size:16px 16px}
+.back-weave    {--pattern:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 2px,transparent 2px 8px),
+                          repeating-linear-gradient(0deg,rgba(255,255,255,.14) 0 2px,transparent 2px 8px)}
+.back-rule     {--pattern:repeating-linear-gradient(0deg,rgba(255,255,255,.17) 0 1px,transparent 1px 6px)}
+.back-scales   {--pattern:radial-gradient(circle at 50% 100%,transparent 5px,rgba(255,255,255,.16) 5px 6px,transparent 6px);
+                --size:14px 9px}
+.back-diamonds {--pattern:repeating-linear-gradient(45deg,rgba(255,255,255,.15) 0 1px,transparent 1px 9px),
+                          repeating-linear-gradient(-45deg,rgba(255,255,255,.15) 0 1px,transparent 1px 9px);
+                --size:13px 13px}
+.back-orbits   {--pattern:radial-gradient(circle at 50% 50%,transparent 6px,rgba(255,255,255,.15) 6px 7px,transparent 7px);
+                --size:20px 20px}
+.deck .face::before{background-size:var(--size,12px 12px)}
 
 /* — all activities — */
 .brow{

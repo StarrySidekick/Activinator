@@ -44,7 +44,7 @@ const chips = (act, opts, cur) => `<div class="chips">${opts.map(([v, label]) =>
 const menuPanel = () => openPanel({ key:'menu', title:'Activinator', body: () => `
   <button class="pbtn" data-act="ctx">Right now<small>${esc(ctxLine())}</small></button>
   <button class="pbtn" data-act="browse">All activities<small>${pool().length} of them, searchable</small></button>
-  <button class="pbtn" data-act="packs">Packs<small>${PACKS.filter(p => packOn(p.id)).length} of ${PACKS.length} switched on</small></button>
+  <button class="pbtn" data-act="decks">Decks<small>${PACKS.filter(p => packOn(p.id)).length} of ${PACKS.length} on the table</small></button>
   <button class="pbtn" data-act="add">Write your own<small>Anything it would never think of</small></button>
   <button class="pbtn" data-act="curate">Curate<small>${curationRows().length} to take back to the packs</small></button>
   <button class="pbtn" data-act="taste">What it thinks you are like<small>${S.swipes} swipes in</small></button>
@@ -71,19 +71,35 @@ const ctxPanel = () => openPanel({ key:'ctx', title:'Right now', back:'menu', bo
   evidence about what you are like. How long you have is a ceiling, so anything
   shorter is fair game too.</p>` });
 
-/* — packs. A pack is a CSV in packs/, built into the app rather than fetched:
-     the deck has to deal on a train. Switching one off takes its activities
+/* — the decks. A pack is a CSV in packs/, built into the app rather than
+     fetched: the deck has to deal on a train. Switching one off takes its cards
      out of the pool and leaves everything you have said about them alone, so
-     switching it back on picks up where you were. — */
-const packsPanel = () => openPanel({ key:'packs', title:'Packs', back:'menu', body: () => `
-  ${PACKS.map(p => `<div class="item pack ${packOn(p.id) ? 'on' : ''}">
-      <button class="tick" data-act="togglepack" data-id="${esc(p.id)}">✓</button>
-      <div class="iwrap"><div class="itxt">${esc(p.name)}</div>
-        <div class="imeta"><span>${p.items.length} activities</span><span>${esc(p.note)}</span></div></div>
-    </div>`).join('')}
-  <p class="pnote">Switching a pack off takes its activities out of the deck and leaves
-  what you have said about them alone — switch it back on and it picks up where it was.
-  Packs are built into the app, so they work with the aeroplane mode on.</p>
+     switching it back on picks up where you were.
+
+     It is drawn as what it is — a deck of cards, face down, in the ink that
+     pack is printed in and carrying one of the drawn marks as its emblem. A
+     list of names with tickboxes is a settings screen; a table with eight decks
+     laid out on it is the thing you are actually choosing between. — */
+const deckOf = (p) => {
+  const on = packOn(p.id);
+  return `<button class="deck ${on ? 'on' : 'off'} back-${esc(p.back)}"
+      data-act="togglepack" data-id="${esc(p.id)}"
+      style="--ink:${esc(p.ink)}" aria-pressed="${on}">
+    <span class="stack">
+      <i></i><i></i>
+      <span class="face">${markHTML(p.mark, 'pip')}</span>
+    </span>
+    <span class="dname">${esc(p.name)}</span>
+    <span class="dcount">${p.items.length} cards</span>
+  </button>`;
+};
+
+const packsPanel = () => openPanel({ key:'packs', title:'Decks', back:'menu', body: () => `
+  <div class="table">${PACKS.map(deckOf).join('')}</div>
+  <p class="pnote">Tap a deck to take it off the table or put it back. What you have said
+  about its cards is kept either way, and the round is not shortened by it — the deck you
+  put away simply is not dealt. They are built into the app, so they work with the
+  aeroplane mode on.</p>
   ${S.mine.length ? `<div class="prow"><p class="plabel">Yours, as pack rows</p>
     <textarea class="field pickme" style="min-height:96px;font-size:11px" readonly>${esc(mineCSV())}</textarea>
     <p class="pnote">${S.mine.length} written on this device, and they live only on it.

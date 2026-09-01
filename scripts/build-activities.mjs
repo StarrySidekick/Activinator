@@ -27,7 +27,7 @@
 // title. Two rows that merely say nearly the same thing are reported at the end
 // and build anyway: some of those pairs are deliberate.
 import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { TAGS, GROUPS, DURATIONS, COSTS, durationOf, idOf } from '../js/vocab.js';
+import { TAGS, GROUPS, MARKS, DURATIONS, COSTS, durationOf, idOf } from '../js/vocab.js';
 
 const dir = new URL('../packs/', import.meta.url);
 const read = (f) => readFileSync(new URL(f, dir), 'utf8');
@@ -57,6 +57,11 @@ const titles = new Map();
 
 const build = (meta) => {
   const file = meta.id + '.csv';
+  /* A pack says how its own deck is printed — the emblem on the back and the
+     ink it is printed in. The emblem is one of the drawn marks, so a pack
+     cannot name a picture that does not exist. */
+  if (meta.mark && !MARKS[meta.mark])
+    errors.push(`index.json: ${meta.id} wants the mark "${meta.mark}", which is not drawn`);
   if (!existsSync(new URL(file, dir))) { errors.push(`${file}: no such pack`); return null; }
   const rows = parseCSV(read(file));
   const head = rows.shift().map(h => h.trim().toLowerCase());
@@ -147,7 +152,7 @@ const out = `/* GENERATED FILE — do not edit.
    Built from packs/*.csv by scripts/build-activities.mjs. Change an activity
    by changing the CSV and running that, then commit both. */
 export const PACKS = [
-${packs.map(p => `  { id:${JSON.stringify(p.id)}, name:${JSON.stringify(p.name)}, note:${JSON.stringify(p.note)}, on:${!!p.on}, items:[
+${packs.map(p => `  { id:${JSON.stringify(p.id)}, name:${JSON.stringify(p.name)}, note:${JSON.stringify(p.note)}, on:${!!p.on}, mark:${JSON.stringify(p.mark || '')}, ink:${JSON.stringify(p.ink || '#3E5140')}, back:${JSON.stringify(p.back || 'lattice')}, items:[
 ${p.items.map(a => `    {id:'${a.id}',t:${JSON.stringify(a.t)},tags:${JSON.stringify(a.tags)},min:${a.min},cost:${a.cost}${a.d ? `,d:${JSON.stringify(a.d)}` : ''}${a.lang ? `,lang:${JSON.stringify(a.lang)}` : ''}},`).join('\n')}
   ]},`).join('\n')}
 ];

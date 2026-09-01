@@ -28,7 +28,7 @@ const act = (name, el) => {
     case 'menu':   return P.menuPanel();
     case 'ctx':    return P.ctxPanel();
     case 'browse': return P.browsePanel();
-    case 'packs':  return P.packsPanel();
+    case 'packs': case 'decks': return P.packsPanel();
     case 'taste':  return P.tastePanel();
     case 'add':    return P.addPanel();
     case 'curate': return P.curatePanel();

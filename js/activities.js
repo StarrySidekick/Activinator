@@ -2,7 +2,7 @@
    Built from packs/*.csv by scripts/build-activities.mjs. Change an activity
    by changing the CSV and running that, then commit both. */
 export const PACKS = [
-  { id:"core", name:"Activities", note:"Things to actually go and do.", on:true, items:[
+  { id:"core", name:"Activities", note:"Things to actually go and do.", on:true, mark:"move", ink:"#3E5140", back:"lattice", items:[
     {id:'a77u1d',t:"Write the first page of the thing you keep meaning to write",tags:["create","writing","challenging","anywhere","medium","free"],min:45,cost:0},
     {id:'a5qlvxc',t:"Write a letter by hand and actually post it",tags:["create","writing","kindness","casual","home","medium","free"],min:40,cost:0},
     {id:'a1muj0v5',t:"Write down everything you remember about one particular day",tags:["create","writing","nostalgic","engaging","anywhere","medium","free"],min:40,cost:0},
@@ -653,7 +653,7 @@ export const PACKS = [
     {id:'argp8i6',t:"Spend a day doing only what somebody else chooses",tags:["kindness","friends","engaging","anywhere","allday","frugal"],min:480,cost:1},
     {id:'a1fj63jo',t:"Buy the ticket for the thing you keep not going to",tags:["adventurous","watch","engaging","indoors","allday","costly"],min:600,cost:2},
   ]},
-  { id:"questions", name:"Questions", note:"For yourself, for a friend, for anybody.", on:true, items:[
+  { id:"questions", name:"Questions", note:"For yourself, for a friend, for anybody.", on:true, mark:"question", ink:"#3B4A63", back:"rays", items:[
     {id:'arr5pv0',t:"What are you avoiding right now?",tags:["solo","mindful","engaging","anywhere","question","short","free"],min:10,cost:0},
     {id:'a1shvaqy',t:"What would make today feel well spent?",tags:["solo","mindful","casual","anywhere","question","short","free"],min:5,cost:0},
     {id:'agzukuz',t:"What are you doing out of habit that you would never choose fresh?",tags:["solo","mindful","engaging","anywhere","question","short","free"],min:15,cost:0},
@@ -964,7 +964,7 @@ export const PACKS = [
     {id:'a1jh67su',t:"Would you rather live in a lighthouse or a treehouse?",tags:["funny","casual","anywhere","question","short","free"],min:5,cost:0},
     {id:'alvq93i',t:"What tiny luxury should come standard in every home?",tags:["funny","casual","anywhere","question","short","free"],min:5,cost:0},
   ]},
-  { id:"q-partner", name:"Ask a partner", note:"Questions for the two of you.", on:true, items:[
+  { id:"q-partner", name:"Ask a partner", note:"Questions for the two of you.", on:true, mark:"partner", ink:"#6B3B3E", back:"pips", items:[
     {id:'a17narsf',t:"What did you first notice about me?",tags:["partner","romantic","casual","anywhere","question","short","free"],min:10,cost:0},
     {id:'ai30m5a',t:"When did you know this was serious?",tags:["partner","romantic","engaging","anywhere","question","short","free"],min:15,cost:0},
     {id:'aa316me',t:"What almost kept us from happening?",tags:["partner","nostalgic","engaging","anywhere","question","short","free"],min:15,cost:0},
@@ -1066,7 +1066,7 @@ export const PACKS = [
     {id:'a1pd9fzi',t:"What are we building?",tags:["partner","mindful","engaging","anywhere","question","short","free"],min:20,cost:0},
     {id:'ahe0wpa',t:"Why me?",tags:["partner","romantic","engaging","anywhere","question","short","free"],min:15,cost:0},
   ]},
-  { id:"words", name:"Words", note:"Words you might not know, and what they mean.", on:true, items:[
+  { id:"words", name:"Words", note:"Words you might not know, and what they mean.", on:true, mark:"read", ink:"#4A4159", back:"weave", items:[
     {id:'a5pbgv5',t:"Petrichor",tags:["learn","casual","anywhere","short","free"],min:5,cost:0,d:"the smell of rain falling on dry ground"},
     {id:'a1o71rpy',t:"Apricity",tags:["learn","casual","anywhere","short","free"],min:5,cost:0,d:"the warmth of the sun, felt in winter"},
     {id:'aeyhud5',t:"Susurrus",tags:["learn","casual","anywhere","short","free"],min:5,cost:0,d:"a soft whispering or rustling sound"},
@@ -1188,7 +1188,7 @@ export const PACKS = [
     {id:'atfwned',t:"Funambulist",tags:["learn","adventurous","casual","anywhere","short","free"],min:5,cost:0,d:"a tightrope walker"},
     {id:'atyc9vf',t:"Grimoire",tags:["learn","spooky","casual","anywhere","short","free"],min:5,cost:0,d:"a book of spells and invocations"},
   ]},
-  { id:"quotes", name:"Quotes", note:"Short, verified, and actually said by the person named.", on:true, items:[
+  { id:"quotes", name:"Quotes", note:"Short, verified, and actually said by the person named.", on:true, mark:"writing", ink:"#54473A", back:"rule", items:[
     {id:'amc292s',t:"'Well done is better than well said' — Benjamin Franklin",tags:["read","mindful","casual","anywhere","short","free"],min:5,cost:0},
     {id:'aqs4fup',t:"'The question is not what you look at, but what you see' — Henry David Thoreau",tags:["read","mindful","casual","anywhere","short","free"],min:5,cost:0},
     {id:'a1w5cf5j',t:"'The years teach much which the days never know' — Ralph Waldo Emerson",tags:["read","mindful","casual","anywhere","short","free"],min:5,cost:0},
@@ -1299,7 +1299,7 @@ export const PACKS = [
     {id:'a14004r6',t:"'You can observe a lot by watching' — Yogi Berra",tags:["read","funny","casual","anywhere","short","free"],min:5,cost:0},
     {id:'a2641al',t:"'I arise in the morning torn between a desire to improve the world and a desire to enjoy the world' — E. B. White",tags:["read","funny","casual","anywhere","short","free"],min:5,cost:0},
   ]},
-  { id:"italian", name:"Italian", note:"A word, its meaning, and a voice to say it.", on:true, items:[
+  { id:"italian", name:"Italian", note:"A word, its meaning, and a voice to say it.", on:true, mark:"listen", ink:"#3F5A57", back:"scales", items:[
     {id:'aj2e66s',t:"Essere",tags:["learn","engaging","anywhere","short","free"],min:10,cost:0,d:"to be\npresente (I am): sono, sei, è, siamo, siete, sono\nimperfetto (I was): ero, eri, era, eravamo, eravate, erano\nfuturo (I will be): sarò, sarai, sarà, saremo, sarete, saranno\npassato prossimo (I have been): sono stato\npresente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro",lang:"it-IT"},
     {id:'aegj66s',t:"Avere",tags:["learn","engaging","anywhere","short","free"],min:10,cost:0,d:"to have\npresente (I have): ho, hai, ha, abbiamo, avete, hanno\nimperfetto (I had): avevo, avevi, aveva, avevamo, avevate, avevano\nfuturo (I will have): avrò, avrai, avrà, avremo, avrete, avranno\npassato prossimo (I have had): ho avuto\npresente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro",lang:"it-IT"},
     {id:'a13ifw1c',t:"Andare",tags:["learn","engaging","anywhere","short","free"],min:10,cost:0,d:"to go\npresente (I go): vado, vai, va, andiamo, andate, vanno\nimperfetto (I used to go): andavo, andavi, andava, andavamo, andavate, andavano\nfuturo (I will go): andrò, andrai, andrà, andremo, andrete, andranno\npassato prossimo (I have gone): sono andato\npresente, imperfetto and futuro run io, tu, lui/lei, noi, voi, loro",lang:"it-IT"},
@@ -1419,7 +1419,7 @@ export const PACKS = [
     {id:'ap1web3',t:"Vicino",tags:["learn","casual","anywhere","short","free"],min:5,cost:0,d:"near; nearby",lang:"it-IT"},
     {id:'akusbai',t:"Lontano",tags:["learn","casual","anywhere","short","free"],min:5,cost:0,d:"far; far away",lang:"it-IT"},
   ]},
-  { id:"tableaus", name:"Tableaus", note:"A scene in a sentence. Work off it.", on:true, items:[
+  { id:"tableaus", name:"Tableaus", note:"A scene in a sentence. Work off it.", on:true, mark:"visualart", ink:"#7A5326", back:"diamonds", items:[
     {id:'aqwalyj',t:"From the window, he leapt",tags:["create","writing","adventurous","casual","anywhere","short","free"],min:20,cost:0},
     {id:'ah53jc2',t:"The sands of time swept through the valley of reality",tags:["create","writing","mindful","casual","anywhere","short","free"],min:20,cost:0},
     {id:'a1a8xk09',t:"The lighthouse had been lying for years",tags:["create","writing","spooky","casual","anywhere","short","free"],min:20,cost:0},
@@ -1522,7 +1522,7 @@ export const PACKS = [
     {id:'a18qkhti',t:"The theatre played to a full house of coats",tags:["create","writing","spooky","casual","anywhere","short","free"],min:20,cost:0},
     {id:'a13hiq2h',t:"The runway grew wildflowers overnight",tags:["create","writing","mindful","casual","anywhere","short","free"],min:20,cost:0},
   ]},
-  { id:"visualizations", name:"Visualizations", note:"Impossible things to picture.", on:true, items:[
+  { id:"visualizations", name:"Visualizations", note:"Impossible things to picture.", on:true, mark:"watch", ink:"#2F3E4E", back:"orbits", items:[
     {id:'a1ulxau9',t:"A ladder made of pauses",tags:["create","mindful","casual","anywhere","short","free"],min:10,cost:0},
     {id:'aw9lwrv',t:"A key that only opens weather",tags:["create","mindful","casual","anywhere","short","free"],min:10,cost:0},
     {id:'a1m0on5v',t:"The museum of unsent letters",tags:["create","nostalgic","casual","anywhere","short","free"],min:10,cost:0},

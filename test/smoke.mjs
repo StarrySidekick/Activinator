@@ -268,7 +268,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
 
   // — and it comes back out as a row a pack would accept —
   await menu();
-  await page.click('[data-act="packs"]'); await page.waitForTimeout(400);
+  await page.click('[data-act="decks"]'); await page.waitForTimeout(400);
   const mineRow = await page.evaluate(() => {
     const t = document.querySelector('.pbody textarea');
     return t ? t.value.trim() : '';
