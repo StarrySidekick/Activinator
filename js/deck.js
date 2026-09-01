@@ -23,18 +23,32 @@ const know = () => {
   document.body.classList.toggle('bare', !Q.length);
 };
 
-/* The tap that turns a card over, from anywhere that has one. Two phases: the
-   card squeezes to nothing, the face is swapped while there is nothing to see,
-   and it opens out again. The swap is at the join rather than on a timer that
-   happens to line up with the middle of one long animation. */
-const TURN = 170;
+/* The tap that turns a card over, from anywhere that has one. One movement:
+   the class goes on and the stylesheet turns the card through half a circle.
+   There is nothing to time in the middle of it — both faces are on the card
+   already and the browser holds back whichever is facing away — so the only
+   thing this waits for is the end, to put the lift and the rest of the hand
+   back.
+
+   `body.turning` hides the cards behind for the length of the turn. They are
+   dead in line with this one and the same cream, so as the card goes edge-on
+   the gap would show another card rather than the room, and it read as the card
+   being somehow behind itself.
+
+   The button on the back is asked for at the halfway point rather than at
+   either end: at the start it fades in over a card still showing its face, and
+   at the end it arrives after the card has settled, which is late. */
+const TURN = 460;
 const flip = (el) => {
   if (!el || el.dataset.turning) return;
   el.dataset.turning = '1';
-  el.classList.add('turn');
+  el.classList.add('turning');
+  document.body.classList.add('turning');
+  el.classList.toggle('flip');
+  setTimeout(know, TURN / 2);
   setTimeout(() => {
-    el.classList.toggle('flip');
-    el.classList.remove('turn');
+    el.classList.remove('turning');
+    document.body.classList.remove('turning');
     delete el.dataset.turning;
     know();
   }, TURN);
@@ -68,19 +82,23 @@ const restack = () => {
   render();
 };
 
-/* The hand is stacked dead flat: every card in it is the screen, and the only
-   motion is the top one leaving. Written inline rather than as classes because
-   a drag overwrites the top card's transform every frame and must not have to
-   fight a stylesheet.
+/* The hand is stacked dead flat and dead square: the two behind sit exactly
+   under the top one, so what you see is one card and not a pile. They were
+   fanned a degree or so off true, the way a real deck never quite squares up,
+   and the cost was that the card stopped reading as the full width of the
+   screen — you saw the corners of the ones underneath and the whole assembly
+   looked inset.
 
-   A card is a card again rather than the screen, so the two under it show at
-   the edges the way a pile does — a degree or so off true rather than offset,
-   because a squared-up deck is the one thing a real one never is. */
-const FAN = ['rotate(0deg)', 'rotate(-1.5deg)', 'rotate(1.2deg)'];
+   They are still there, and still have to be: the top card flies off on a
+   verdict and the next one has to already be underneath it, or the screen goes
+   empty for the length of the throw.
+
+   Written inline rather than as classes because a drag overwrites the top
+   card's transform every frame and must not have to fight a stylesheet. */
 const place = (els) => {
   els.forEach((el, i) => {
     el.classList.toggle('top', i === 0);
-    el.style.transform = FAN[i] || FAN[2];
+    el.style.transform = 'none';
     el.style.opacity = 1;
   });
 };
@@ -155,6 +173,10 @@ const WEIGHT = { like:[1, 1], dislike:[0, 1], never:[0, 2.2] };
 
 const say = (v) => {
   const c = top(); if (!c) return;
+  /* A verdict can land on a card that is still turning, and the hand behind it
+     is hidden while one is. Let it go now rather than at the end of a turn that
+     is no longer happening. */
+  document.body.classList.remove('turning');
   const mark = v === 'skip' ? null : learn(c, WEIGHT[v][0], WEIGHT[v][1]);
   S.seen[c.id] = { v, at: now() };
   remember(c.id);

@@ -12,9 +12,12 @@
   /* How wide a card is drawn, in one place: the deck reads it for the card
      itself, and the one button reads it to sit on that card's corner rather
      than float in the middle of the table. */
-  /* 0.5833 is 7/12, a tarot card's proportion: whichever is smaller, nearly all
-     of the screen or whatever the remaining height allows at that shape. */
-  --cardw:min(93vw, calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 96px) * 0.5833), 460px);
+  /* 0.5833 is 7/12, a tarot card's proportion. The card goes right out to the
+     left and right edges of the screen — no margin, no table down the sides —
+     so it is 100vw unless the height cannot take a card that wide, and then it
+     is whatever the height allows. There is no fixed cap: on anything wider
+     than a phone the height is what holds it in. */
+  --cardw:min(100vw, calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px) * 0.5833));
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;overscroll-behavior:none}
@@ -55,8 +58,10 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
      nothing. */
   position:fixed; z-index:50;
   /* 1.7143 is 12/7 — how tall the card is for its width, so this stays on the
-     corner and not in the air when the proportion changes. */
-  top:calc(50% - (var(--cardw) * 1.7143 / 2) + 9px);
+     card's own top corner and not in the air when the proportion changes. The
+     max is the notch: on a short screen the card reaches almost to the top of
+     the glass, and the corner it wants is underneath the status bar. */
+  top:max(calc(var(--top) + 6px), calc(50% - (var(--cardw) * 1.7143 / 2) + 9px));
   right:calc(50% - var(--cardw) / 2 + 7px);
   width:46px; height:46px; display:flex; align-items:center; justify-content:center;
   color:var(--text-2); opacity:0; pointer-events:none; transform:scale(.9);

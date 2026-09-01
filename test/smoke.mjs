@@ -38,18 +38,21 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return j.name === 'Activinator' && j.icons.length === 3;
   });
 
-  // — a card is a card: seven by twelve, a tarot card's proportion, on a table
-  //   with the rest of the deck showing under it. The top card is the LAST in
-  //   the DOM, because the hand is painted back to front. —
+  // — a card is a card: seven by twelve, out to both edges of the screen, with
+  //   the rest of the hand squared up dead under it so what you see is one
+  //   card. The top card is the LAST in the DOM, because the hand is painted
+  //   back to front. —
   const cardShaped = await page.evaluate(() => {
     const r = document.querySelector('.card.top').getBoundingClientRect();
     const under = [...document.querySelectorAll('#deck .card:not(.top)')];
+    const same = (a) => Math.abs(a.left - r.left) < 0.5 && Math.abs(a.top - r.top) < 0.5 &&
+                        Math.abs(a.width - r.width) < 0.5 && Math.abs(a.height - r.height) < 0.5;
     return {
       tarot: Math.abs(r.width / r.height - 7 / 12) < 0.01,
-      onATable: r.top > 40 && innerHeight - r.bottom > 40,
-      asWideAsItCanBe: r.width > innerWidth * 0.85,
-      // the rest of the deck is under it, off true, so the pile reads as a pile
-      stacked: under.length === 2 && under.every(c => /rotate/.test(c.style.transform))
+      edgeToEdge: r.left < 0.5 && innerWidth - r.right < 0.5,
+      roomAboveAndBelow: r.top > 8 && innerHeight - r.bottom > 8,
+      // squared up rather than fanned: the hand sits under it exactly
+      squareStack: under.length === 2 && under.every(c => same(c.getBoundingClientRect()))
     };
   });
 
@@ -81,34 +84,50 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   });
   const emblems = await page.locator('.card.top .idx.tl .mark').count();
 
-  // — turning a card over. It squeezes to nothing, the face is swapped while
-  //   there is nothing to see, and it opens out again — so the two faces are
-  //   never both painted, whatever the browser thinks of backface-visibility. —
+  // — turning a card over. One movement that carries all the way through: the
+  //   matrix's m11 is cos of the angle, so it runs 1 → 0 → -1 and never turns
+  //   back on itself. A squeeze-and-open would come back to +1, which is
+  //   exactly what it is not allowed to do. Sampled frame by frame, because a
+  //   screenshot cannot catch the middle of half a second. —
   const turn = await page.evaluate(async () => {
     const card = document.querySelector('.card.top');
     const inner = card.querySelector('.cardin');
-    const xOf = () => +new DOMMatrixReadOnly(getComputedStyle(inner).transform).a.toFixed(3);
-    const front = () => getComputedStyle(card.querySelector('.face.front')).display;
+    const cosOf = () => +new DOMMatrixReadOnly(getComputedStyle(inner).transform).m11.toFixed(3);
+    const behind = () => {
+      const o = document.querySelector('#deck .card:not(.top)');
+      return o ? getComputedStyle(o).visibility : 'hidden';
+    };
     const seen = [];
     ACT.flip(card);
     const t0 = performance.now();
     await new Promise(done => {
-      const tick = () => { seen.push([xOf(), front()]);
-        performance.now() - t0 < 420 ? requestAnimationFrame(tick) : done(); };
+      const tick = () => { seen.push([cosOf(), behind()]);
+        performance.now() - t0 < 700 ? requestAnimationFrame(tick) : done(); };
       requestAnimationFrame(tick);
     });
-    const xs = seen.map(s => s[0]);
+    const cos = seen.map(s => s[0]);
+    const mid = seen.filter(s => Math.abs(s[0]) < 0.9);
     return {
-      startsWide: xs[0] > 0.9,
-      squeezes: Math.min(...xs) < 0.1,
-      opensBack: xs[xs.length - 1] > 0.95,
-      // the swap happens edge-on and never while the card is open
-      swappedEdgeOn: seen.filter((s, i) => i && s[1] !== seen[i - 1][1]).every(s => s[0] < 0.25)
+      startsSquare: cos[0] > 0.99,
+      passesEdgeOn: Math.min(...cos.map(Math.abs)) < 0.12,
+      // all the way round, not back where it started
+      carriesThrough: cos[cos.length - 1] < -0.99,
+      // and never reverses on the way: no frame turns back towards the front
+      neverDoublesBack: cos.every((c, i) => !i || c <= cos[i - 1] + 0.02),
+      // the hand behind is out of sight for the whole of it, so the gap that
+      // opens as the card goes edge-on shows the room and not another card
+      handHidden: mid.length > 3 && mid.every(s => s[1] === 'hidden')
     };
   });
   const flipped = await page.locator('.card.top.flip').count() === 1;
-  const frontHidden = await page.evaluate(() =>
-    getComputedStyle(document.querySelector('.card.top .front')).display === 'none');
+  // The front is facing away rather than removed: both faces are on the card
+  // and the browser holds back whichever has its back to you.
+  const frontHidden = await page.evaluate(() => {
+    const card = document.querySelector('.card.top');
+    const m = new DOMMatrixReadOnly(getComputedStyle(card.querySelector('.cardin')).transform);
+    const bf = (s) => getComputedStyle(card.querySelector(s)).backfaceVisibility === 'hidden';
+    return m.m11 < -0.99 && bf('.face.front') && bf('.face.back');
+  });
   await shot('02-back');
   await page.locator('.card.top').click();
   await page.waitForTimeout(600);

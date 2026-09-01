@@ -35,7 +35,7 @@ new filter had no entry for it, and the throw during the first render left a
 blank screen with the buttons still sitting on it. Add a case to it whenever
 the saved shape changes.
 
-The smoke test exercises dealing, the shape of the card and the pile under it, the corner index, the bare front and its emblems, the
+The smoke test exercises dealing, the shape of the card and the hand squared up under it, the corner index, the bare front and its emblems, the
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
 leaves the pool but "never again" does, the context filter, the one button, search,
 liking from the browser, writing your own, rewriting the card in front of you,
@@ -367,6 +367,16 @@ corner, has to move with it — that is what the `1.7143` (12/7) in `.settings`
 is. `.stack` in `css/panels.css` is the same card on the deck table and has to
 change with it, or the table is a picture of a different deck.
 
+**It goes out to both edges of the screen, and the hand behind it is squared
+up.** `--cardw` is `100vw` unless the height cannot take a card that wide. The
+two cards under the top one used to be fanned a degree or so off true, the way
+a real deck never quite squares up — and the cost was that the card stopped
+reading as the full width of the screen: you saw the corners of the ones
+underneath and the whole thing looked inset. They sit exactly under it now, to
+the pixel, so what you see is one card. They still have to be there: the top
+card flies off the moment you let go, and the next one has to already be
+underneath it or the screen goes empty for the length of the throw.
+
 **The radius has to be named on every rounded thing, never inherited.**
 `border-radius: inherit` takes the value from the *parent element*, and
 `.cardin` sits between `.card` and `.face` with no radius of its own — so for a
@@ -376,12 +386,11 @@ and `.face`. It is two percentages with a slash because a corner arc on a box
 that is not square needs one number for the horizontal radius and one for the
 vertical, or the arc comes out an ellipse.
 
-**The card sits on a table rather than being the screen.** It used to be full
-bleed, no radius, no edge — which meant it could not have corners, and corners
-are most of what makes a card a card. It costs the room around it, and buys the
-rest of the deck showing under it: the two behind are a degree or so off true
-rather than scaled back, because a squared-up pile is the one thing a real deck
-never is.
+**There is a table above and below it and none at either side.** The card used
+to be full bleed on every edge, which meant it could not have corners, and
+corners are most of what makes a card a card. Seven by twelve at the full width
+of a phone leaves room top and bottom and none at the sides, which is exactly
+the room the corners need.
 
 **The stock has an air-cushion finish.** A real card is embossed with a grid of
 dimples about half a millimetre apart, which is what stops a pile of them
@@ -396,32 +405,48 @@ corners before that, and every one of them but this was a quick link into that
 same hub: four things standing in front of the one thing you are deciding
 about. The front of a card is now the activity and nothing else at all.
 
-It lives outside `#frame` rather than in it. Back when the flip was done in 3D
-the deck carried a `perspective` and the cards were `preserve-3d`, and a 3D
-rendering context sorts what it contains by depth rather than by the z-index of
-anything beside it — so the row of emblems at the head of the card took the taps
-meant for the button, whatever z-index it was given. The 3D is gone; the button
-stays outside, because there is no reason for it to be in there.
+**It lives outside `#frame` rather than in it, and that is load-bearing.** The
+card carries a `perspective` and `.cardin` is `preserve-3d` for the turn, and a
+3D rendering context sorts what it contains by depth rather than by the z-index
+of anything beside it — so the row of emblems at the head of the card took the
+taps meant for the button, whatever z-index it was given. That was true the
+first time the flip was in 3D, stopped mattering for the one commit the flip
+was not, and is true again. Leave the button where it is.
 
 **Undo is a swipe down**, the opposite of the way the card left, and the card
 comes back the way it went: down from the top rather than appearing. There is
 no undo button, so nothing has to sit on the card waiting to be needed. Up is
 unchanged — it passes the card on without saying anything about it.
 
-**The flip is not in 3D.** It was, twice, and it never read as a card turning
-over: `rotateY` swung the card's right edge away from you, which looks like the
-card going backwards; the shadow travelled through the rotation; halfway through
-the card was edge-on and both faces were painted, so the rest of the hand showed
-through and — every card being the same cream — the card you were reading looked
-like it was behind itself. Turning it round and hiding the hand fixed each
-complaint and never fixed the feel.
+**The flip is one movement that carries all the way through.** A single 460 ms
+`rotateY(-180deg)` on `.cardin`, one transition, nothing timed in the middle of
+it. Both faces are on the card at once and `backface-visibility` holds back
+whichever has its back to you, so there is no moment to swap them at — which is
+the point: a turn that has a swap in it has a seam.
 
-What is there now has no perspective in it at all: two 170 ms phases, `scaleX`
-to nothing and back, with the face swapped at the join while there is nothing to
-see, and a shade of `brightness` off at the edge because a card catches less
-light there. The face that is not showing is `display:none`, so there is never a
-second face for a browser to get wrong. `flip()` in `js/deck.js` owns the timing
-and `data-turning` stops a second tap landing mid-turn.
+It turns **negative**, which lifts the right edge up out of the screen towards
+you, the way you turn a card you are holding. Positive pushes that edge away
+and reads as the card going backwards.
+
+The two things that made earlier 3D versions look wrong are fixed here rather
+than avoided. The drop shadow is on `.card`, which does not rotate — a shadow
+swinging round with the card was most of what made it look like a rotating
+picture instead of a turning card; the hairline edge stays on `.face` and does
+turn, because that one belongs to the card. And `body.turning` hides the rest
+of the hand for the length of the turn: the cards behind are dead in line and
+the same cream, so as the card goes edge-on the gap showed another card rather
+than the room, and it read as the card being somehow behind itself.
+
+The version before this one avoided 3D entirely — two 170 ms phases squeezing
+to nothing with `scaleX` and opening out again. It was smooth and it still read
+wrong, because it is the same motion twice, once forwards and once in reverse:
+however it is eased, a card that goes out and comes back looks like it sprang
+back rather than turned over.
+
+`flip()` in `js/deck.js` owns the timing. `data-turning` stops a second tap
+landing mid-turn, and `know()` runs at the halfway point rather than at either
+end — at the start the button on the back fades in over a card still showing
+its face, and at the end it arrives after the card has settled, which is late.
 
 `theme-color` is the ink, flat. Safari tints its own toolbars with it, and while
 the card was the screen deck.js had to swap it to the paper colour and back so

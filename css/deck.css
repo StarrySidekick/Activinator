@@ -17,6 +17,10 @@
    with the corners rounded as a fraction of the box so it stays right whatever
    size it is drawn.
 
+   It goes right out to the left and right edges of the screen. There is no
+   table down the sides — the only room is above and below, which is where a
+   seven-by-twelve card on a phone has room left over anyway.
+
    The width is whichever is smaller: nearly all of the screen, or whatever the
    height allows at that proportion. So it is as big as it can be and never
    taller than the room. The transform is written inline by deck.js so a drag
@@ -34,34 +38,50 @@
   margin:0; translate:-50% -50%;
   --radius:8.57% / 5%;
   border-radius:var(--radius);
+  /* The weight of the card, cast on what is behind it. It lives out here
+     rather than on the face because the face turns over and this must not:
+     a shadow that swings round with the card is the single thing that made
+     every earlier version of the flip look like a rotating picture. */
+  box-shadow:0 14px 30px -10px rgba(0,0,0,.7);
+  transition:box-shadow .2s ease;
+  /* The vanishing point for the turn, on the card rather than on the deck, so
+     it is always about this card's own middle wherever a drag has taken it. */
+  perspective:1100px;
   will-change:transform;
 }
-.card.rest{transition:transform .34s cubic-bezier(.2,.8,.25,1), opacity .34s}
+.card.rest{transition:transform .34s cubic-bezier(.2,.8,.25,1), opacity .34s, box-shadow .2s ease}
 .card.gone{transition:transform .34s cubic-bezier(.3,.1,.3,1), opacity .3s; opacity:0}
 .card:not(.top){pointer-events:none}
 
 /* — turning a card over —
-   Written from scratch, and deliberately not in 3D. The old one rotated the
-   card in perspective with `backface-visibility` holding the hidden face back
-   and an opacity swap at the halfway point in case Safari dropped it; between
-   the perspective origin, the shadow travelling through the rotation and two
-   faces both painted for part of the turn, it never read as a card turning
-   over.
+   One movement that carries all the way through, rather than something that
+   goes out and comes back. A squeeze to nothing and out again is the same
+   motion twice, once forwards and once in reverse, and however it is eased it
+   reads as the card springing back rather than turning over — which is what it
+   kept being told.
 
-   This one turns the card edge-on and back: squeeze to nothing, swap the face
-   while there is nothing to see, open out again. Two phases of 170ms, easing in
-   on the way down and out on the way up, and a shade darker at the edge because
-   a card catches less light there. There is no back face painted at any point —
-   the one that is not showing is `display:none` — so there is nothing for a
-   browser to get wrong. */
+   So it is a real rotation again: a single 180° sweep about the card's own
+   vertical axis, one transition, no halves and no timer in the middle. It
+   turns *negative*, which brings the right edge up out of the screen towards
+   you — the way you turn a card you are holding. Rotating the other way pushes
+   that edge away and reads as the card going backwards, which is the other
+   thing it kept being told.
+
+   The two things that made 3D look wrong before are fixed rather than avoided:
+   the shadow is on .card and does not rotate, and the rest of the hand is
+   hidden for the length of the turn so the gap shows the room and not another
+   identical cream card. */
 .cardin{
   position:absolute; inset:0; border-radius:var(--radius);
-  transition:transform .17s cubic-bezier(0,0,.3,1), filter .17s linear;
+  transform-style:preserve-3d;
+  transition:transform .46s cubic-bezier(.4,.02,.24,1);
 }
-.card.turn .cardin{
-  transform:scaleX(.02); filter:brightness(.9);
-  transition-timing-function:cubic-bezier(.5,0,1,1);
-}
+.card.flip .cardin{transform:rotateY(-180deg)}
+/* A card lifts off the pile as you turn it, and drops back. */
+.card.turning{box-shadow:0 30px 46px -12px rgba(0,0,0,.72)}
+/* Only the hand behind the one turning. The card itself must stay painted, or
+   there is nothing to turn. */
+body.turning #deck .card:not(.top){visibility:hidden}
 
 
 .face{
@@ -79,10 +99,10 @@
      every corner in the app was square while the card that painted nothing was
      the only thing rounded. */
   border-radius:var(--radius);
-  /* Off the table, and printed to the edge of its own stock rather than the
-     screen's: a hairline of the ink it is printed on, and a shadow with a card's
-     weight in it. */
-  box-shadow:0 14px 30px -10px rgba(0,0,0,.7), 0 0 0 1px rgba(36,31,24,.14);
+  /* A hairline of the ink it is printed on. This one does belong to the face
+     and turns with it; the weight of the card is a shadow on .card, which does
+     not. */
+  box-shadow:0 0 0 1px rgba(36,31,24,.14);
   display:flex; flex-direction:column;
   /* Room down each side for the corner index, the way a card leaves room for
      its rank and suit. */
@@ -127,12 +147,13 @@
 /* The one button sits in the top right of the back, so the kicker stops short
    of it. */
 .face.back .kicker{padding-right:46px}
-/* One face is painted at a time, and the swap happens while the card is edge
-   on. `display` rather than opacity, because a face that is not there cannot
-   show through one that is. */
-.card .face.back{display:none}
-.card.flip .face.front{display:none}
-.card.flip .face.back{display:flex}
+/* Both faces are on the card at once, back to back, and the one facing away is
+   held back by `backface-visibility` rather than by `display` — the whole point
+   of a rotation that carries through is that there is no moment to swap them
+   at. The back starts a half-turn round, so the container's -180° lands it
+   square. */
+.face{backface-visibility:hidden; -webkit-backface-visibility:hidden}
+.face.back{transform:rotateY(180deg)}
 
 /* Paper, not a rectangle of cream: a faint tooth, printed under everything. */
 .face::after{
