@@ -12,7 +12,9 @@
   /* How wide a card is drawn, in one place: the deck reads it for the card
      itself, and the one button reads it to sit on that card's corner rather
      than float in the middle of the table. */
-  --cardw:min(93vw, calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 96px) * 0.7143), 460px);
+  /* 0.5833 is 7/12, a tarot card's proportion: whichever is smaller, nearly all
+     of the screen or whatever the remaining height allows at that shape. */
+  --cardw:min(93vw, calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 96px) * 0.5833), 460px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;overscroll-behavior:none}
@@ -52,7 +54,9 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
      card is drawn at — a button floating in the middle of the table belongs to
      nothing. */
   position:fixed; z-index:50;
-  top:calc(50% - (var(--cardw) * 1.4 / 2) + 9px);
+  /* 1.7143 is 12/7 — how tall the card is for its width, so this stays on the
+     corner and not in the air when the proportion changes. */
+  top:calc(50% - (var(--cardw) * 1.7143 / 2) + 9px);
   right:calc(50% - var(--cardw) / 2 + 7px);
   width:46px; height:46px; display:flex; align-items:center; justify-content:center;
   color:var(--text-2); opacity:0; pointer-events:none; transform:scale(.9);

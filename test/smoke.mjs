@@ -38,14 +38,14 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return j.name === 'Activinator' && j.icons.length === 3;
   });
 
-  // — a card is a card: two and a half by three and a half, on a table with
-  //   the rest of the deck showing under it. The top card is the LAST in the
-  //   DOM, because the hand is painted back to front. —
+  // — a card is a card: seven by twelve, a tarot card's proportion, on a table
+  //   with the rest of the deck showing under it. The top card is the LAST in
+  //   the DOM, because the hand is painted back to front. —
   const cardShaped = await page.evaluate(() => {
     const r = document.querySelector('.card.top').getBoundingClientRect();
     const under = [...document.querySelectorAll('#deck .card:not(.top)')];
     return {
-      bicycle: Math.abs(r.width / r.height - 2.5 / 3.5) < 0.01,
+      tarot: Math.abs(r.width / r.height - 7 / 12) < 0.01,
       onATable: r.top > 40 && innerHeight - r.bottom > 40,
       asWideAsItCanBe: r.width > innerWidth * 0.85,
       // the rest of the deck is under it, off true, so the pile reads as a pile

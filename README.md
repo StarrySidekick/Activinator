@@ -35,7 +35,7 @@ new filter had no entry for it, and the throw during the first render left a
 blank screen with the buttons still sitting on it. Add a case to it whenever
 the saved shape changes.
 
-The smoke test exercises dealing, the full-bleed card, the four corners, the bare front and its emblems, the
+The smoke test exercises dealing, the shape of the card and the pile under it, the corner index, the bare front and its emblems, the
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
 leaves the pool but "never again" does, the context filter, the one button, search,
 liking from the browser, writing your own, rewriting the card in front of you,
@@ -354,12 +354,40 @@ knows *least* about rather than from the top of the ranking. A wildcard says on
 its face that it is one — except on the first day, when it knows nothing and
 there is nothing to deal against, so nothing is labelled.
 
-**The card is the screen.** Full bleed, no radius, no edge — and so is the one
-behind it. The hand is stacked dead flat. The two behind used to sit back a
-little, `scale(.965)` and `scale(.93)`, so the deck would read as a deck; but a
-card smaller than the screen is a card with the dark room around it, and the
-moment the top one moved you saw that as a band along the top and the bottom.
-The depth was never visible except as the thing breaking the full bleed.
+**A card is a card, at tarot proportions.** Seven by twelve — a 70 by 120 mm
+tarot card, corners cut to 6 mm — rather than the poker two-and-a-half by
+three-and-a-half it was first drawn at. Both are real cards; only one of them
+is the shape of a phone. At poker proportions a card as wide as the screen is
+only ever about that-and-a-half tall, so a third of a phone stayed empty table
+no matter what; a tarot card is nearly as tall as the screen already is and
+still reads unmistakably as a card. The whole geometry is `--cardw` in
+`css/base.css` and the `aspect-ratio` and `--radius` on `.card`: change the
+proportion in one place and the settings button, which sits on the card's own
+corner, has to move with it — that is what the `1.7143` (12/7) in `.settings`
+is. `.stack` in `css/panels.css` is the same card on the deck table and has to
+change with it, or the table is a picture of a different deck.
+
+**The radius has to be named on every rounded thing, never inherited.**
+`border-radius: inherit` takes the value from the *parent element*, and
+`.cardin` sits between `.card` and `.face` with no radius of its own — so for a
+while every corner in the app was square while the only rounded element was the
+one that paints nothing. Hence `--radius`, set on `.card` and read by `.cardin`
+and `.face`. It is two percentages with a slash because a corner arc on a box
+that is not square needs one number for the horizontal radius and one for the
+vertical, or the arc comes out an ellipse.
+
+**The card sits on a table rather than being the screen.** It used to be full
+bleed, no radius, no edge — which meant it could not have corners, and corners
+are most of what makes a card a card. It costs the room around it, and buys the
+rest of the deck showing under it: the two behind are a degree or so off true
+rather than scaled back, because a squared-up pile is the one thing a real deck
+never is.
+
+**The stock has an air-cushion finish.** A real card is embossed with a grid of
+dimples about half a millimetre apart, which is what stops a pile of them
+sticking together. It is a three-pixel `radial-gradient` at 5% opacity — meant
+to be findable and never noticeable, because a texture you can see is worse
+than none.
 
 **There is one button in the whole app, and you meet it only once you have
 turned a card over.** It is the app's own mark, top right of the back, and it
@@ -368,29 +396,38 @@ corners before that, and every one of them but this was a quick link into that
 same hub: four things standing in front of the one thing you are deciding
 about. The front of a card is now the activity and nothing else at all.
 
-It lives outside `#frame` rather than in it. The deck carries a `perspective`
-and the cards are `preserve-3d`, and a 3D rendering context sorts what it
-contains by depth rather than by the z-index of anything beside it — so the row
-of emblems at the head of the card took the taps meant for the button, whatever
-z-index it was given.
+It lives outside `#frame` rather than in it. Back when the flip was done in 3D
+the deck carried a `perspective` and the cards were `preserve-3d`, and a 3D
+rendering context sorts what it contains by depth rather than by the z-index of
+anything beside it — so the row of emblems at the head of the card took the taps
+meant for the button, whatever z-index it was given. The 3D is gone; the button
+stays outside, because there is no reason for it to be in there.
 
 **Undo is a swipe down**, the opposite of the way the card left, and the card
 comes back the way it went: down from the top rather than appearing. There is
 no undo button, so nothing has to sit on the card waiting to be needed. Up is
 unchanged — it passes the card on without saying anything about it.
 
-**The flip turns the other way round.** `rotateY(180deg)` swings the card's
-right edge away from you, which reads as the card going backwards; a card in
-the hand turns with its right edge coming towards you. And halfway through the
-turn the card is edge-on, so the rest of the hand showed through — every card
-being the same cream, it looked like the card you were reading was somehow
-behind itself. The hand is hidden for the length of the turn, and what you see
-through the gap is the room.
+**The flip is not in 3D.** It was, twice, and it never read as a card turning
+over: `rotateY` swung the card's right edge away from you, which looks like the
+card going backwards; the shadow travelled through the rotation; halfway through
+the card was edge-on and both faces were painted, so the rest of the hand showed
+through and — every card being the same cream — the card you were reading looked
+like it was behind itself. Turning it round and hiding the hand fixed each
+complaint and never fixed the feel.
 
-Safari tints its own toolbars with `theme-color`, which is the band above and
-below the card when the app is opened in a tab rather than installed. The card
-is the screen, so the screen's colour is the card's — and deck.js swaps it for
-the ink when there is no card to be paper.
+What is there now has no perspective in it at all: two 170 ms phases, `scaleX`
+to nothing and back, with the face swapped at the join while there is nothing to
+see, and a shade of `brightness` off at the edge because a card catches less
+light there. The face that is not showing is `display:none`, so there is never a
+second face for a browser to get wrong. `flip()` in `js/deck.js` owns the timing
+and `data-turning` stops a second tap landing mid-turn.
+
+`theme-color` is the ink, flat. Safari tints its own toolbars with it, and while
+the card was the screen deck.js had to swap it to the paper colour and back so
+the bands above and below matched the card. The card is on a table now and the
+table is the same dark all the way out, so there is nothing left to keep in
+step.
 
 **An activity's id comes from its title, never from its place in the list.**
 It was `'s' + index`, which meant inserting one activity silently re-pointed

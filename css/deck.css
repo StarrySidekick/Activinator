@@ -9,11 +9,13 @@
   position:absolute; inset:0; touch-action:none;
 }
 
-/* A card is a card: two and a half by three and a half, the proportion the eye
-   reads as a playing card, with the corners rounded as a fraction of that so it
-   stays right whatever size it is drawn. It is no longer the screen — it sits
-   on the table with the rest of the deck under it, which is what makes the
-   stack readable and the corners possible at all.
+/* A card is a card, and now it is a tarot card: seven by twelve rather than the
+   poker five by seven. A phone is a tall narrow thing and a poker card is a
+   wide one, so at poker proportions the card could only ever be as tall as it
+   was wide-and-a-bit and left a third of the screen as table. A tarot card is
+   the shape the screen already is, so it fills it and still reads as a card,
+   with the corners rounded as a fraction of the box so it stays right whatever
+   size it is drawn.
 
    The width is whichever is smaller: nearly all of the screen, or whatever the
    height allows at that proportion. So it is as big as it can be and never
@@ -22,14 +24,15 @@
 .card{
   position:absolute; top:50%; left:50%;
   width:var(--cardw);
-  /* A Bicycle poker card is 2.5 by 3.5 inches — 63.5 by 88.9 mm — and its
-     corners are cut to a 3.5 mm radius. As a fraction of the card that is
-     5.51% of the width and 3.94% of the height, which is why the radius is
-     written as two percentages: one corner arc, measured against a box that is
-     not square. On this phone it comes out at 20 pixels. */
-  aspect-ratio:2.5 / 3.5;
+  /* A tarot card is 70 by 120 mm — the size every tarot deck is printed at —
+     and its corners are cut to a 6 mm radius, a deeper cut than a poker card's
+     3.5 mm. As a fraction of the card that is 8.57% of the width and 5% of the
+     height, which is why the radius is written as two percentages: it is one
+     circular corner, measured against a box that is not square. On this phone
+     it comes out at 31 pixels. */
+  aspect-ratio:7 / 12;
   margin:0; translate:-50% -50%;
-  --radius:5.51% / 3.94%;
+  --radius:8.57% / 5%;
   border-radius:var(--radius);
   will-change:transform;
 }
@@ -106,8 +109,8 @@
 /* `.face>*` sets every direct child position:relative — same specificity and
    later in the file — so the index has to be named by its class to stay in the
    corner it is the whole point of. */
-.face .idx.tl{top:4.4%; left:5%}
-.face .idx.br{bottom:4.4%; right:5%; transform:rotate(180deg)}
+.face .idx.tl{top:4%; left:6.5%}
+.face .idx.br{bottom:4%; right:6.5%; transform:rotate(180deg)}
 .face .idx .mark{width:17px; height:17px}
 .marks{margin:0; display:flex; flex-wrap:wrap; gap:11px; align-items:center}
 /* A suit sits on the card, not in a chip. No background, no ring — the
@@ -149,7 +152,11 @@
 
 .t{
   font-family:var(--serif); font-weight:400; margin:0;
-  font-size:clamp(23px,6.8vw,34px); line-height:1.12; letter-spacing:-.012em;
+  /* A tarot card gives the title half again as much room as a poker one did,
+     and type sized for the smaller card read like a caption printed in the
+     middle of a lot of cream. 8vw is the biggest that still lands the longest
+     title in the deck inside the card. */
+  font-size:clamp(25px,8vw,38px); line-height:1.14; letter-spacing:-.012em;
   text-wrap:balance;
   /* Floccinaucinihilipilification is a real card now. */
   hyphens:auto; overflow-wrap:anywhere;

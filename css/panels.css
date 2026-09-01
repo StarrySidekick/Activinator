@@ -81,20 +81,21 @@
    of names with tickboxes is a settings screen; eight decks laid out on a table
    is the thing you are actually choosing between.
 
-   The proportions are a real card's — 2.5 by 3.5 — because that is the shape
-   the eye reads as a playing card, and the corner radius is a percentage of
-   that so it stays right at any size. */
+   The proportions are a real card's — seven by twelve, the tarot size the deck
+   itself is drawn at — and the corner radius is a percentage of that so it
+   stays right at any size. A deck on this table has to be the same card as the
+   one dealt off it, or the table is a picture of a different deck. */
 .table{display:grid; grid-template-columns:1fr 1fr; gap:20px 16px; padding:6px 0 4px}
 .deck{
   display:flex; flex-direction:column; align-items:center; gap:0;
   padding:0; background:none; border:0; text-align:center;
 }
-.stack{position:relative; display:block; width:100%; aspect-ratio:2.5/3.5; margin-bottom:9px}
+.stack{position:relative; display:block; width:100%; aspect-ratio:7/12; margin-bottom:9px}
 
 /* The two behind are the rest of the deck: the same card, a degree or two off
    true, showing along one edge the way a squared-up pile never quite is. */
 .stack i, .stack .face{
-  position:absolute; inset:0; border-radius:7% / 5%;
+  position:absolute; inset:0; border-radius:8.57% / 5%;
   background:var(--paper); box-shadow:0 2px 6px -1px rgba(0,0,0,.55);
 }
 .stack i:nth-child(1){transform:rotate(-2.4deg) translate(-2px,2px)}
@@ -108,12 +109,12 @@
 }
 /* The field: the ink, the pattern, and a hairline keyline inside it. */
 .deck .face::before{
-  content:''; position:absolute; inset:6.5%; border-radius:4% / 3%;
+  content:''; position:absolute; inset:3.8% 6.5%; border-radius:6% / 3.3%;
   background-color:var(--ink); background-image:var(--pattern);
   box-shadow:0 0 0 1px rgba(255,255,255,.22) inset;
 }
 .deck .pip{
-  position:relative; z-index:1; width:34%; height:34%;
+  position:relative; z-index:1; width:34%; aspect-ratio:1;
   color:rgba(245,240,228,.92);
 }
 .deck .pip svg{width:100%;height:100%}
