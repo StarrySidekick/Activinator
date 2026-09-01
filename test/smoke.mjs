@@ -81,12 +81,34 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   });
   const emblems = await page.locator('.card.top .idx.tl .mark').count();
 
-  // — flip: the front must not be readable through the back, and it must turn back —
-  await page.locator('.card.top').click();
-  await page.waitForTimeout(600);
+  // — turning a card over. It squeezes to nothing, the face is swapped while
+  //   there is nothing to see, and it opens out again — so the two faces are
+  //   never both painted, whatever the browser thinks of backface-visibility. —
+  const turn = await page.evaluate(async () => {
+    const card = document.querySelector('.card.top');
+    const inner = card.querySelector('.cardin');
+    const xOf = () => +new DOMMatrixReadOnly(getComputedStyle(inner).transform).a.toFixed(3);
+    const front = () => getComputedStyle(card.querySelector('.face.front')).display;
+    const seen = [];
+    ACT.flip(card);
+    const t0 = performance.now();
+    await new Promise(done => {
+      const tick = () => { seen.push([xOf(), front()]);
+        performance.now() - t0 < 420 ? requestAnimationFrame(tick) : done(); };
+      requestAnimationFrame(tick);
+    });
+    const xs = seen.map(s => s[0]);
+    return {
+      startsWide: xs[0] > 0.9,
+      squeezes: Math.min(...xs) < 0.1,
+      opensBack: xs[xs.length - 1] > 0.95,
+      // the swap happens edge-on and never while the card is open
+      swappedEdgeOn: seen.filter((s, i) => i && s[1] !== seen[i - 1][1]).every(s => s[0] < 0.25)
+    };
+  });
   const flipped = await page.locator('.card.top.flip').count() === 1;
   const frontHidden = await page.evaluate(() =>
-    getComputedStyle(document.querySelector('.card.top .front')).opacity === '0');
+    getComputedStyle(document.querySelector('.card.top .front')).display === 'none');
   await shot('02-back');
   await page.locator('.card.top').click();
   await page.waitForTimeout(600);
@@ -377,7 +399,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('09-offline');
   await ctx.setOffline(false);
 
-  console.log({ dealt, manifestOk, cardShaped, frontIsBare, cornerIndex, emblems, packs, flipped, frontHidden,
+  console.log({ dealt, manifestOk, cardShaped, frontIsBare, cornerIndex, emblems, packs, turn, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
     refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, oneButton, prefilled, rewritten, curation,
@@ -385,6 +407,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await browser.close();
   const ok = dealt === 3 && manifestOk && frontIsBare && emblems > 0 && flipped &&
     Object.values(cardShaped).every(Boolean) && Object.values(cornerIndex).every(Boolean) &&
+    Object.values(turn).every(Boolean) &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&

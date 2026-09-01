@@ -23,8 +23,22 @@ const know = () => {
   document.body.classList.toggle('bare', !Q.length);
 };
 
-/* The tap that turns a card over, from anywhere that has one. */
-const flip = (el) => { if (!el) return; el.classList.toggle('flip'); know(); };
+/* The tap that turns a card over, from anywhere that has one. Two phases: the
+   card squeezes to nothing, the face is swapped while there is nothing to see,
+   and it opens out again. The swap is at the join rather than on a timer that
+   happens to line up with the middle of one long animation. */
+const TURN = 170;
+const flip = (el) => {
+  if (!el || el.dataset.turning) return;
+  el.dataset.turning = '1';
+  el.classList.add('turn');
+  setTimeout(() => {
+    el.classList.toggle('flip');
+    el.classList.remove('turn');
+    delete el.dataset.turning;
+    know();
+  }, TURN);
+};
 
 const toast = (msg) => {
   const t = $('#toast'); if (!msg) return;

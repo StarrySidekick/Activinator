@@ -6,7 +6,7 @@
    it, so the deck is the whole frame with the safe areas kept clear of the
    type. */
 #deck{
-  position:absolute; inset:0; perspective:1600px; touch-action:none;
+  position:absolute; inset:0; touch-action:none;
 }
 
 /* A card is a card: two and a half by three and a half, the proportion the eye
@@ -22,42 +22,60 @@
 .card{
   position:absolute; top:50%; left:50%;
   width:var(--cardw);
+  /* A Bicycle poker card is 2.5 by 3.5 inches — 63.5 by 88.9 mm — and its
+     corners are cut to a 3.5 mm radius. As a fraction of the card that is
+     5.51% of the width and 3.94% of the height, which is why the radius is
+     written as two percentages: one corner arc, measured against a box that is
+     not square. On this phone it comes out at 20 pixels. */
   aspect-ratio:2.5 / 3.5;
   margin:0; translate:-50% -50%;
-  border-radius:4.6% / 3.3%;
-  transform-style:preserve-3d; will-change:transform;
+  --radius:5.51% / 3.94%;
+  border-radius:var(--radius);
+  will-change:transform;
 }
 .card.rest{transition:transform .34s cubic-bezier(.2,.8,.25,1), opacity .34s}
 .card.gone{transition:transform .34s cubic-bezier(.3,.1,.3,1), opacity .3s; opacity:0}
 .card:not(.top){pointer-events:none}
 
-.cardin{
-  position:absolute; inset:0; transform-style:preserve-3d;
-  transition:transform .5s cubic-bezier(.3,.9,.3,1);
-}
-/* Turned the other way round. A card in the hand turns with its right edge
-   coming towards you — `rotateY(180deg)` swings the right edge away instead,
-   and it reads as the card going backwards. */
-.card.flip .cardin{transform:rotateY(-180deg)}
+/* — turning a card over —
+   Written from scratch, and deliberately not in 3D. The old one rotated the
+   card in perspective with `backface-visibility` holding the hidden face back
+   and an opacity swap at the halfway point in case Safari dropped it; between
+   the perspective origin, the shadow travelling through the rotation and two
+   faces both painted for part of the turn, it never read as a card turning
+   over.
 
-/* The hand used to be hidden while a card was turned over: every card was the
-   full screen and the same cream, so the one showing through at the halfway
-   point read as the card you were reading being somehow behind itself. A card
-   that sits on the deck rather than covering it does not have that problem —
-   what shows through is the deck it is lying on, which is what turning a card
-   over on a table looks like. */
+   This one turns the card edge-on and back: squeeze to nothing, swap the face
+   while there is nothing to see, open out again. Two phases of 170ms, easing in
+   on the way down and out on the way up, and a shade darker at the edge because
+   a card catches less light there. There is no back face painted at any point —
+   the one that is not showing is `display:none` — so there is nothing for a
+   browser to get wrong. */
+.cardin{
+  position:absolute; inset:0; border-radius:var(--radius);
+  transition:transform .17s cubic-bezier(0,0,.3,1), filter .17s linear;
+}
+.card.turn .cardin{
+  transform:scaleX(.02); filter:brightness(.9);
+  transition-timing-function:cubic-bezier(.5,0,1,1);
+}
+
 
 .face{
   position:absolute; inset:0; overflow:hidden;
-  backface-visibility:hidden; -webkit-backface-visibility:hidden;
-  /* backface-visibility alone is not enough — Safari drops it whenever
-     something in the card builds its own rendering layer, and then the front's
-     type shows through the back and neither is readable. The hidden face is
-     also made transparent, swapped at the halfway point of the turn so the
-     change happens edge-on and cannot be seen. */
-  transition:opacity 0s linear .25s;
-  background:var(--paper); color:var(--text);
-  border-radius:inherit;
+  background-color:var(--paper); color:var(--text);
+  /* The air-cushion finish: a card is embossed with a fine grid of dimples
+     about half a millimetre apart, which is what stops a pile of them sticking
+     together. At the size a card is drawn here that is a three-pixel pitch, and
+     it wants to be almost too faint to see — a texture you can find but never
+     notice is the difference between paper and a rectangle of cream. */
+  background-image:radial-gradient(circle at 50% 50%, rgba(58,48,32,.05) .5px, transparent 1px);
+  background-size:3px 3px;
+  /* The radius has to be named, not inherited: `inherit` takes the value from
+     the parent element, and .cardin between here and the card had none — so
+     every corner in the app was square while the card that painted nothing was
+     the only thing rounded. */
+  border-radius:var(--radius);
   /* Off the table, and printed to the edge of its own stock rather than the
      screen's: a hairline of the ink it is printed on, and a shadow with a card's
      weight in it. */
@@ -102,13 +120,16 @@
 /* The word and its definition centre together; on a plain card the group is
    just the title, so nothing moves. */
 .face.front .word{margin:auto 0}
-.face.back{transform:rotateY(180deg); background:var(--paper-2); overflow-y:auto}
+.face.back{background-color:var(--paper-2); overflow-y:auto}
 /* The one button sits in the top right of the back, so the kicker stops short
    of it. */
 .face.back .kicker{padding-right:46px}
-.card .face.back{opacity:0}
-.card.flip .face.front{opacity:0}
-.card.flip .face.back{opacity:1}
+/* One face is painted at a time, and the swap happens while the card is edge
+   on. `display` rather than opacity, because a face that is not there cannot
+   show through one that is. */
+.card .face.back{display:none}
+.card.flip .face.front{display:none}
+.card.flip .face.back{display:flex}
 
 /* Paper, not a rectangle of cream: a faint tooth, printed under everything. */
 .face::after{
