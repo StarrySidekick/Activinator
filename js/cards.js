@@ -38,6 +38,16 @@ const markHTML = (g, cls = '') => !MARKS[g] ? '' :
 
 const emblemRow = (c) => `<p class="marks">${emblemsOf(c).map(g => markHTML(g)).join('')}</p>`;
 
+/* The corner index. A playing card carries its rank and suit in two opposite
+   corners, the second one upside down so it reads whichever way up the card is
+   held; ours carry the three most particular of its marks. Three because an
+   index is read at a glance — a column of seven silhouettes is a list, and the
+   whole set is on the back anyway. */
+const indexOf = (c) => {
+  const three = emblemsOf(c).slice(0, 3).map(g => markHTML(g)).join('');
+  return `<span class="idx tl">${three}</span><span class="idx br">${three}</span>`;
+};
+
 /* Minutes as somebody would say them. The duration tag is the band; this is
    the actual figure, and it only appears on the back. */
 const lengthOf = (m) => {
@@ -59,7 +69,7 @@ const cardHTML = (c) => {
     <div class="face front">
       <div class="stamp s-yes">Like</div>
       <div class="stamp s-no">Don’t Like</div>
-      ${emblemRow(c)}
+      ${indexOf(c)}
       <div class="word">
         <h2 class="t">${esc(c.t)}</h2>
         ${c.d ? `<p class="def">${esc(c.d)}</p>` : ''}
@@ -92,4 +102,4 @@ const cardHTML = (c) => {
   </article>`;
 };
 
-export { cardHTML, emblemsOf, emblemRow, markHTML, lengthOf, esc };
+export { cardHTML, emblemsOf, emblemRow, indexOf, markHTML, lengthOf, esc };

@@ -9,13 +9,22 @@
   position:absolute; inset:0; perspective:1600px; touch-action:none;
 }
 
-/* The card is the screen — no radius, no inset, no edge, and neither has the
-   one behind it: the hand is stacked dead flat so that nothing but paper ever
-   reaches the top and bottom of the screen. The transform is written inline by
-   deck.js so a drag can overwrite it every frame without fighting a
-   stylesheet. */
+/* A card is a card: two and a half by three and a half, the proportion the eye
+   reads as a playing card, with the corners rounded as a fraction of that so it
+   stays right whatever size it is drawn. It is no longer the screen — it sits
+   on the table with the rest of the deck under it, which is what makes the
+   stack readable and the corners possible at all.
+
+   The width is whichever is smaller: nearly all of the screen, or whatever the
+   height allows at that proportion. So it is as big as it can be and never
+   taller than the room. The transform is written inline by deck.js so a drag
+   can overwrite it every frame without fighting a stylesheet. */
 .card{
-  position:absolute; inset:0; border-radius:0;
+  position:absolute; top:50%; left:50%;
+  width:var(--cardw);
+  aspect-ratio:2.5 / 3.5;
+  margin:0; translate:-50% -50%;
+  border-radius:4.6% / 3.3%;
   transform-style:preserve-3d; will-change:transform;
 }
 .card.rest{transition:transform .34s cubic-bezier(.2,.8,.25,1), opacity .34s}
@@ -31,16 +40,15 @@
    and it reads as the card going backwards. */
 .card.flip .cardin{transform:rotateY(-180deg)}
 
-/* Halfway through the turn the card is edge-on and there is nothing in front
-   of the rest of the hand, so the next card showed through — and since every
-   card in the hand is the same cream, it read as the card you were reading
-   somehow being behind itself. The hand is hidden for the length of the turn,
-   and what you see through the gap is the room. `visibility`, because deck.js
-   writes `opacity` inline on every card in the hand and inline wins. */
-body.reading #deck .card:not(.top){visibility:hidden}
+/* The hand used to be hidden while a card was turned over: every card was the
+   full screen and the same cream, so the one showing through at the halfway
+   point read as the card you were reading being somehow behind itself. A card
+   that sits on the deck rather than covering it does not have that problem —
+   what shows through is the deck it is lying on, which is what turning a card
+   over on a table looks like. */
 
 .face{
-  position:absolute; inset:0; border-radius:0; overflow:hidden;
+  position:absolute; inset:0; overflow:hidden;
   backface-visibility:hidden; -webkit-backface-visibility:hidden;
   /* backface-visibility alone is not enough — Safari drops it whenever
      something in the card builds its own rendering layer, and then the front's
@@ -49,17 +57,40 @@ body.reading #deck .card:not(.top){visibility:hidden}
      change happens edge-on and cannot be seen. */
   transition:opacity 0s linear .25s;
   background:var(--paper); color:var(--text);
-  box-shadow:0 18px 40px -12px rgba(0,0,0,.65);
+  border-radius:inherit;
+  /* Off the table, and printed to the edge of its own stock rather than the
+     screen's: a hairline of the ink it is printed on, and a shadow with a card's
+     weight in it. */
+  box-shadow:0 14px 30px -10px rgba(0,0,0,.7), 0 0 0 1px rgba(36,31,24,.14);
   display:flex; flex-direction:column;
-  /* Nothing sits over the card any more, so the type only keeps clear of the
-     notch and the home indicator. */
-  padding:calc(var(--top) + 30px) 26px calc(var(--bot) + 34px);
+  /* Room down each side for the corner index, the way a card leaves room for
+     its rank and suit. */
+  padding:13% 9.5%;
 }
 /* — the emblems, and then the activity. That is the whole front.
      The row stays in the flow: `.face>*` makes every direct child position
      relative, so an absolutely-placed row of marks quietly became a centred
      one and sat on top of the title. — */
-.face.front{justify-content:flex-start}
+.face.front{justify-content:center}
+
+/* — the index. On a playing card the corners carry the rank and the suit, in
+     two opposite corners, the second one upside down so it reads whichever way
+     up the card is held. Ours carry what kind of thing the card is: the three
+     most particular of its marks, in the vocabulary's own order. The rest are
+     on the back with everything else the app knows.
+
+     Three, because a corner index is read at a glance and a column of seven
+     silhouettes is a list. — */
+.face .idx{
+  position:absolute; display:flex; flex-direction:column; gap:6px;
+  align-items:center; z-index:2;
+}
+/* `.face>*` sets every direct child position:relative — same specificity and
+   later in the file — so the index has to be named by its class to stay in the
+   corner it is the whole point of. */
+.face .idx.tl{top:4.4%; left:5%}
+.face .idx.br{bottom:4.4%; right:5%; transform:rotate(180deg)}
+.face .idx .mark{width:17px; height:17px}
 .marks{margin:0; display:flex; flex-wrap:wrap; gap:11px; align-items:center}
 /* A suit sits on the card, not in a chip. No background, no ring — the
    silhouette is the whole mark. */
@@ -97,7 +128,7 @@ body.reading #deck .card:not(.top){visibility:hidden}
 
 .t{
   font-family:var(--serif); font-weight:400; margin:0;
-  font-size:clamp(29px,8.4vw,42px); line-height:1.1; letter-spacing:-.012em;
+  font-size:clamp(23px,6.8vw,34px); line-height:1.12; letter-spacing:-.012em;
   text-wrap:balance;
   /* Floccinaucinihilipilification is a real card now. */
   hyphens:auto; overflow-wrap:anywhere;
@@ -109,7 +140,7 @@ body.reading #deck .card:not(.top){visibility:hidden}
    the meaning is set apart, smaller and quieter. pre-line is what lets a verb
    card keep its conjugations one tense to a line. */
 .def{
-  margin:16px 0 0; font-size:15.5px; line-height:1.5; color:var(--text-2);
+  margin:14px 0 0; font-size:14px; line-height:1.45; color:var(--text-2);
   white-space:pre-line; max-width:34em;
 }
 .back .def{font-size:13px;line-height:1.45;margin-top:8px}

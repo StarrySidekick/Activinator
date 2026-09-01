@@ -21,10 +21,6 @@ const know = () => {
   const el = $('#deck .card.top');
   document.body.classList.toggle('reading', !!el && el.classList.contains('flip'));
   document.body.classList.toggle('bare', !Q.length);
-  /* Safari tints its own bars with the theme colour, which is the band above
-     and below the card in a tab. The screen's colour is the card's. */
-  const m = document.querySelector('meta[name="theme-color"]');
-  if (m) m.content = Q.length ? '#F5F0E4' : '#14151c';
 };
 
 /* The tap that turns a card over, from anywhere that has one. */
@@ -63,12 +59,10 @@ const restack = () => {
    a drag overwrites the top card's transform every frame and must not have to
    fight a stylesheet.
 
-   They used to sit back a little — `scale(.965)`, `scale(.93)` — so the deck
-   would read as a deck. But a card that is smaller than the screen is a card
-   with the dark room around it, and the moment the top one moves you see that
-   as a band along the top and the bottom. The depth was never visible except
-   as the thing that broke the full bleed. */
-const FAN = ['translate(0,0)', 'translate(0,0)', 'translate(0,0)'];
+   A card is a card again rather than the screen, so the two under it show at
+   the edges the way a pile does — a degree or so off true rather than offset,
+   because a squared-up deck is the one thing a real one never is. */
+const FAN = ['rotate(0deg)', 'rotate(-1.5deg)', 'rotate(1.2deg)'];
 const place = (els) => {
   els.forEach((el, i) => {
     el.classList.toggle('top', i === 0);

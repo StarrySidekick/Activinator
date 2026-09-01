@@ -38,26 +38,48 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return j.name === 'Activinator' && j.icons.length === 3;
   });
 
-  // — the card fills the screen. The top card is the LAST in the DOM, because
-  //   the hand is painted back to front; the first one is scaled down behind it. —
-  const fullBleed = await page.evaluate(() => {
+  // — a card is a card: two and a half by three and a half, on a table with
+  //   the rest of the deck showing under it. The top card is the LAST in the
+  //   DOM, because the hand is painted back to front. —
+  const cardShaped = await page.evaluate(() => {
     const r = document.querySelector('.card.top').getBoundingClientRect();
-    return Math.round(r.width) === innerWidth && Math.round(r.height) === innerHeight;
+    const under = [...document.querySelectorAll('#deck .card:not(.top)')];
+    return {
+      bicycle: Math.abs(r.width / r.height - 2.5 / 3.5) < 0.01,
+      onATable: r.top > 40 && innerHeight - r.bottom > 40,
+      asWideAsItCanBe: r.width > innerWidth * 0.85,
+      // the rest of the deck is under it, off true, so the pile reads as a pile
+      stacked: under.length === 2 && under.every(c => /rotate/.test(c.style.transform))
+    };
   });
 
-  // — the front is emblems and the activity, and nothing else. A definition
-  //   card may also carry its meaning and a speak button, but those live
-  //   inside the word group; nothing from the back leaks forward. —
+  // — the front is a corner index and the activity, and nothing else. A
+  //   definition card may also carry its meaning and a speak button, but those
+  //   live inside the word group; nothing from the back leaks forward. —
   const frontIsBare = await page.evaluate(() => {
     const f = document.querySelector('.card.top .front');
     const kids = [...f.children].filter(el => !el.classList.contains('stamp'));
-    const word = kids[1];
-    return kids.length === 2 && kids[0].classList.contains('marks') &&
+    const word = kids[2];
+    return kids.length === 3 && kids[0].matches('.idx.tl') && kids[1].matches('.idx.br') &&
            word.classList.contains('word') && word.firstElementChild.classList.contains('t') &&
            [...word.children].every(el => el.matches('.t, .def, .speak')) &&
            !f.querySelector('.taglist, .kicker, .why, .odds, .facts');
   });
-  const emblems = await page.locator('.card.top .marks .mark').count();
+  // — and the index is in two opposite corners, the second one upside down —
+  const cornerIndex = await page.evaluate(() => {
+    const f = document.querySelector('.card.top .front').getBoundingClientRect();
+    const tl = document.querySelector('.card.top .idx.tl');
+    const br = document.querySelector('.card.top .idx.br');
+    const a = tl.getBoundingClientRect(), b = br.getBoundingClientRect();
+    return {
+      countsThree: tl.querySelectorAll('.mark').length <= 3 && tl.querySelectorAll('.mark').length > 0,
+      sameBothEnds: tl.innerHTML === br.innerHTML,
+      topLeft: a.top - f.top < f.height * .12 && a.left - f.left < f.width * .12,
+      bottomRight: f.bottom - b.bottom < f.height * .12 && f.right - b.right < f.width * .12,
+      upsideDown: /matrix\(-1/.test(getComputedStyle(br).transform)
+    };
+  });
+  const emblems = await page.locator('.card.top .idx.tl .mark').count();
 
   // — flip: the front must not be readable through the back, and it must turn back —
   await page.locator('.card.top').click();
@@ -149,9 +171,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     const out = { only, hidden,
       shownWhenReading: getComputedStyle(st).opacity === '1',
       topRight: r.top < innerHeight / 2 && r.left + r.width / 2 > innerWidth / 2,
-      // and the rest of the hand is out of the way while a card is turned over
-      handHidden: [...document.querySelectorAll('#deck .card:not(.top)')]
-        .every(c => getComputedStyle(c).visibility === 'hidden') };
+    };
     ACT.flip(document.querySelector('.card.top'));
     await new Promise(r => setTimeout(r, 550));
     out.hiddenAgain = getComputedStyle(st).opacity === '0';
@@ -357,13 +377,14 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('09-offline');
   await ctx.setOffline(false);
 
-  console.log({ dealt, manifestOk, fullBleed, frontIsBare, emblems, packs, flipped, frontHidden,
+  console.log({ dealt, manifestOk, cardShaped, frontIsBare, cornerIndex, emblems, packs, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
     refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, oneButton, prefilled, rewritten, curation,
     editPersisted, unedited, defEditable, persisted, swReady, offline, errors: errs });
   await browser.close();
-  const ok = dealt === 3 && manifestOk && fullBleed && frontIsBare && emblems > 2 && flipped &&
+  const ok = dealt === 3 && manifestOk && frontIsBare && emblems > 0 && flipped &&
+    Object.values(cardShaped).every(Boolean) && Object.values(cornerIndex).every(Boolean) &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
