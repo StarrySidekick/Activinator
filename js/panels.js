@@ -46,6 +46,7 @@ const menuPanel = () => openPanel({ key:'menu', title:'Activinator', body: () =>
   <button class="pbtn" data-act="browse">All activities<small>${pool().length} of them, searchable</small></button>
   <button class="pbtn" data-act="decks">Decks<small>${PACKS.filter(p => packOn(p.id)).length} of ${PACKS.length} on the table</small></button>
   <button class="pbtn" data-act="add">Write your own<small>Anything it would never think of</small></button>
+  <button class="pbtn" data-act="table">The table<small>Deal them out and handle them — a place to try things</small></button>
   <button class="pbtn" data-act="curate">Curate<small>${curationRows().length} to take back to the packs</small></button>
   <button class="pbtn" data-act="taste">What it thinks you are like<small>${S.swipes} swipes in</small></button>
   <button class="pbtn" data-act="backup">Back it up<small>There is no server, so this is the only copy</small></button>

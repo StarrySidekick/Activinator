@@ -20,6 +20,7 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/deck.css">
 <link rel="stylesheet" href="css/panels.css">
+<link rel="stylesheet" href="css/table.css">
 </head>
 <body>
 <div id="frame">
@@ -38,6 +39,9 @@
 <button class="settings" data-act="menu" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true">
   <path fill-rule="evenodd" d="M9.83 1.32 L14.17 1.32 L14.34 4.35 A8.0 8.0 0 0 1 15.76 4.94 L18.02 2.91 L21.09 5.98 L19.06 8.24 A8.0 8.0 0 0 1 19.65 9.66 L22.68 9.83 L22.68 14.17 L19.65 14.34 A8.0 8.0 0 0 1 19.06 15.76 L21.09 18.02 L18.02 21.09 L15.76 19.06 A8.0 8.0 0 0 1 14.34 19.65 L14.17 22.68 L9.83 22.68 L9.66 19.65 A8.0 8.0 0 0 1 8.24 19.06 L5.98 21.09 L2.91 18.02 L4.94 15.76 A8.0 8.0 0 0 1 4.35 14.34 L1.32 14.17 L1.32 9.83 L4.35 9.66 A8.0 8.0 0 0 1 4.94 8.24 L2.91 5.98 L5.98 2.91 L8.24 4.94 A8.0 8.0 0 0 1 9.66 4.35 Z M12 8.5a3.5 3.5 0 1 0 0 7.0a3.5 3.5 0 1 0 0-7.0Z"/>
 </svg></button>
+<!-- The table: a surface to handle cards on, over everything, empty until
+     you open it. -->
+<div id="table"></div>
 <div id="panelhost"></div>
 <div id="toast"></div>
 <script type="module" src="js/boot.js"></script>

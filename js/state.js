@@ -5,7 +5,7 @@
 import { SEEDS, PACKS, TAGS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 
 const KEY = 'activinator.v1';
-const APP_VERSION = '0.21';
+const APP_VERSION = '0.22';
 const DATA_V = 5;
 
 /* `w` is the taste model: one weight per tag, plus a bias. `seen` is the last
@@ -21,6 +21,8 @@ const fresh = () => ({
   edits: {},                   // id -> {t, tags, min, cost}: a pack card, rewritten
   pass: { n: 1, done: [] },    // which time round the deck you are, and what it has already dealt
   ctx: { who:'', where:'', time:'' },
+  table: { n: 3 },              // the table: how many cards it is laid out for
+
   packs: Object.fromEntries(PACKS.map(p => [p.id, p.on])),
   nerve: 0.3
 });
@@ -108,6 +110,14 @@ const migrate = (o) => {
   const pass = o.pass || {};
   o.pass = { n: Number(pass.n) > 0 ? Math.floor(pass.n) : 1,
              done: Array.isArray(pass.done) ? pass.done.filter(x => typeof x === 'string') : [] };
+
+  /* The table is a place to play with cards rather than part of the deck, so
+     it keeps one number and nothing else: how many it is laid out for, which
+     is what decides how big a card is drawn there. A saved state from before
+     it existed has no opinion and takes the default; anything unrecognised is
+     put back to it, because a nonsense here is a table with no cards on it. */
+  const n = Math.round(Number((o.table || {}).n));
+  o.table = { n: n >= 1 && n <= 8 ? n : 3 };
 
   /* A filter is ephemeral, and one saved under the old vocabulary means
      nothing under this one. Anything unrecognised goes back to "no filter"

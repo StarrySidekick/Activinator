@@ -410,6 +410,97 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     ACT.panels.closePanel();
     return ok;
   });
+  // — the table: dealing, handling, and staying out of the deck's way —
+  const table = await page.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const T = ACT.table;
+    const deckWas = JSON.stringify({ w: ACT.S.w, done: ACT.S.pass.done.length, swipes: ACT.S.swipes });
+    ACT.panels.closePanel();
+    T.openTable();
+    await wait(120);
+    const felt = document.querySelector('#table .felt');
+    const opened = !!felt && T.pileSize() > 0;
+
+    /* Dealt one at a time off the pile, and the pile knows it. */
+    const p0 = T.pileSize();
+    document.querySelector('.pile').click(); await wait(320);
+    const dealsOne = T.onTable().length === 1 && T.pileSize() === p0 - 1;
+
+    /* A side each way. Twenty deals landing all one way up is a one in half a
+       million coincidence; landing all one way up every run is a bug. */
+    for (let i = 0; i < 19; i++) { document.querySelector('.pile').click(); await wait(30); }
+    const sides = new Set(T.onTable().map(o => o.side));
+    const bothSides = sides.has(0) && sides.has(1);
+
+    /* Two-sided packs print the meaning on the other side; every other pack
+       prints its own back there. */
+    const kindOf = (id) => {
+      const el = [...document.querySelectorAll('.tcard')].find((e, i) => T.onTable()[i].id === id);
+      return el && el.querySelector('.face.b').classList.contains('printed') ? 'printed' : 'text';
+    };
+    const packs = ACT.PACKS;
+    const two = packs.filter(p => p.twosided).map(p => p.id);
+    const twoSided = two.length === 2 && two.includes('words') && two.includes('italian') &&
+      packs.every(p => !p.twosided || p.items.every(a => !!a.d));
+    const on = T.onTable();
+    const printedRight = on.every((o, i) => {
+      const seed = ACT.pool().find(c => c.id === o.id) || {};
+      const twoish = two.includes(seed.pack);
+      const el = document.querySelectorAll('.tcard')[i];
+      return el.querySelector('.face.b').classList.contains('printed') !== twoish;
+    });
+
+    /* Laid out for the number you asked for, inside the felt, at a card's
+       proportion. The rect is the rotated box, so measure the layout box. */
+    T.setN(4); await wait(60);
+    const cards = [...document.querySelectorAll('.tcard')];
+    const laidOut = cards.every(e =>
+      e.offsetTop >= -1 && e.offsetTop + e.offsetHeight <= felt.clientHeight + 1 &&
+      e.offsetLeft >= -1 && e.offsetLeft + e.offsetWidth <= felt.clientWidth + 1 &&
+      Math.abs(e.offsetWidth / e.offsetHeight - 7 / 12) < 0.02);
+    const setting = ACT.S.table.n === 4;
+
+    /* Shuffle is the pile and leaves the table alone; gather is the table and
+       ends in a shuffle. They were briefly one function. */
+    const outWas = T.onTable().length, pileWas = T.pileSize();
+    T.shuffle(); await wait(60);
+    const shuffleKeepsTable = T.onTable().length === outWas && T.pileSize() === pileWas;
+    T.gather(); await wait(400);
+    const gatherReturns = T.onTable().length === 0 && T.pileSize() === pileWas + outWas;
+
+    T.closeTable(); await wait(300);
+    const closes = !document.querySelector('#table .felt') && !ACT.table.isOpen();
+    /* Nothing it did was about the deck. */
+    const deckUntouched = JSON.stringify({ w: ACT.S.w, done: ACT.S.pass.done.length, swipes: ACT.S.swipes }) === deckWas;
+    return { opened, dealsOne, bothSides, twoSided, printedRight, laidOut, setting,
+             shuffleKeepsTable, gatherReturns, closes, deckUntouched };
+  });
+
+  // — and it can be handled: a tap turns a card over, a drag moves it —
+  await page.evaluate(() => { ACT.table.openTable(); ACT.table.setN(2); });
+  await page.waitForTimeout(200);
+  await page.click('.pile'); await page.waitForTimeout(320);
+  await page.click('.pile'); await page.waitForTimeout(320);
+  await shot('13-table');
+  const tc = await page.locator('.tcard').first();
+  const wasFlipped = await tc.evaluate(e => e.classList.contains('flip'));
+  await tc.click(); await page.waitForTimeout(600);
+  const tapTurns = await tc.evaluate((e, was) => e.classList.contains('flip') !== was, wasFlipped);
+  const tb0 = await tc.evaluate(e => [e.offsetLeft, e.offsetTop, e.classList.contains('flip')]);
+  const tbox = await tc.boundingBox();
+  await page.mouse.move(tbox.x + tbox.width / 2, tbox.y + tbox.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) { await page.mouse.move(tbox.x + tbox.width / 2 + i * 11, tbox.y + tbox.height / 2 + i * 7); await page.waitForTimeout(12); }
+  await page.mouse.up();
+  await page.waitForTimeout(300);
+  const tb1 = await tc.evaluate(e => [e.offsetLeft, e.offsetTop, e.classList.contains('flip')]);
+  await shot('14-table-handled');
+  // a drag moves the card and must not also turn it over
+  const dragMoves = Math.abs(tb1[0] - tb0[0]) > 40 && Math.abs(tb1[1] - tb0[1]) > 20 && tb1[2] === tb0[2];
+  await page.evaluate(() => ACT.table.closeTable());
+  await page.waitForTimeout(300);
+  table.tapTurns = tapTurns; table.dragMoves = dragMoves;
+
   await page.waitForTimeout(300);
   const swReady = await page.evaluate(() => navigator.serviceWorker.ready.then(r => !!r.active).catch(() => false));
   await ctx.setOffline(true);
@@ -422,7 +513,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
     refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, oneButton, prefilled, rewritten, curation,
-    editPersisted, unedited, defEditable, persisted, swReady, offline, errors: errs });
+    editPersisted, unedited, defEditable, table, persisted, swReady, offline, errors: errs });
   await browser.close();
   const ok = dealt === 3 && manifestOk && frontIsBare && emblems > 0 && flipped &&
     Object.values(cardShaped).every(Boolean) && Object.values(cornerIndex).every(Boolean) &&
@@ -432,6 +523,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
     mine && persisted && swReady && offline && prefilled && editPersisted && unedited &&
     defEditable && undoRound && Object.values(rounds).every(Boolean) &&
+    Object.values(table).every(Boolean) &&
     Object.values(oneButton).every(Boolean) &&
     Object.values(rewritten).every(Boolean) && Object.values(curation).every(Boolean) &&
     packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && rowIsPackShaped && !errs.length;

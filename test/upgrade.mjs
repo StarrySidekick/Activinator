@@ -53,6 +53,9 @@ const REWROTE = 'Walk to the furthest point you can reach in thirty minutes';
 const V4 = {
   v:4, w:{ outdoors:.4 }, bias:0, swipes:12, seen:{}, recent:[], mine:[],
   ctx:{ who:'', where:'', time:'' }, nerve:.3, packs:{},
+  // a saved table setting the app cannot use — a nonsense here is a table with
+  // no cards on it, so it has to be put back to a number
+  table:{ n:'lots' },
   edits:{
     // an id is the hash of the title the pack has, which is what lets a rewrite
     // be a rewrite of that card rather than a new one
@@ -142,7 +145,9 @@ const boot = async (browser, state) => {
     newPackDefaulted: ACT.PACKS.filter(p => p.id !== 'core')
       .every(p => ACT.S.packs[p.id] === p.on),
     ctxKept: ACT.S.ctx.where === 'outdoors',
-    curates: ACT.panels.curationRows().length === 0
+    curates: ACT.panels.curationRows().length === 0,
+    // a state from before the table existed arrives with a table it can open
+    tableDefaulted: ACT.S.table && ACT.S.table.n >= 1 && ACT.S.table.n <= 8
   }));
 
   // — from v4: a rewrite is carried across, cleaned against the vocabulary —
@@ -162,7 +167,9 @@ const boot = async (browser, state) => {
       // still has, or the next compile cannot find the row it replaces
       inCuration: ACT.panels.curationCSV().split('\n').some(l =>
         l.startsWith('edit,') && l.includes('Walk as far as you can get in half an hour') &&
-        l.includes('Walk to the furthest point you can reach in thirty minutes'))
+        l.includes('Walk to the furthest point you can reach in thirty minutes')),
+      // and a table setting that is not a number goes back to one
+      tableFixed: ACT.S.table.n === 3
     };
   }, idOf(REWROTE));
   await d.page.screenshot({ path:'test/shots/upgrade-v4.png' });
@@ -191,10 +198,12 @@ const boot = async (browser, state) => {
   const v2ok = out.v2.cards >= 0 && out.v2.v === 5 && out.v2.remapped && out.v2.noPositionalIds &&
     out.v2.neverStillOut && out.v2.packKept && out.v2.newPackDefaulted && !b.errs.length;
   const v3ok = out.v3.cards === 3 && out.v3.v === 5 && out.v3.editsEmpty && out.v3.roundOne &&
+    out.v3.tableDefaulted &&
     out.v3.packKept &&
     out.v3.goneDropped && out.v3.newPackDefaulted && out.v3.ctxKept && out.v3.curates &&
     !c.errs.length;
-  const v4ok = out.v4.orphanKept && out.v4.roundOne && out.v4.applied && out.v4.wasKept && out.v4.renamed &&
+  const v4ok = out.v4.orphanKept && out.v4.roundOne && out.v4.applied && out.v4.wasKept &&
+    out.v4.tableFixed && out.v4.renamed &&
     out.v4.cleaned && out.v4.inCuration && !d.errs.length;
   process.exit(v1ok && v2ok && v3ok && v4ok ? 0 : 1);
 })();

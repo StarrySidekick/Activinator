@@ -8,9 +8,9 @@
     "on": true, "mark": "partner",   "ink": "#6B3B3E", "back": "pips" },
 
   { "id": "words",          "name": "Words",          "note": "Words you might not know, and what they mean.",
-    "on": true, "mark": "read",      "ink": "#4A4159", "back": "weave" },
+    "on": true, "mark": "read",      "ink": "#4A4159", "back": "weave", "twosided": true },
   { "id": "italian",        "name": "Italian",        "note": "A word, its meaning, and a voice to say it.",
-    "on": true, "mark": "listen",    "ink": "#3F5A57", "back": "scales", "lang": "it-IT" },
+    "on": true, "mark": "listen",    "ink": "#3F5A57", "back": "scales", "lang": "it-IT", "twosided": true },
 
   { "id": "tableaus",       "name": "Tableaus",       "note": "A scene in a sentence. Work off it.",
     "on": true, "mark": "visualart", "ink": "#7A5326", "back": "diamonds" },

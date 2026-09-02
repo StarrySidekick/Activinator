@@ -39,7 +39,9 @@ The smoke test exercises dealing, the shape of the card and the hand squared up 
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
 leaves the pool but "never again" does, the context filter, the one button, search,
 liking from the browser, writing your own, rewriting the card in front of you,
-the curation export, that a whole round deals everything exactly once and then
+the curation export, the table — dealing, both sides, the layout, shuffle
+against gather, a tap that turns and a drag that does not, and that none of it
+touched the deck — that a whole round deals everything exactly once and then
 says so, that a swipe down puts a card back into the round, persistence across a
 reload and an offline reload. Screenshots land in `test/shots/` — look
 at them, this is a visual app and a passing assertion doesn't mean it looks
@@ -523,15 +525,71 @@ would disagree about what you think.
 | `deck.js` | The hand, the verdicts, undo, the stack, the empty deck. |
 | `swipe.js` | Pointer drag, the two stamps, and the tap that flips. Right is like, left is not, up is neither — which is why up has no stamp — and down is not about this card at all: it takes the last one back. |
 | `panels.js` | Every panel: the hub, right now, all activities, taste, write your own, rewrite this card, curate, backup. |
+| `table.js` | The table: its own shuffled pile, dealing, dragging, turning a card over, shuffle and gather. Touches nothing the deck owns. |
 | `boot.js` | One delegated listener set. To add an action, add a `data-act` and a case in `act()`. |
 
-Three stylesheets: `base.css` (the room), `deck.css` (the card), `panels.css`.
+Four stylesheets: `base.css` (the room), `deck.css` (the card), `panels.css`, `table.css`.
 
 After changing anything in `js/`, `css/` or `index.html`, bump `CACHE` in
 `sw.js` **and** `APP_VERSION` in `js/state.js`. Without the cache bump an
 installed copy keeps serving the old version, and the symptom — "my change
 didn't deploy" — points at the wrong culprit. A new file must also be added to
 `SHELL` in `sw.js` or it won't be there offline.
+
+## The table
+
+**Menu → The table.** A surface to handle cards on, rather than a deck that
+hands them to you one at a time. It is a place to try things: how big a card
+should be, what a spread reads like, whether a two-sided card is better than a
+card with the meaning printed under the word. Nothing tried here is a decision
+about the deck until it is moved into the deck.
+
+It is deliberately walled off. It deals from **its own shuffled pile**, built
+when you open it from the packs that are switched on, minus anything you have
+said "never again" to. It teaches the taste model nothing, it does not touch
+the round, and closing it throws the whole table away. The smoke test asserts
+that last part — the weights, the round and the swipe count all have to come
+out the other side untouched.
+
+- **Tap the pile to deal a card**, one at a time, as many as you like.
+- **Laid out for 1–8** is the one setting, and it is not really about how many
+  you get: it is what decides how big a card is drawn. The layout tries every
+  number of columns and keeps whichever gives the widest card, so four is two
+  by two on a phone and four in a row on anything wider, worked out rather than
+  chosen. A last row that does not fill goes in the middle. Deal past the
+  number it is laid out for and they stack a little down and across, clamped so
+  nothing walks off the edge — a card you cannot see is a card you have lost.
+  Type is sized in `cqw`, the card's own width, so one rule covers every size.
+- **Drag a card** anywhere. Picking one up brings it to the front. You can hang
+  it over the edge but not push it off: its middle stays on the felt, so there
+  is always something to pick back up.
+- **Tap a card to turn it over**, the same 460 ms rotation the deck uses. A tap
+  that moved less than nine pixels in under half a second is a tap; anything
+  else was a drag.
+- **Shuffle** is the pile and leaves the table alone. **Gather** is the table:
+  everything goes back in and the pile is shuffled. They were briefly the same
+  function, which made two buttons that did the same thing and no way at all to
+  shuffle what you had not dealt yet.
+
+**Two-sided packs.** `"twosided": true` in `packs/index.json` — Words and
+Italian have it. A card in such a pack is printed on both sides: the word on
+one and the meaning on the other, rather than the meaning set under the word.
+The build refuses a row in a two-sided pack with no definition, because there
+would be nothing on the back of it.
+
+On a verb card the meaning is a paragraph — the English first, then the tenses
+— so the first line is set as the headline and the rest goes under it small.
+That is what makes "one side the Italian, one side the English" true of a card
+that also has to carry a conjugation table.
+
+**Every other pack's other side is its printed back**: the same field of ink and
+pattern the decks on the Decks table are drawn with. So a card that lands face
+down on the table is a card face down on a table, not a blank.
+
+**Cards land on a random side.** On a two-sided pack that is the point — half
+arrive showing the meaning and half showing the word, which is a deck you can
+test yourself with rather than read off. On the rest it is what makes it a
+table: some face up, some face down, and turning them over is the game.
 
 ## The aesthetics studio
 

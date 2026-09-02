@@ -10,6 +10,7 @@ import { deal, cycle } from './deal.js';
 import { PACKS } from './data.js';
 import { wire as wireSwipe } from './swipe.js';
 import * as P from './panels.js';
+import * as T from './table.js';
 
 /* There is no server, so every way out of the app is a file the browser makes
    for itself. */
@@ -34,6 +35,16 @@ const act = (name, el) => {
     case 'curate': return P.curatePanel();
     case 'backup': return P.backupPanel();
     case 'closepanel': return P.closePanel();
+
+    /* The table is a surface rather than a panel, so opening it closes the
+       panel you came from — there is nothing to go back to underneath it. It
+       deals from its own pile, teaches nothing and touches no round. */
+    case 'table':      P.closePanel(); return T.openTable();
+    case 'closetable': return T.closeTable();
+    case 'dealone':    return T.dealOne();
+    case 'tshuffle':   return T.shuffle();
+    case 'tgather':    return T.gather();
+    case 'tablen':     return T.setN(v);
 
     /* Speech synthesis is the one voice that works on a train: it is in the
        browser, it costs nothing, and on an iPhone the Italian voice is already
@@ -132,12 +143,16 @@ const wire = () => {
   /* A keyboard is a Mac, and on a Mac the arrows are the swipe. */
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input,textarea')) return;
+    /* Escape still closes the table; everything else on this keyboard is the
+       deck's, and the deck is underneath it. A card swiped out of sight is a
+       card you did not decide about. */
+    if (T.isOpen() && e.key !== 'Escape') return;
     const k = { ArrowRight:'like', ArrowLeft:'dislike', ArrowUp:'skip' }[e.key];
     if (k) { e.preventDefault(); return say(k); }
     // Down is the swipe that takes the last card back, on a keyboard too.
     if (e.key === 'ArrowDown') { e.preventDefault(); return takeBack(); }
     if (e.key === 'z' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); return takeBack(); }
-    if (e.key === 'Escape') return P.closePanel();
+    if (e.key === 'Escape') return T.isOpen() ? T.closeTable() : P.closePanel();
     if (e.key === ' ') { e.preventDefault(); flip(document.querySelector('.card.top')); }
   });
 
@@ -154,4 +169,4 @@ if ('serviceWorker' in navigator) {
 
 /* One handle for the console and for the smoke test. */
 window.ACT = { S, render, redeal, goRound, say, takeBack, top, pool, deal, cycle, flip,
-               PACKS, panels:P, save };
+               PACKS, panels:P, table:T, save };

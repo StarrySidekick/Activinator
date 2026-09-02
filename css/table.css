@@ -1,0 +1,160 @@
+/* Activinator — the table.
+   A surface rather than a sheet, so it takes the whole screen and the deck
+   waits underneath it. Everything about a card here is the deck's card at a
+   different size: same proportion, same corner cut, same stock, same turn. */
+#table{
+  position:fixed; inset:0; z-index:60;
+  display:none; flex-direction:column;
+  background:var(--ink);
+  opacity:0; transition:opacity .24s ease;
+}
+body.tabled #table{display:flex}
+#table.on{opacity:1}
+
+.thead{
+  flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
+  padding:calc(var(--top) + 10px) 14px 8px;
+}
+.thead h2{
+  font-family:var(--serif); font-weight:400; font-size:18px; color:#e9e6df; margin:0;
+}
+.thead .x{
+  width:34px; height:34px; border:0; background:none; color:var(--dim);
+  font-size:17px; line-height:1;
+}
+
+/* The felt: the only part cards live in, and the box their layout is worked
+   out against. `touch-action:none` because a drag here is a drag and not the
+   page scrolling under your finger. */
+.felt{
+  position:relative; flex:1 1 auto; min-height:0;
+  margin:0 6px; touch-action:none; overflow:hidden;
+}
+
+/* — a card on the table — */
+.tcard{
+  position:absolute; top:0; left:0;
+  aspect-ratio:7 / 12;
+  --radius:8.57% / 5%;
+  border-radius:var(--radius);
+  box-shadow:0 10px 22px -8px rgba(0,0,0,.75);
+  perspective:1000px;
+  transition:box-shadow .16s ease;
+  touch-action:none; cursor:grab;
+}
+/* Picked up: off the surface and a shade bigger, the way a card comes up in
+   your fingers. The transform is inline (it carries the card's own tilt), so
+   the lift is a shadow and a scale on the inside. */
+.tcard.held{box-shadow:0 22px 40px -10px rgba(0,0,0,.8); cursor:grabbing}
+.tcard.held .tcardin{transform:scale(1.04)}
+.tcardin{
+  position:absolute; inset:0; border-radius:var(--radius);
+  transform-style:preserve-3d;
+  transition:transform .46s cubic-bezier(.4,.02,.24,1);
+}
+.tcard.flip .tcardin{transform:rotateY(-180deg)}
+.tcard.held.flip .tcardin{transform:rotateY(-180deg) scale(1.04)}
+
+.tcard .face{
+  position:absolute; inset:0; overflow:hidden;
+  border-radius:var(--radius);
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  background-color:var(--paper); color:var(--text);
+  background-image:radial-gradient(circle at 50% 50%, rgba(58,48,32,.05) .5px, transparent 1px);
+  background-size:3px 3px;
+  box-shadow:0 0 0 1px rgba(36,31,24,.14);
+  display:flex; flex-direction:column; justify-content:center;
+  padding:11% 8%;
+}
+.tcard .face.b{transform:rotateY(180deg)}
+
+/* Type scales with the card, not with the screen: eight of them on a phone are
+   eight small cards, and the word on one still has to be the loudest thing on
+   it. cqw is the card's own width, which is what makes one rule cover every
+   size the table lays out. */
+.tcard .face{container-type:inline-size}
+.tcard .word{margin:auto 0; min-width:0}
+.tcard .t{
+  font-family:var(--serif); font-weight:400; margin:0;
+  font-size:clamp(11px, 11cqw, 30px); line-height:1.15; letter-spacing:-.012em;
+  text-wrap:balance; hyphens:auto; overflow-wrap:anywhere;
+}
+.tcard .tdef{
+  margin:7% 0 0; font-size:clamp(8px, 5.2cqw, 13px); line-height:1.35;
+  color:var(--text-2); white-space:pre-line;
+}
+.tcard .idx{
+  position:absolute; display:flex; flex-direction:column; gap:4cqw;
+  align-items:center; z-index:2;
+}
+.tcard .idx.tl{top:4%; left:6.5%}
+.tcard .idx.br{bottom:4%; right:6.5%; transform:rotate(180deg)}
+.tcard .idx .mark{width:7cqw; height:7cqw; max-width:17px; max-height:17px}
+
+/* The printed back, on a pack that is not two-sided: the same field of ink and
+   pattern inside a white margin that the decks on the Decks table are drawn
+   with. A card face down on a table is a card back, not a blank. */
+.tcard .face.printed{padding:6.5%; align-items:center; justify-content:center}
+.tcard .face.printed::before{
+  content:''; position:absolute; inset:3.8% 6.5%; border-radius:6% / 3.3%;
+  background-color:var(--ink); background-image:var(--pattern);
+  background-size:var(--size,12px 12px);
+  box-shadow:0 0 0 1px rgba(255,255,255,.22) inset;
+}
+.tcard .face.printed .pip{
+  position:relative; z-index:1; width:30%; aspect-ratio:1; height:auto;
+  color:rgba(245,240,228,.92);
+}
+
+/* — the bar: the pile, and what you can do to it — */
+.tbar{
+  flex:0 0 auto; padding:10px 14px calc(var(--bot) + 12px);
+  border-top:1px solid #23262f; background:#151721;
+}
+.trow{display:flex; align-items:center; gap:10px; margin-top:10px}
+.trow:first-child{margin-top:0}
+.tlabel{margin:0; font-size:12px; color:var(--dim-2); flex:0 0 auto}
+.chips.tiny{gap:6px; margin:0}
+.chips.tiny button{padding:6px 12px; font-size:13px; min-width:38px; justify-content:center}
+
+/* The pile is a small deck, drawn the way the decks on the Decks table are:
+   two cards showing behind one, off true. It is the deal button, so it is the
+   biggest thing in the bar. */
+.pile{
+  position:relative; flex:0 0 auto; width:44px; height:75px;
+  padding:0; border:0; background:none;
+}
+.pile i, .pile .pface{
+  position:absolute; inset:0; border-radius:9% / 5%;
+  background:var(--paper); box-shadow:0 2px 6px -1px rgba(0,0,0,.6);
+}
+.pile i:nth-child(1){transform:rotate(-3deg) translate(-2px,1px)}
+.pile i:nth-child(2){transform:rotate(2deg) translate(2px,1px)}
+.pile .pface{
+  background-image:repeating-linear-gradient(45deg,rgba(40,34,26,.13) 0 1px,transparent 1px 6px),
+                   repeating-linear-gradient(-45deg,rgba(40,34,26,.13) 0 1px,transparent 1px 6px);
+  box-shadow:0 4px 10px -3px rgba(0,0,0,.7), 0 0 0 1px rgba(36,31,24,.18);
+}
+.pile:active .pface{transform:translateY(1px)}
+.pile.empty{opacity:.3}
+.pilen{
+  position:absolute; left:50%; top:50%; translate:-50% -50%; z-index:2;
+  font-size:11px; font-weight:700; color:var(--text-3);
+}
+/* Shuffling is a thing you watch happen, or it is a button that says it did
+   something you have no way of checking. */
+@keyframes riffle{
+  0%{transform:none}
+  25%{transform:translateX(-4px) rotate(-4deg)}
+  60%{transform:translateX(4px) rotate(3deg)}
+  100%{transform:none}
+}
+.pile.riffle i:nth-child(1){animation:riffle .34s ease}
+.pile.riffle i:nth-child(2){animation:riffle .34s ease .05s}
+.pile.riffle .pface{animation:riffle .34s ease .1s}
+
+.tbtn{
+  flex:1 1 0; border:1px solid #2e3240; border-radius:12px; padding:12px 8px;
+  font-size:13.5px; font-weight:600; color:#cfd3de; background:#1c1f29;
+}
+.tbtn:active{background:#242836}

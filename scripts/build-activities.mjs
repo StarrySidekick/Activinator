@@ -19,6 +19,11 @@
 // A pack may declare "lang" in index.json (e.g. "it-IT"); its cards then get
 // a speak button that says the title out loud in that language.
 //
+// A pack may also declare "twosided": true. Its cards are printed on both
+// sides — the word on one, the meaning on the other — rather than the meaning
+// sitting under the word, which is how they are dealt on the table. Every row
+// in such a pack must have a definition, or there is nothing on the back.
+//
 // Every row must name exactly one place and exactly one how-hard. Anything
 // else is refused with the file and line, because a bad row that builds is a
 // card that quietly never gets dealt.
@@ -62,6 +67,10 @@ const build = (meta) => {
      cannot name a picture that does not exist. */
   if (meta.mark && !MARKS[meta.mark])
     errors.push(`index.json: ${meta.id} wants the mark "${meta.mark}", which is not drawn`);
+  /* A two-sided pack prints its meaning on the other side of the card rather
+     than under the word, so every card in it has to have a meaning to print. */
+  if ('twosided' in meta && typeof meta.twosided !== 'boolean')
+    errors.push(`index.json: ${meta.id} — "twosided" is true or false, not ${JSON.stringify(meta.twosided)}`);
   if (!existsSync(new URL(file, dir))) { errors.push(`${file}: no such pack`); return null; }
   const rows = parseCSV(read(file));
   const head = rows.shift().map(h => h.trim().toLowerCase());
@@ -99,6 +108,8 @@ const build = (meta) => {
     const d = (r[4] || '').trim();
     if (d) item.d = d;
     if (meta.lang) item.lang = meta.lang;
+    if (meta.twosided && !d)
+      errors.push(`${at}  ${meta.id} is two-sided, so this row needs a definition to print on the other side`);
     items.push(item);
   });
   return { ...meta, items };
@@ -152,7 +163,7 @@ const out = `/* GENERATED FILE — do not edit.
    Built from packs/*.csv by scripts/build-activities.mjs. Change an activity
    by changing the CSV and running that, then commit both. */
 export const PACKS = [
-${packs.map(p => `  { id:${JSON.stringify(p.id)}, name:${JSON.stringify(p.name)}, note:${JSON.stringify(p.note)}, on:${!!p.on}, mark:${JSON.stringify(p.mark || '')}, ink:${JSON.stringify(p.ink || '#3E5140')}, back:${JSON.stringify(p.back || 'lattice')}, items:[
+${packs.map(p => `  { id:${JSON.stringify(p.id)}, name:${JSON.stringify(p.name)}, note:${JSON.stringify(p.note)}, on:${!!p.on}, mark:${JSON.stringify(p.mark || '')}, ink:${JSON.stringify(p.ink || '#3E5140')}, back:${JSON.stringify(p.back || 'lattice')}, twosided:${!!p.twosided}, items:[
 ${p.items.map(a => `    {id:'${a.id}',t:${JSON.stringify(a.t)},tags:${JSON.stringify(a.tags)},min:${a.min},cost:${a.cost}${a.d ? `,d:${JSON.stringify(a.d)}` : ''}${a.lang ? `,lang:${JSON.stringify(a.lang)}` : ''}},`).join('\n')}
   ]},`).join('\n')}
 ];
