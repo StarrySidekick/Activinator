@@ -219,6 +219,155 @@ const count = () => {
   if (p) p.classList.toggle('empty', !PILE.length);
 };
 
+/* — shaking —
+   Two ways, and they end in the same place. Shake the phone and the pile
+   shuffles. Or pick the pile up — press and hold it — and shake it in your
+   hand, which is how a deck is actually shuffled by somebody standing up.
+
+   A shake is direction changes, not speed: something fast in one direction is
+   a throw, and something that keeps reversing is a shake. Both counters want
+   the reversals to be worth something, so a small jitter while you hold the
+   pile still is not a shuffle. */
+const SHAKE_GAP = 700;          // one shuffle per shake, not one per reversal
+let lastShake = 0;
+const shookIt = () => {
+  const now = Date.now();
+  if (now - lastShake < SHAKE_GAP) return;
+  lastShake = now;
+  shuffle();
+  if (navigator.vibrate) navigator.vibrate(18);
+};
+
+/* The phone itself. `devicemotion` is behind a permission prompt on iOS that
+   can only be asked for from a tap, so it is asked for by the switch — turning
+   it on is the gesture. Nothing is listened for while it is off. */
+const M = { x:0, y:0, z:0, n:0, at:0 };
+const onMotion = (e) => {
+  const a = e.accelerationIncludingGravity || e.acceleration;
+  if (!a) return;
+  const d = Math.abs((a.x || 0) - M.x) + Math.abs((a.y || 0) - M.y) + Math.abs((a.z || 0) - M.z);
+  M.x = a.x || 0; M.y = a.y || 0; M.z = a.z || 0;
+  const now = Date.now();
+  if (now - M.at > 500) M.n = 0;            // the run has gone cold
+  if (d > 14) { M.n++; M.at = now; }
+  if (M.n >= 3) { M.n = 0; shookIt(); }
+};
+const listenMotion = (on) => {
+  removeEventListener('devicemotion', onMotion);
+  if (on) addEventListener('devicemotion', onMotion);
+};
+
+/* iOS will only hand this over from inside a gesture, and only once — after a
+   refusal it says no without asking again, so the switch has to say what
+   happened rather than sit there looking on. */
+let motionOK = false;
+const askMotion = async () => {
+  const DM = window.DeviceMotionEvent;
+  if (!DM) return false;
+  if (typeof DM.requestPermission !== 'function') { motionOK = true; return true; }  // not iOS
+  try { motionOK = (await DM.requestPermission()) === 'granted'; return motionOK; }
+  catch (e) { return false; }
+};
+
+const setShake = async () => {
+  if (S.table.shake) {
+    S.table.shake = false; save(); listenMotion(false);
+  } else {
+    if (!(await askMotion())) return toast('This device will not report movement');
+    S.table.shake = true; save(); listenMotion(true);
+  }
+  const b = $('[data-act="tshake"]');
+  if (b) {
+    b.classList.toggle('on', S.table.shake);
+    b.querySelector('span').textContent = S.table.shake ? 'on' : 'off';
+  }
+  toast(S.table.shake ? 'Shake the phone to shuffle' : 'Shaking does nothing now');
+};
+
+/* — the pile, in your hand —
+   A tap deals one. Press and hold and the pile comes off the table and follows
+   your finger; shake it there and it shuffles; let go and it drops back into
+   its slot. Which is, near enough, how you shuffle a deck standing up.
+
+   The slot in the bar keeps its size while the pile is away, so nothing in the
+   row moves under your finger. */
+const HOLD = 320;
+const P = { on:false, id:0, x:0, y:0, moved:0, held:false, timer:0, dir:0, n:0, at:0 };
+
+const liftPile = () => {
+  const p = $('.pile'); if (!p) return;
+  P.held = true;
+  const r = p.getBoundingClientRect();
+  p.style.width = r.width + 'px'; p.style.height = r.height + 'px';
+  p.classList.add('lifted');
+  movePile(P.x, P.y);
+  if (navigator.vibrate) navigator.vibrate(12);
+  toast('Shake it');
+};
+
+const movePile = (x, y) => {
+  const p = $('.pile'); if (!p) return;
+  /* Above the finger rather than under it, or the thing you are holding is the
+     one thing you cannot see. */
+  p.style.left = (x - p.offsetWidth / 2) + 'px';
+  p.style.top = (y - p.offsetHeight - 18) + 'px';
+};
+
+const dropPile = () => {
+  const p = $('.pile'), slot = $('.pileslot');
+  P.held = false;
+  if (!p || !slot) return;
+  const from = p.getBoundingClientRect(), to = slot.getBoundingClientRect();
+  p.classList.remove('lifted');
+  p.style.left = p.style.top = p.style.width = p.style.height = '';
+  p.animate([{ transform: `translate(${from.left - to.left}px,${from.top - to.top}px)` },
+             { transform: 'none' }],
+            { duration: 220, easing: 'cubic-bezier(.2,.8,.25,1)' });
+};
+
+/* Reversals of direction while you hold it, which is a shake and not a swipe. */
+const pileShake = (x) => {
+  const dx = x - P.x;
+  if (Math.abs(dx) < 9) return;
+  const dir = Math.sign(dx);
+  const now = Date.now();
+  if (now - P.at > 450) P.n = 0;
+  if (dir !== P.dir && P.dir !== 0) { P.n++; P.at = now; }
+  P.dir = dir; P.x = x;
+  if (P.n >= 3) { P.n = 0; shookIt(); }
+};
+
+const pileDown = (e) => {
+  P.on = true; P.id = e.pointerId; P.moved = 0; P.held = false;
+  P.x = e.clientX; P.y = e.clientY; P.dir = 0; P.n = 0; P.at = 0;
+  clearTimeout(P.timer);
+  P.timer = setTimeout(liftPile, HOLD);
+  const p = $('.pile');
+  try { p && p.setPointerCapture && p.setPointerCapture(e.pointerId); } catch (err) { /* not capturable */ }
+};
+
+const pileMove = (e) => {
+  if (!P.on || e.pointerId !== P.id) return;
+  P.moved = Math.max(P.moved, Math.abs(e.clientX - P.x) + Math.abs(e.clientY - P.y));
+  if (!P.held) {
+    // moved before the hold landed: that was a swipe at the bar, not a press
+    if (P.moved > 12) clearTimeout(P.timer);
+    P.y = e.clientY;
+    return;
+  }
+  P.y = e.clientY;
+  movePile(e.clientX, e.clientY);
+  pileShake(e.clientX);
+};
+
+const pileUp = (e) => {
+  if (!P.on || e.pointerId !== P.id) return;
+  P.on = false;
+  clearTimeout(P.timer);
+  if (P.held) return dropPile();
+  if (P.moved < 12) dealOne();
+};
+
 /* — picking a card up —
    The same shape as the swipe: the card follows your hand exactly, and what
    you did is decided on release. A tap that barely moved turns it over; a drag
@@ -227,6 +376,7 @@ const count = () => {
 const G = { on: false, o: null, x: 0, y: 0, ox: 0, oy: 0, moved: 0, t: 0, id: 0 };
 
 const down = (e) => {
+  if (e.target.closest('.pile')) return pileDown(e);
   const el = e.target.closest('.tcard');
   if (!el) return;
   const o = OUT.find(x => x.k === el.dataset.tk);
@@ -244,6 +394,7 @@ const down = (e) => {
 };
 
 const move = (e) => {
+  if (P.on) return pileMove(e);
   if (!G.on || e.pointerId !== G.id) return;
   const dx = e.clientX - G.x, dy = e.clientY - G.y;
   G.moved = Math.max(G.moved, Math.abs(dx) + Math.abs(dy));
@@ -259,6 +410,7 @@ const move = (e) => {
 };
 
 const up = (e) => {
+  if (P.on) return pileUp(e);
   if (!G.on || e.pointerId !== G.id) return;
   G.on = false;
   const o = G.o;
@@ -310,35 +462,73 @@ const HTML = () => `
         `<button data-act="tablen" data-v="${n}" class="${S.table.n === n ? 'on' : ''}">${n}</button>`).join('')}</div>
     </div>
     <div class="trow">
-      <button class="pile" data-act="dealone" aria-label="Deal a card">
-        <i></i><i></i><span class="pface"></span>
-        <span class="pilen">0</span>
-      </button>
+      <!-- The slot holds the pile's place in the row so the buttons do not jump
+           sideways when you pick the pile up and it goes to your finger. -->
+      <span class="pileslot">
+        <button class="pile" aria-label="Deal a card. Hold to pick the pile up.">
+          <i></i><i></i><span class="pface"></span>
+          <span class="pilen">0</span>
+        </button>
+      </span>
       <button class="tbtn" data-act="tshuffle">Shuffle</button>
       <button class="tbtn" data-act="tgather">Gather</button>
     </div>
+    <div class="trow">
+      <button class="chip toggle ${S.table.shake ? 'on' : ''}" data-act="tshake">
+        Shake to shuffle<span>${S.table.shake ? 'on' : 'off'}</span>
+      </button>
+    </div>
   </div>`;
+
+/* Wired once, not once per open. The host element outlives the screen inside
+   it, so a listener added here every time the table opens is a listener that
+   accumulates: the named ones are deduped by identity, but a click handler
+   written inline is a new function each time, and after two visits one tap on
+   the pile dealt two cards. */
+let wired = false;
+const wire = () => {
+  if (wired) return;
+  wired = true;
+  const h = host();
+  /* A tap on the pile is handled in pointerup, so that a press-and-hold can be
+     a press-and-hold instead. That leaves the keyboard with nothing: a button
+     activated by Enter or Space fires a click and no pointer events at all.
+     `detail` is 0 on exactly those, and on a script's own .click(), so this is
+     the keyboard's way in and never a second deal on a real tap. */
+  h.addEventListener('click', (e) => {
+    if (open && e.target.closest('.pile') && e.detail === 0) dealOne();
+  });
+  h.addEventListener('pointerdown', down);
+  h.addEventListener('pointermove', move);
+  h.addEventListener('pointerup', up);
+  h.addEventListener('pointercancel', up);
+};
 
 const openTable = () => {
   if (open) return;
   open = true;
   document.body.classList.add('tabled');
   host().innerHTML = HTML();
-  host().addEventListener('pointerdown', down);
-  host().addEventListener('pointermove', move);
-  host().addEventListener('pointerup', up);
-  host().addEventListener('pointercancel', up);
+  wire();
   /* Its own pile, from the packs that are on the table, minus anything you
      have said "never again" to. It is not the round and never touches it. */
   PILE = shuffled(pool().filter(live));
   OUT = [];
   count();
+  /* Only while the table is up. A listener on the accelerometer that outlives
+     the screen it belongs to is a battery bill for nothing. iOS will already
+     have been asked when the switch was turned on; where it has not, this does
+     nothing until it is. */
+  listenMotion(!!S.table.shake && (!window.DeviceMotionEvent ||
+    typeof window.DeviceMotionEvent.requestPermission !== 'function' || motionOK));
   requestAnimationFrame(() => { if (open) host().classList.add('on'); });
 };
 
 const closeTable = () => {
   if (!open) return;
   open = false;
+  listenMotion(false);
+  clearTimeout(P.timer); P.on = false; P.held = false;
   document.body.classList.remove('tabled');
   host().classList.remove('on');
   setTimeout(() => { if (!open) host().innerHTML = ''; }, 240);
@@ -354,7 +544,7 @@ const setN = (n) => {
 
 addEventListener('resize', () => { if (open) relay(); });
 
-export { openTable, closeTable, dealOne, shuffle, gather, setN, relay };
+export { openTable, closeTable, dealOne, shuffle, gather, setN, setShake, relay };
 export const isOpen = () => open;
 export const onTable = () => OUT.map(o => ({ id: o.c.id, t: o.c.t, side: o.side }));
 export const pileSize = () => PILE.length;

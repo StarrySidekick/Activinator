@@ -596,6 +596,20 @@ out the other side untouched.
 - **Tap a card to turn it over**, the same 460 ms rotation the deck uses. A tap
   that moved less than nine pixels in under half a second is a tap; anything
   else was a drag.
+- **Shake the phone to shuffle**, with a switch in the bar to turn it off.
+  `devicemotion` is behind a permission prompt on iOS that can only be asked
+  for from inside a gesture, so the switch itself is that gesture: turning it on
+  is what asks. Nothing is listened for while it is off, and the listener is
+  dropped when the table closes — an accelerometer listener that outlives its
+  screen is a battery bill for nothing. A shake is *direction changes*, not
+  speed: something fast in one direction is a throw, something that keeps
+  reversing is a shake.
+- **Or pick the pile up and shake it in your hand**, which is how a deck is
+  actually shuffled by somebody standing up. Press and hold it for 320 ms and it
+  comes off the table, scales up and follows your finger; reverse direction three
+  times and it shuffles; let go and it drops back into its slot. A `.pileslot`
+  holds its place in the bar while it is away, so nothing beside it moves under
+  your finger. A tap is still a tap and deals one card.
 - **Shuffle** is the pile and leaves the table alone. **Gather** is the table:
   everything goes back in and the pile is shuffled. They were briefly the same
   function, which made two buttons that did the same thing and no way at all to
@@ -628,6 +642,18 @@ word, which is a deck you can test yourself with rather than read off.
 doing nothing, and an exception out of a `pointerdown` handler takes the rest
 of the gesture with it. Capture improves a drag; it is not required for one. It
 is in a `try` in both `swipe.js` and `table.js`.
+
+**Wire a host's listeners once, not once per open.** `#table` outlives the
+screen rendered into it, so a listener added in `openTable()` accumulates. The
+named handlers are deduped by identity and were fine; a click handler written
+inline is a new function every time, and after two visits to the table one tap
+on the pile dealt two cards. `wire()` is guarded by a flag.
+
+**A tap on the pile is handled in `pointerup`**, so that a press-and-hold can be
+a press-and-hold. That leaves the keyboard with nothing — a button activated by
+Enter or Space fires a click and no pointer events at all — so there is a click
+handler for `detail === 0`, which is exactly keyboard activation and a script's
+own `.click()`, and never a real tap.
 
 **Do not put `container-type` on a face that turns over.** The type here is
 sized from `--tw`, the card's own width in pixels, written by `table.js` when it

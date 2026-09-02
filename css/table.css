@@ -119,11 +119,25 @@ body.tabled #table{display:flex}
 
 /* The pile is a small deck, drawn the way the decks on the Decks table are:
    two cards showing behind one, off true. It is the deal button, so it is the
-   biggest thing in the bar. */
+   biggest thing in the bar.
+
+   The slot keeps the pile's place in the row while the pile itself is off in
+   your hand, so nothing beside it moves under your finger. */
+.pileslot{position:relative; flex:0 0 auto; width:44px; height:75px}
 .pile{
-  position:relative; flex:0 0 auto; width:44px; height:75px;
+  position:absolute; inset:0;
   padding:0; border:0; background:none;
+  touch-action:none;
 }
+/* Off the table and following your finger. Fixed, because it has to be able to
+   go anywhere on the screen and not just inside the bar. */
+.pile.lifted{
+  position:fixed; inset:auto; z-index:70;
+  filter:drop-shadow(0 14px 18px rgba(0,0,0,.6));
+  transform:scale(1.25);
+}
+.pile.lifted i:nth-child(1){transform:rotate(-6deg) translate(-4px,2px)}
+.pile.lifted i:nth-child(2){transform:rotate(5deg) translate(4px,2px)}
 .pile i, .pile .pface{
   position:absolute; inset:0; border-radius:9% / 5%;
   background:var(--paper); box-shadow:0 2px 6px -1px rgba(0,0,0,.6);
@@ -152,6 +166,20 @@ body.tabled #table{display:flex}
 .pile.riffle i:nth-child(1){animation:riffle .34s ease}
 .pile.riffle i:nth-child(2){animation:riffle .34s ease .05s}
 .pile.riffle .pface{animation:riffle .34s ease .1s}
+
+/* The switch. A chip that says what it is and what it is set to, rather than a
+   slider you have to read the colour of. */
+.chip.toggle{
+  display:inline-flex; align-items:center; gap:8px;
+  border:1px solid #2e3240; border-radius:999px; padding:7px 8px 7px 13px;
+  font-size:12.5px; color:var(--dim); background:#1c1f29;
+}
+.chip.toggle span{
+  font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  padding:3px 9px; border-radius:999px; background:#2a2e3a; color:var(--dim-2);
+}
+.chip.toggle.on{color:#e9e6df; border-color:#3d4354}
+.chip.toggle.on span{background:var(--yes); color:#0f1410}
 
 .tbtn{
   flex:1 1 0; border:1px solid #2e3240; border-radius:12px; padding:12px 8px;

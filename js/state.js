@@ -5,7 +5,7 @@
 import { SEEDS, PACKS, TAGS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 
 const KEY = 'activinator.v1';
-const APP_VERSION = '0.24';
+const APP_VERSION = '0.25';
 const DATA_V = 5;
 
 /* `w` is the taste model: one weight per tag, plus a bias. `seen` is the last
@@ -21,7 +21,8 @@ const fresh = () => ({
   edits: {},                   // id -> {t, tags, min, cost}: a pack card, rewritten
   pass: { n: 1, done: [] },    // which time round the deck you are, and what it has already dealt
   ctx: { who:'', where:'', time:'' },
-  table: { n: 3 },              // the table: how many cards it is laid out for
+  table: { n: 3,                // the table: how many cards it is laid out for
+           shake: true },       // and whether shaking the phone shuffles it
 
   packs: Object.fromEntries(PACKS.map(p => [p.id, p.on])),
   nerve: 0.3
@@ -116,8 +117,10 @@ const migrate = (o) => {
      is what decides how big a card is drawn there. A saved state from before
      it existed has no opinion and takes the default; anything unrecognised is
      put back to it, because a nonsense here is a table with no cards on it. */
-  const n = Math.round(Number((o.table || {}).n));
-  o.table = { n: n >= 1 && n <= 8 ? n : 3 };
+  const t = o.table || {};
+  const n = Math.round(Number(t.n));
+  o.table = { n: n >= 1 && n <= 8 ? n : 3,
+              shake: t.shake === undefined ? true : !!t.shake };
 
   /* A filter is ephemeral, and one saved under the old vocabulary means
      nothing under this one. Anything unrecognised goes back to "no filter"

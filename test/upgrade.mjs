@@ -157,7 +157,8 @@ const boot = async (browser, state) => {
     ctxKept: ACT.S.ctx.where === 'outdoors',
     curates: ACT.panels.curationRows().length === 0,
     // a state from before the table existed arrives with a table it can open
-    tableDefaulted: ACT.S.table && ACT.S.table.n >= 1 && ACT.S.table.n <= 8
+    tableDefaulted: ACT.S.table && ACT.S.table.n >= 1 && ACT.S.table.n <= 8 &&
+                    ACT.S.table.shake === true
   }));
 
   // — from v4: a rewrite is carried across, cleaned against the vocabulary —
@@ -179,7 +180,7 @@ const boot = async (browser, state) => {
         l.startsWith('edit,') && l.includes('Walk as far as you can get in half an hour') &&
         l.includes('Walk to the furthest point you can reach in thirty minutes')),
       // and a table setting that is not a number goes back to one
-      tableFixed: ACT.S.table.n === 3
+      tableFixed: ACT.S.table.n === 3 && ACT.S.table.shake === true
     };
   }, idOf(REWROTE));
   await d.page.screenshot({ path:'test/shots/upgrade-v4.png' });

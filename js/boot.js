@@ -45,6 +45,7 @@ const act = (name, el) => {
     case 'tshuffle':   return T.shuffle();
     case 'tgather':    return T.gather();
     case 'tablen':     return T.setN(v);
+    case 'tshake':     return T.setShake();
 
     /* Speech synthesis is the one voice that works on a train: it is in the
        browser, it costs nothing, and on an iPhone the Italian voice is already

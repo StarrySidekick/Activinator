@@ -612,6 +612,47 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('14-table-handled');
   // a drag moves the card and must not also turn it over
   const dragMoves = Math.abs(tb1[0] - tb0[0]) > 40 && Math.abs(tb1[1] - tb0[1]) > 20 && tb1[2] === tb0[2];
+  /* — the pile: a tap deals one, a press picks it up, a shake in your hand
+       shuffles it, and letting go drops it back in its slot. — */
+  const pileBox = await page.locator('.pile').boundingBox();
+  const dealtBefore = await page.evaluate(() => ACT.table.onTable().length);
+  await page.mouse.move(pileBox.x + pileBox.width / 2, pileBox.y + pileBox.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(430);                       // past the hold
+  const lifted = await page.evaluate(() => !!document.querySelector('.pile.lifted'));
+  await page.mouse.move(200, 420); await page.waitForTimeout(60);
+  const follows = await page.evaluate(() => {
+    const r = document.querySelector('.pile').getBoundingClientRect();
+    return Math.abs(r.left + r.width / 2 - 200) < 40 && r.bottom < 420;
+  });
+  // a shake is reversals, so a straight drag must not have shuffled it
+  const quietSoFar = await page.evaluate(() => document.querySelector('#toast').textContent);
+  for (const x of [120, 280, 120, 280, 120, 280]) { await page.mouse.move(x, 420); await page.waitForTimeout(40); }
+  await page.waitForTimeout(150);
+  const shookShuffles = await page.evaluate(() => /Shuffled/.test(document.querySelector('#toast').textContent));
+  await page.mouse.up(); await page.waitForTimeout(320);
+  const dropped = await page.evaluate(() => {
+    const p = document.querySelector('.pile'), slot = document.querySelector('.pileslot');
+    if (!p || !slot || p.classList.contains('lifted')) return false;
+    const a = p.getBoundingClientRect(), b = slot.getBoundingClientRect();
+    return Math.abs(a.left - b.left) < 2 && Math.abs(a.top - b.top) < 2;
+  });
+  // and picking it up is not dealing: no card came off during any of that
+  const heldDealtNothing = await page.evaluate(d => ACT.table.onTable().length === d, dealtBefore);
+  await page.click('.pile'); await page.waitForTimeout(320);
+  const tapDeals = await page.evaluate(d => ACT.table.onTable().length === d + 1, dealtBefore);
+  const shakeSwitch = await page.evaluate(async () => {
+    const was = ACT.S.table.shake;
+    document.querySelector('[data-act="tshake"]').click();
+    await new Promise(r => setTimeout(r, 120));
+    const flipped = ACT.S.table.shake !== was;
+    document.querySelector('[data-act="tshake"]').click();
+    await new Promise(r => setTimeout(r, 120));
+    return flipped && ACT.S.table.shake === was;
+  });
+  Object.assign(table, { lifted, follows, shookShuffles, dropped, heldDealtNothing,
+                         tapDeals, shakeSwitch,
+                         straightDragIsNotAShake: !/Shuffled/.test(quietSoFar) });
   await page.evaluate((w) => { ACT.table.closeTable(); ACT.S.packs = JSON.parse(w); ACT.save(); ACT.redeal(); }, packsWere);
   await page.waitForTimeout(300);
   table.tapTurns = tapTurns; table.dragMoves = dragMoves;
