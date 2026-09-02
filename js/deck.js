@@ -38,20 +38,48 @@ const know = () => {
    The button on the back is asked for at the halfway point rather than at
    either end: at the start it fades in over a card still showing its face, and
    at the end it arrives after the card has settled, which is late. */
-const TURN = 460;
+const TURN = 460, HALF = TURN / 2;
+/* Two halves of one rotation, and it never turns past 90°.
+
+   Out to edge-on, accelerating; the face is swapped there, where the card is a
+   line and there is nothing to see; then out again from edge-on the other way,
+   decelerating. The jump from -90° to +90° is between two identical pictures —
+   a card with no width — so what you see is one sweep, the near edge crossing
+   the middle and coming out the far side.
+
+   It turned the whole 180° in one go before, with both faces on the card and
+   `backface-visibility` holding back whichever faced away. That reads better as
+   code and it asks the browser to honour backface-visibility inside a
+   preserve-3d subtree; where it does not, both faces paint coplanar and the
+   front shows through the back, mirrored. Ninety degrees is the most a face can
+   turn and still only ever be seen from the front. */
 const flip = (el) => {
   if (!el || el.dataset.turning) return;
+  const inner = el.querySelector('.cardin');
+  if (!inner) return;
   el.dataset.turning = '1';
   el.classList.add('turning');
   document.body.classList.add('turning');
-  el.classList.toggle('flip');
-  setTimeout(know, TURN / 2);
+  inner.style.transition = `transform ${HALF}ms cubic-bezier(.4,0,1,1)`;
+  inner.style.transform = 'rotateY(-90deg)';
   setTimeout(() => {
-    el.classList.remove('turning');
-    document.body.classList.remove('turning');
-    delete el.dataset.turning;
+    el.classList.toggle('flip');
     know();
-  }, TURN);
+    /* Straight to the far side without animating through: the two are the same
+       picture, and animating between them is the turn going backwards. */
+    inner.style.transition = 'none';
+    inner.style.transform = 'rotateY(90deg)';
+    inner.getBoundingClientRect();     // reflow, or the next line has nothing to animate from
+    inner.style.transition = `transform ${HALF}ms cubic-bezier(0,0,.6,1)`;
+    inner.style.transform = 'rotateY(0deg)';
+    setTimeout(() => {
+      inner.style.transition = ''; inner.style.transform = '';
+      el.classList.remove('turning');
+      document.body.classList.remove('turning');
+      delete el.dataset.turning;
+      know();
+    }, HALF);
+  }, HALF);
 };
 
 const toast = (msg) => {

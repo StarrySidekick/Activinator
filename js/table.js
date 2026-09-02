@@ -235,7 +235,12 @@ const down = (e) => {
   G.x = e.clientX; G.y = e.clientY; G.ox = o.x; G.oy = o.y;
   o.z = ++Z; el.style.zIndex = o.z;
   el.classList.add('held');
-  el.setPointerCapture?.(e.pointerId);
+  /* A pointer that has already been released — a synthetic event, an
+       assistive device, a release that beat us here — throws rather than
+       no-opping, and an exception thrown out of a pointerdown handler takes
+       the rest of the gesture with it. Capture is an improvement on the
+       drag, not a requirement of it. */
+  try { el.setPointerCapture?.(e.pointerId); } catch (err) { /* not capturable */ }
 };
 
 const move = (e) => {
@@ -261,13 +266,32 @@ const up = (e) => {
   if (G.moved < 9 && Date.now() - G.t < 500) turn(o);
 };
 
-const TURN = 460;
+/* The same two halves as the deck's flip, and for the same reason — see the
+   note in deck.css. Out to edge-on, swap the face where there is nothing to
+   see, out again from edge-on the other way. Nothing is ever turned past 90°,
+   so no face is ever seen from behind. */
+const TURN = 460, HALF = TURN / 2;
 const turn = (o) => {
   if (o.el.dataset.turning || !twoSided(o.c)) return;
+  const inner = o.el.querySelector('.tcardin');
+  if (!inner) return;
   o.el.dataset.turning = '1';
-  o.side = o.side ? 0 : 1;
-  o.el.classList.toggle('flip');
-  setTimeout(() => { delete o.el.dataset.turning; }, TURN);
+  const lift = () => (o.el.classList.contains('held') ? ' scale(1.04)' : '');
+  inner.style.transition = `transform ${HALF}ms cubic-bezier(.4,0,1,1)`;
+  inner.style.transform = 'rotateY(-90deg)' + lift();
+  setTimeout(() => {
+    o.side = o.side ? 0 : 1;
+    o.el.classList.toggle('flip');
+    inner.style.transition = 'none';
+    inner.style.transform = 'rotateY(90deg)' + lift();
+    inner.getBoundingClientRect();     // reflow, or there is nothing to animate from
+    inner.style.transition = `transform ${HALF}ms cubic-bezier(0,0,.6,1)`;
+    inner.style.transform = 'rotateY(0deg)' + lift();
+    setTimeout(() => {
+      inner.style.transition = ''; inner.style.transform = '';
+      delete o.el.dataset.turning;
+    }, HALF);
+  }, HALF);
 };
 
 /* — the screen —

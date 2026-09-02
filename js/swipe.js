@@ -40,7 +40,12 @@ const down = (e) => {
   G.on = true; G.el = el; G.x = e.clientX; G.y = e.clientY;
   G.dx = G.dy = G.moved = 0; G.t = Date.now(); G.id = e.pointerId;
   el.classList.remove('rest');
-  el.setPointerCapture?.(e.pointerId);
+  /* A pointer that has already been released — a synthetic event, an
+       assistive device, a release that beat us here — throws rather than
+       no-opping, and an exception thrown out of a pointerdown handler takes
+       the rest of the gesture with it. Capture is an improvement on the
+       drag, not a requirement of it. */
+  try { el.setPointerCapture?.(e.pointerId); } catch (err) { /* not capturable */ }
 };
 
 const move = (e) => {

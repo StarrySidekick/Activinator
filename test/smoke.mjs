@@ -84,15 +84,21 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   });
   const emblems = await page.locator('.card.top .idx.tl .mark').count();
 
-  // — turning a card over. One movement that carries all the way through: the
-  //   matrix's m11 is cos of the angle, so it runs 1 → 0 → -1 and never turns
-  //   back on itself. A squeeze-and-open would come back to +1, which is
-  //   exactly what it is not allowed to do. Sampled frame by frame, because a
-  //   screenshot cannot catch the middle of half a second. —
+  // — turning a card over. Two halves of one rotation, and it never turns past
+  //   90°: m11 is the cosine of the angle, so it runs 1 → 0 out to edge-on and
+  //   0 → 1 back out the other side. The assertion that matters is the last
+  //   one: m11 never goes negative, on the container or on the face that is
+  //   showing. A face drawn with a negative m11 is a face seen from behind,
+  //   which is mirrored text — which is what turning the whole 180° with both
+  //   faces on the card gave on a browser that does not honour
+  //   backface-visibility inside a 3D subtree. Sampled frame by frame, because
+  //   a screenshot cannot catch the middle of half a second. —
   const turn = await page.evaluate(async () => {
     const card = document.querySelector('.card.top');
     const inner = card.querySelector('.cardin');
     const cosOf = () => +new DOMMatrixReadOnly(getComputedStyle(inner).transform).m11.toFixed(3);
+    const faces = () => [...card.querySelectorAll('.face')]
+      .filter(f => getComputedStyle(f).display !== 'none').length;
     const behind = () => {
       const o = document.querySelector('#deck .card:not(.top)');
       return o ? getComputedStyle(o).visibility : 'hidden';
@@ -101,32 +107,34 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     ACT.flip(card);
     const t0 = performance.now();
     await new Promise(done => {
-      const tick = () => { seen.push([cosOf(), behind()]);
+      const tick = () => { seen.push([cosOf(), behind(), faces()]);
         performance.now() - t0 < 700 ? requestAnimationFrame(tick) : done(); };
       requestAnimationFrame(tick);
     });
     const cos = seen.map(s => s[0]);
     const mid = seen.filter(s => Math.abs(s[0]) < 0.9);
+    const half = cos.indexOf(Math.min(...cos.map(Math.abs)) * Math.sign(cos[0] || 1));
     return {
       startsSquare: cos[0] > 0.99,
       passesEdgeOn: Math.min(...cos.map(Math.abs)) < 0.12,
-      // all the way round, not back where it started
-      carriesThrough: cos[cos.length - 1] < -0.99,
-      // and never reverses on the way: no frame turns back towards the front
-      neverDoublesBack: cos.every((c, i) => !i || c <= cos[i - 1] + 0.02),
+      opensBackOut: cos[cos.length - 1] > 0.99,
+      /* Never seen from behind. This is the whole bug: a negative m11 is a
+         mirrored face, and no frame of the turn is allowed one. */
+      neverMirrored: cos.every(c => c >= -0.01),
+      // one face in the layout at a time, all the way through
+      oneFaceThroughout: seen.every(s => s[2] === 1),
       // the hand behind is out of sight for the whole of it, so the gap that
       // opens as the card goes edge-on shows the room and not another card
       handHidden: mid.length > 3 && mid.every(s => s[1] === 'hidden')
     };
   });
   const flipped = await page.locator('.card.top.flip').count() === 1;
-  // The front is facing away rather than removed: both faces are on the card
-  // and the browser holds back whichever has its back to you.
+  // The front is not there at all rather than facing away: nothing that is not
+  // being looked at is painted, so nothing can show through anything.
   const frontHidden = await page.evaluate(() => {
     const card = document.querySelector('.card.top');
-    const m = new DOMMatrixReadOnly(getComputedStyle(card.querySelector('.cardin')).transform);
-    const bf = (s) => getComputedStyle(card.querySelector(s)).backfaceVisibility === 'hidden';
-    return m.m11 < -0.99 && bf('.face.front') && bf('.face.back');
+    return getComputedStyle(card.querySelector('.face.front')).display === 'none' &&
+           getComputedStyle(card.querySelector('.face.back')).display !== 'none';
   });
   await shot('02-back');
   await page.locator('.card.top').click();
@@ -566,6 +574,33 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   const wasFlipped = await tc.evaluate(e => e.classList.contains('flip'));
   await tc.click(); await page.waitForTimeout(600);
   const tapTurns = await tc.evaluate((e, was) => e.classList.contains('flip') !== was, wasFlipped);
+  /* And it is never drawn mirrored on the way. One face in the layout at a
+     time, and the container never past 90° — a negative m11 is a face seen from
+     behind, which is text backwards.
+
+     The sampler is armed first and the turn started by a real tap, because a
+     hand-made PointerEvent is not a pointer: setPointerCapture throws on one,
+     and the throw comes out of the app's own pointerdown handler. */
+  await page.evaluate(() => {
+    const card = document.querySelector('.tcard');
+    const inner = card.querySelector('.tcardin');
+    window.__turn = [];
+    const t0 = performance.now();
+    const tick = () => {
+      const t = getComputedStyle(inner).transform;
+      window.__turn.push([+new DOMMatrixReadOnly(t === 'none' ? '' : t).m11.toFixed(3),
+        [...card.querySelectorAll('.face')].filter(f => getComputedStyle(f).display !== 'none').length]);
+      if (performance.now() - t0 < 800) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await tc.click();
+  await page.waitForTimeout(850);
+  const tableTurnClean = await page.evaluate(() => {
+    const seen = window.__turn || [];
+    return seen.length > 10 && seen.every(s => s[0] >= -0.01 && s[1] === 1) &&
+           Math.min(...seen.map(s => Math.abs(s[0]))) < 0.12;
+  });
   const tb0 = await tc.evaluate(e => [e.offsetLeft, e.offsetTop, e.classList.contains('flip')]);
   const tbox = await tc.boundingBox();
   await page.mouse.move(tbox.x + tbox.width / 2, tbox.y + tbox.height / 2);
@@ -580,6 +615,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await page.evaluate((w) => { ACT.table.closeTable(); ACT.S.packs = JSON.parse(w); ACT.save(); ACT.redeal(); }, packsWere);
   await page.waitForTimeout(300);
   table.tapTurns = tapTurns; table.dragMoves = dragMoves;
+  table.turnClean = tableTurnClean;
 
   /* — a panel opened and closed inside one frame must not leave the host
        taking taps. `.on` is added a frame late so the sheet has something to

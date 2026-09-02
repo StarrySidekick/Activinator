@@ -70,13 +70,27 @@
    The two things that made 3D look wrong before are fixed rather than avoided:
    the shadow is on .card and does not rotate, and the rest of the hand is
    hidden for the length of the turn so the gap shows the room and not another
-   identical cream card. */
-.cardin{
-  position:absolute; inset:0; border-radius:var(--radius);
-  transform-style:preserve-3d;
-  transition:transform .46s cubic-bezier(.4,.02,.24,1);
-}
-.card.flip .cardin{transform:rotateY(-180deg)}
+   identical cream card.
+
+   **It is one rotation but two halves, and it never turns past 90°.** The first
+   half takes the card to edge-on, the face is swapped while there is nothing on
+   screen to see, and the second half opens it out from edge-on the other way.
+   Both halves are real `rotateY` with the card's own perspective, so it reads
+   as one continuous sweep — the near edge crosses the middle and comes out the
+   far side, which is what a card does.
+
+   The version before this turned the whole 180° in one go, with both faces on
+   the card at once and `backface-visibility` holding back whichever faced away.
+   That is the tidier thing to write and it depends on the browser honouring
+   `backface-visibility` inside a `preserve-3d` subtree. Where it does not, both
+   faces paint and they are coplanar, so what you get is the *front* showing
+   through the back, mirrored — text backwards. Turning only to 90° cannot
+   produce that: there is one face in the layout at a time, `display:none` on
+   the other, and nothing is ever rotated far enough to be seen from behind.
+
+   The timing is written by flip() in deck.js rather than by a class, because
+   the two halves need a transition turned off between them. */
+.cardin{position:absolute; inset:0; border-radius:var(--radius)}
 /* A card lifts off the pile as you turn it, and drops back. */
 .card.turning{box-shadow:0 30px 46px -12px rgba(0,0,0,.72)}
 /* Only the hand behind the one turning. The card itself must stay painted, or
@@ -147,13 +161,13 @@ body.turning #deck .card:not(.top){visibility:hidden}
 /* The one button sits in the top right of the back, so the kicker stops short
    of it. */
 .face.back .kicker{padding-right:46px}
-/* Both faces are on the card at once, back to back, and the one facing away is
-   held back by `backface-visibility` rather than by `display` — the whole point
-   of a rotation that carries through is that there is no moment to swap them
-   at. The back starts a half-turn round, so the container's -180° lands it
-   square. */
-.face{backface-visibility:hidden; -webkit-backface-visibility:hidden}
-.face.back{transform:rotateY(180deg)}
+/* One face is in the layout at a time, and the swap happens at the join of the
+   two halves, while the card is edge-on and there is nothing to see. `display`
+   rather than `backface-visibility`: a face that is not there cannot show
+   through the one that is, whatever the browser thinks of a 3D subtree. */
+.card .face.back{display:none}
+.card.flip .face.front{display:none}
+.card.flip .face.back{display:flex}
 
 /* Paper, not a rectangle of cream: a faint tooth, printed under everything. */
 .face::after{

@@ -430,17 +430,35 @@ comes back the way it went: down from the top rather than appearing. There is
 no undo button, so nothing has to sit on the card waiting to be needed. Up is
 unchanged — it passes the card on without saying anything about it.
 
-**The flip is one movement that carries all the way through.** A single 460 ms
-`rotateY(-180deg)` on `.cardin`, one transition, nothing timed in the middle of
-it. Both faces are on the card at once and `backface-visibility` holds back
-whichever has its back to you, so there is no moment to swap them at — which is
-the point: a turn that has a swap in it has a seam.
+**The flip is one movement, in two halves, and it never turns past 90°.** Out
+to edge-on in 230 ms accelerating, the face swapped there where the card is a
+line and there is nothing to see, then out again from edge-on the other way in
+230 ms decelerating. The jump from -90° to +90° is between two identical
+pictures — a card with no width — so what you see is one sweep, the near edge
+crossing the middle and coming out the far side.
+
+**Never both faces at once, and never `backface-visibility`.** It was a single
+460 ms `rotateY(-180deg)` with both faces on the card and `backface-visibility`
+holding back whichever faced away. That is much the tidier thing to write, and
+it asks the browser to honour `backface-visibility` inside a `preserve-3d`
+subtree. Where it does not — Timothy's phone, and Chromium composes it
+correctly so no test here caught it — both faces paint, they are coplanar, and
+what you get is the *front* showing through the back, mirrored: text backwards.
+It is what the printed card backs were bleeding through as too; removing them
+treated the symptom.
+
+Ninety degrees is the most a face can turn and still only ever be seen from the
+front. One face is in the layout at a time (`display:none` on the other), so
+there is nothing behind anything to show through. The smoke test samples the
+turn frame by frame and asserts the container's `m11` never goes negative and
+exactly one face is displayed throughout — a negative `m11` is a face seen from
+behind, which is the bug.
 
 It turns **negative**, which lifts the right edge up out of the screen towards
 you, the way you turn a card you are holding. Positive pushes that edge away
 and reads as the card going backwards.
 
-The two things that made earlier 3D versions look wrong are fixed here rather
+The two other things that made earlier versions look wrong are fixed rather
 than avoided. The drop shadow is on `.card`, which does not rotate — a shadow
 swinging round with the card was most of what made it look like a rotating
 picture instead of a turning card; the hairline edge stays on `.face` and does
@@ -455,9 +473,11 @@ wrong, because it is the same motion twice, once forwards and once in reverse:
 however it is eased, a card that goes out and comes back looks like it sprang
 back rather than turned over.
 
-`flip()` in `js/deck.js` owns the timing. `data-turning` stops a second tap
-landing mid-turn, and `know()` runs at the halfway point rather than at either
-end — at the start the button on the back fades in over a card still showing
+`flip()` in `js/deck.js` owns the timing — it has to, because the two halves
+need the transition turned off between them, which a class cannot do.
+`turn()` in `js/table.js` is the same thing for a card on the table.
+`data-turning` stops a second tap landing mid-turn, and `know()` runs at the
+halfway point rather than at either end — at the start the button on the back fades in over a card still showing
 its face, and at the end it arrives after the card has settled, which is late.
 
 `theme-color` is the ink, flat. Safari tints its own toolbars with it, and while
@@ -603,6 +623,11 @@ uses them.
 **Cards land on a random side**, where there is a second side to land on. On a
 two-sided pack that is the point: half arrive showing the meaning and half the
 word, which is a deck you can test yourself with rather than read off.
+
+**`setPointerCapture` throws on a pointer that is already gone**, rather than
+doing nothing, and an exception out of a `pointerdown` handler takes the rest
+of the gesture with it. Capture improves a drag; it is not required for one. It
+is in a `try` in both `swipe.js` and `table.js`.
 
 **Do not put `container-type` on a face that turns over.** The type here is
 sized from `--tw`, the card's own width in pixels, written by `table.js` when it

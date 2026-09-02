@@ -47,18 +47,17 @@ body.tabled #table{display:flex}
    the lift is a shadow and a scale on the inside. */
 .tcard.held{box-shadow:0 22px 40px -10px rgba(0,0,0,.8); cursor:grabbing}
 .tcard.held .tcardin{transform:scale(1.04)}
-.tcardin{
-  position:absolute; inset:0; border-radius:var(--radius);
-  transform-style:preserve-3d;
-  transition:transform .46s cubic-bezier(.4,.02,.24,1);
-}
-.tcard.flip .tcardin{transform:rotateY(-180deg)}
-.tcard.held.flip .tcardin{transform:rotateY(-180deg) scale(1.04)}
+.tcardin{position:absolute; inset:0; border-radius:var(--radius)}
 
+/* One face is in the layout at a time — see the long note in deck.css. The
+   card never turns past 90°, so a face is only ever seen from the front, and
+   the one that is not showing is not there at all. Both faces at once with
+   `backface-visibility` holding one back is the tidier thing to write and it
+   is what put the front through the back, mirrored, on a browser that does not
+   honour it inside a 3D subtree. */
 .tcard .face{
   position:absolute; inset:0; overflow:hidden;
   border-radius:var(--radius);
-  backface-visibility:hidden; -webkit-backface-visibility:hidden;
   background-color:var(--paper); color:var(--text);
   background-image:radial-gradient(circle at 50% 50%, rgba(58,48,32,.05) .5px, transparent 1px);
   background-size:3px 3px;
@@ -66,7 +65,9 @@ body.tabled #table{display:flex}
   display:flex; flex-direction:column; justify-content:center;
   padding:11% 8%;
 }
-.tcard .face.b{transform:rotateY(180deg)}
+.tcard .face.b{display:none}
+.tcard.flip .face.a{display:none}
+.tcard.flip .face.b{display:flex}
 
 /* Type scales with the card, not with the screen: eight of them on a phone are
    eight small cards, and the word on one still has to be the loudest thing on
