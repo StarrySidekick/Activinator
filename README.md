@@ -400,6 +400,16 @@ sticking together. It is a three-pixel `radial-gradient` at 5% opacity — meant
 to be findable and never noticeable, because a texture you can see is worse
 than none.
 
+**A panel opened and closed inside one frame left an invisible layer over
+everything.** `#panelhost` is `pointer-events:none` until it gets `.on`, and
+`openPanel` adds that a frame late so the sheet has something to slide in from.
+Closing removes it synchronously — so a same-tick open-and-shut let the pending
+frame put `.on` back on a host with nothing in it: a full-screen
+`pointer-events:auto` layer, invisible, swallowing every tap on the deck and on
+the table, with nothing on the screen to say why. The callback is guarded on
+`PANEL` still being the panel it was opened for. Anything else that adds a class
+a frame late wants the same guard.
+
 **There is one button in the whole app, and you meet it only once you have
 turned a card over.** It is the app's own mark, top right of the back, and it
 opens the hub — which is where everything is. There were four marks in the
@@ -582,14 +592,25 @@ On a verb card the meaning is a paragraph — the English first, then the tenses
 That is what makes "one side the Italian, one side the English" true of a card
 that also has to carry a conjugation table.
 
-**Every other pack's other side is its printed back**: the same field of ink and
-pattern the decks on the Decks table are drawn with. So a card that lands face
-down on the table is a card face down on a table, not a blank.
+**Every other pack is one-sided here**: one face, always dealt face up, and
+tapping it does nothing because there is nothing on the other side. There was a
+printed back for those cards for one version — the field of ink and pattern the
+decks on the Decks table are drawn with — and it bled through the front, so the
+pattern sat over the words. It is out until the two-sided dynamic is settled.
+The pattern classes it used are still in `panels.css`, where the Decks table
+uses them.
 
-**Cards land on a random side.** On a two-sided pack that is the point — half
-arrive showing the meaning and half showing the word, which is a deck you can
-test yourself with rather than read off. On the rest it is what makes it a
-table: some face up, some face down, and turning them over is the game.
+**Cards land on a random side**, where there is a second side to land on. On a
+two-sided pack that is the point: half arrive showing the meaning and half the
+word, which is a deck you can test yourself with rather than read off.
+
+**Do not put `container-type` on a face that turns over.** The type here is
+sized from `--tw`, the card's own width in pixels, written by `table.js` when it
+places the card. It was a container query, which reads far better — until you
+notice that `container-type` computes to `contain: layout style inline-size`,
+and layout containment on the very element carrying `backface-visibility` and
+the half-turn is exactly the thing that can flatten it. The face that should
+have been facing away came through the front.
 
 ## The aesthetics studio
 

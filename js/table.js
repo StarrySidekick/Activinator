@@ -11,15 +11,21 @@
    laid out for is a number you set, and it decides how big a card is drawn —
    which is the whole of "how many can I see at once".
 
-   Cards land on a random side. On a two-sided pack — Words and Italian — that
-   means half of them arrive showing the meaning and half showing the word,
-   which is the point: it is a deck you can test yourself with rather than read
-   off. On every other pack the other side is the pack's own printed back, so a
-   card that lands face down is a card face down on a table. */
+   Only a two-sided pack — Words and Italian — has two sides here, and those
+   land on a random side: half arrive showing the meaning and half the word,
+   which is the point, since that is a deck you can test yourself with rather
+   than read off. Everything else is one-sided and always dealt face up, and
+   tapping it does nothing, because there is nothing on the other side of it.
+
+   There was a printed back for those cards for one version — the ink and
+   pattern the decks on the Decks table are drawn with — and it bled through
+   the front, so the pattern sat over the words. It is out until the two-sided
+   dynamic is settled; the pattern classes it used are still in panels.css,
+   where the Decks table uses them. */
 import { S, save, pool } from './state.js';
 import { PACKS } from './data.js';
 import { live } from './deal.js';
-import { esc, markHTML, indexOf } from './cards.js';
+import { esc, indexOf } from './cards.js';
 import { toast } from './deck.js';
 
 const host = () => document.getElementById('table');
@@ -96,23 +102,24 @@ const slotOf = (i) => {
    tenses — so the first line is set as the headline and the rest goes under it
    small. That is what makes "one side the Italian, one side the English" true
    of a card that also has to carry a conjugation table. */
+const twoSided = (c) => !!(packOf(c).twosided && c.d);
+
 const sideB = (c) => {
-  const p = packOf(c);
-  if (p.twosided && c.d) {
-    const [head, ...rest] = String(c.d).split('\n');
-    return `<div class="face b">
+  if (!twoSided(c)) return '';
+  const [head, ...rest] = String(c.d).split('\n');
+  return `<div class="face b">
       ${indexOf(c)}
       <div class="word">
         <h2 class="t">${esc(head)}</h2>
         ${rest.length ? `<p class="tdef">${esc(rest.join('\n'))}</p>` : ''}
       </div>
     </div>`;
-  }
-  return `<div class="face b printed ${p.back ? 'back-' + esc(p.back) : ''}"
-    style="--ink:${esc(p.ink || '#2a2f3a')}">${p.mark ? markHTML(p.mark, 'pip') : ''}</div>`;
 };
 
-const cardHTML = (o) => `<article class="tcard ${o.side ? 'flip' : ''}" data-tk="${o.k}">
+/* A one-sided card has one face and says so, so nothing tries to turn it over
+   and there is no second face to bleed through the first. */
+const cardHTML = (o) => `<article class="tcard ${twoSided(o.c) ? '' : 'oneside'} ${o.side ? 'flip' : ''}"
+  data-tk="${o.k}">
   <div class="tcardin">
     <div class="face a">
       ${indexOf(o.c)}
@@ -128,6 +135,7 @@ const place = (o) => {
   const s = slotOf(o.i);
   if (o.x == null) { o.x = s.x; o.y = s.y; }
   o.el.style.width = s.w + 'px';
+  o.el.style.setProperty('--tw', s.w + 'px');
   o.el.style.left = o.x + 'px';
   o.el.style.top = o.y + 'px';
   o.el.style.transform = `rotate(${o.rot}deg)`;
@@ -146,7 +154,10 @@ const dealOne = () => {
   if (!PILE.length) return toast('The pile is empty');
   const c = PILE.shift();
   const o = { k: 'k' + (Z++), c, i: OUT.length, z: Z,
-              side: Math.random() < 0.5 ? 1 : 0,   // a random side up, as dealt
+              /* A random side up, as dealt — but only where there is a second
+                 side to land on. A one-sided card dealt face down would be a
+                 card with nothing on it. */
+              side: twoSided(c) && Math.random() < 0.5 ? 1 : 0,
               rot: (Math.random() * 5 - 2.5), x: null, y: null };
   OUT.push(o);
   $('.felt').insertAdjacentHTML('beforeend', cardHTML(o));
@@ -252,7 +263,7 @@ const up = (e) => {
 
 const TURN = 460;
 const turn = (o) => {
-  if (o.el.dataset.turning) return;
+  if (o.el.dataset.turning || !twoSided(o.c)) return;
   o.el.dataset.turning = '1';
   o.side = o.side ? 0 : 1;
   o.el.classList.toggle('flip');
@@ -298,7 +309,7 @@ const openTable = () => {
   PILE = shuffled(pool().filter(live));
   OUT = [];
   count();
-  requestAnimationFrame(() => host().classList.add('on'));
+  requestAnimationFrame(() => { if (open) host().classList.add('on'); });
 };
 
 const closeTable = () => {

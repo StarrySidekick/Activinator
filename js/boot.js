@@ -6,7 +6,7 @@ import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId, re
 import { learn } from './taste.js';
 import { render, reset as redeal, goRound, say, takeBack, more, toast, top,
          flip } from './deck.js';
-import { deal, cycle } from './deal.js';
+import { deal, cycle, fits } from './deal.js';
 import { PACKS } from './data.js';
 import { wire as wireSwipe } from './swipe.js';
 import * as P from './panels.js';
@@ -168,5 +168,5 @@ if ('serviceWorker' in navigator) {
 }
 
 /* One handle for the console and for the smoke test. */
-window.ACT = { S, render, redeal, goRound, say, takeBack, top, pool, deal, cycle, flip,
+window.ACT = { S, render, redeal, goRound, say, takeBack, top, pool, deal, cycle, fits, flip,
                PACKS, panels:P, table:T, save };

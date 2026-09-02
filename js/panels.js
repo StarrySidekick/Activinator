@@ -22,7 +22,13 @@ const openPanel = (spec) => {
         <button class="x" data-act="closepanel" aria-label="Close">✕</button></div>
       <div class="pbody">${spec.body()}</div>
     </section>`;
-  requestAnimationFrame(() => host().classList.add('on'));
+  /* Guarded on this still being the panel that is open. `.on` is what makes the
+     host take pointer events at all, and it is added a frame late so the sheet
+     has something to slide in from — so a panel opened and closed inside one
+     frame left this callback to put `.on` back on a host with nothing in it:
+     an invisible full-screen layer that swallowed every tap, on the deck and
+     on the table alike. Nothing on the screen showed why. */
+  requestAnimationFrame(() => { if (PANEL === spec) host().classList.add('on'); });
 };
 const refreshPanel = () => {
   if (!PANEL) return;

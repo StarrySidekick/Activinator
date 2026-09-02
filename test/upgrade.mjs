@@ -100,7 +100,17 @@ const boot = async (browser, state) => {
     listGone: !('list' in ACT.S),
     // a written activity has to end up filterable and marked, or it is invisible
     mine: ACT.S.mine[0],
-    mineDealable: ACT.deal(400).some(c => c.id === 'm1'),
+    /* Dealable, asked of the filters rather than of a draw. `deal(400)` is 400
+       random picks weighted by taste, so a specific card turning up in it is
+       likely and not certain — this failed about one run in four and said
+       nothing true when it did. What the migration has to get right is that the
+       card passes: it is in the pool, nothing has banned it, and it answers the
+       filter. */
+    mineDealable: (() => {
+      const c = ACT.pool().find(x => x.id === 'm1');
+      return !!c && ACT.deal(400, []).length > 0 &&
+             (ACT.S.seen['m1'] || {}).v !== 'never' && ACT.fits(c);
+    })(),
     // a state saved before packs existed takes the defaults each pack ships with
     packsDefaulted: JSON.stringify(ACT.S.packs) ===
       JSON.stringify(Object.fromEntries(ACT.PACKS.map(p => [p.id, p.on])))

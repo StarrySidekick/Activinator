@@ -368,11 +368,50 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   }), [editId, 'A better way of putting it']);
   await shot('11-rewritten');
 
-  // — and everything judged or rewritten comes back out as pack rows —
+  // — and everything judged or rewritten comes back out as pack rows.
+  //   One card with a multi-line definition is judged on purpose, so the row
+  //   that spans lines is always in here rather than turning up on the two
+  //   percent of runs where the deck happened to deal one. —
+  await page.evaluate(() => {
+    const c = ACT.pool().find(x => (x.d || '').includes('\n'));
+    if (c) { ACT.S.seen[c.id] = { v:'like', at:new Date().toISOString() }; ACT.save(); }
+  });
   await menu();
   await page.click('[data-act="curate"]'); await page.waitForTimeout(400);
   await shot('12-curate');
-  const lines = (await page.evaluate(() => document.querySelector('.pbody textarea').value)).split('\n');
+  /* A CSV is not its lines. A quoted cell may contain newlines — an Italian
+     verb card carries its conjugations one tense to a line — so splitting on
+     every newline cuts that row up and the last column of it lands on a line of
+     its own. This test did exactly that, and passed for weeks because the card
+     it happens to rewrite is whatever the deck dealt: it only failed on the two
+     percent of runs that landed on a verb. Records, the way the build's own
+     parser reads them. */
+  const records = (text) => {
+    const out = []; let cur = '', q = false;
+    for (const ch of text) {
+      if (ch === '"') { q = !q; cur += ch; }
+      else if (ch === '\n' && !q) { out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    if (cur) out.push(cur);
+    return out;
+  };
+  /* The same reading, one level down: a comma inside quotes is part of a cell. */
+  const cells = (line) => {
+    const out = []; let cur = '', q = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (q) {
+        if (ch === '"') { if (line[i + 1] === '"') { cur += '"'; i++; } else q = false; }
+        else cur += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ',') { out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+    out.push(cur);
+    return out;
+  };
+  const lines = records(await page.evaluate(() => document.querySelector('.pbody textarea').value));
   const row = lines.find(l => l.includes('A better way of putting it'));
   const curation = {
     head: lines[0] === 'verdict,pack,title,minutes,cost,tags,definition,was',
@@ -382,7 +421,11 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     // rewrite replaces and a rewritten title no longer matches the CSV
     rewrite: !!row && /^(edit|keep|cut|out),/.test(row) && row.includes(was),
     // a skip is not a verdict, so it is not in here
-    noSkips: !lines.some(l => l.startsWith('skip,'))
+    noSkips: !lines.some(l => l.startsWith('skip,')),
+    /* Eight columns on every row, quotes and embedded newlines and all. This is
+       the assertion that would have caught the split above, and the one that
+       says the file is pasteable rather than merely present. */
+    eightColumns: lines.length > 3 && lines.every(l => cells(l).length === 8)
   };
   await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 
@@ -426,37 +469,68 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     document.querySelector('.pile').click(); await wait(320);
     const dealsOne = T.onTable().length === 1 && T.pileSize() === p0 - 1;
 
-    /* A side each way. Twenty deals landing all one way up is a one in half a
-       million coincidence; landing all one way up every run is a bug. */
-    for (let i = 0; i < 19; i++) { document.querySelector('.pile').click(); await wait(30); }
-    const sides = new Set(T.onTable().map(o => o.side));
-    const bothSides = sides.has(0) && sides.has(1);
-
-    /* Two-sided packs print the meaning on the other side; every other pack
-       prints its own back there. */
-    const kindOf = (id) => {
-      const el = [...document.querySelectorAll('.tcard')].find((e, i) => T.onTable()[i].id === id);
-      return el && el.querySelector('.face.b').classList.contains('printed') ? 'printed' : 'text';
-    };
     const packs = ACT.PACKS;
     const two = packs.filter(p => p.twosided).map(p => p.id);
     const twoSided = two.length === 2 && two.includes('words') && two.includes('italian') &&
       packs.every(p => !p.twosided || p.items.every(a => !!a.d));
-    const on = T.onTable();
-    const printedRight = on.every((o, i) => {
+
+    /* Only a two-sided pack has a second side, so the coin is only tossed for
+       those. Deal twenty of them: landing all one way up is a one in half a
+       million coincidence, and landing all one way up every run is a bug. So
+       the pile is narrowed to those packs to ask the question at all. */
+    const was = JSON.stringify(ACT.S.packs);
+    for (const k of Object.keys(ACT.S.packs)) ACT.S.packs[k] = two.includes(k);
+    T.closeTable(); T.openTable(); await wait(120);
+    for (let i = 0; i < 20; i++) { document.querySelector('.pile').click(); await wait(28); }
+    const sides = new Set(T.onTable().map(o => o.side));
+    const bothSides = sides.has(0) && sides.has(1);
+    /* Two sides means two faces, and the other one is the meaning in words —
+       never a printed pattern, which bled through the front and is gone.
+
+       Asked of each card against its own pack rather than of the whole table.
+       Switching every pack but the two-sided ones off does not empty the pile
+       of one-sided cards: anything you wrote yourself is in the pool whatever
+       the packs say, by design, and this test writes one earlier. Demanding two
+       faces of everything on the table failed on the runs that dealt it. */
+    const twoFaced = T.onTable().every((o, i) => {
       const seed = ACT.pool().find(c => c.id === o.id) || {};
-      const twoish = two.includes(seed.pack);
-      const el = document.querySelectorAll('.tcard')[i];
-      return el.querySelector('.face.b').classList.contains('printed') !== twoish;
+      const p = ACT.PACKS.find(x => x.id === seed.pack) || {};
+      const both = !!(p.twosided && seed.d);
+      const e = document.querySelectorAll('.tcard')[i];
+      return e.querySelectorAll('.face').length === (both ? 2 : 1) &&
+             !e.querySelector('.printed') &&
+             e.classList.contains('oneside') === !both &&
+             (both || o.side === 0) &&
+             (!both || !!e.querySelector('.face.b .t'));
     });
+
+    /* And a one-sided pack has one face, is always dealt face up, and does not
+       turn over when you tap it — there is nothing on the other side. */
+    ACT.S.packs = JSON.parse(was);
+    for (const k of Object.keys(ACT.S.packs)) ACT.S.packs[k] = (k === 'core');
+    T.closeTable(); T.openTable(); await wait(120);
+    for (let i = 0; i < 8; i++) { document.querySelector('.pile').click(); await wait(28); }
+    const ones = [...document.querySelectorAll('.tcard')];
+    const oneSided = ones.length === 8 &&
+      ones.every(e => e.querySelectorAll('.face').length === 1 &&
+                      e.classList.contains('oneside') && !e.classList.contains('flip')) &&
+      T.onTable().every(o => o.side === 0);
+    ones[0].click(); await wait(600);
+    const wontTurn = !ones[0].classList.contains('flip');
+    ACT.S.packs = JSON.parse(was);
+    T.closeTable(); T.openTable(); await wait(120);
+    for (let i = 0; i < 20; i++) { document.querySelector('.pile').click(); await wait(28); }
 
     /* Laid out for the number you asked for, inside the felt, at a card's
        proportion. The rect is the rotated box, so measure the layout box. */
     T.setN(4); await wait(60);
+    /* Re-asked for, not the one captured at the top: opening the table again
+       replaces the whole screen, and the old node measures nothing at all. */
+    const felt2 = document.querySelector('#table .felt');
     const cards = [...document.querySelectorAll('.tcard')];
-    const laidOut = cards.every(e =>
-      e.offsetTop >= -1 && e.offsetTop + e.offsetHeight <= felt.clientHeight + 1 &&
-      e.offsetLeft >= -1 && e.offsetLeft + e.offsetWidth <= felt.clientWidth + 1 &&
+    const laidOut = cards.length > 8 && cards.every(e =>
+      e.offsetTop >= -1 && e.offsetTop + e.offsetHeight <= felt2.clientHeight + 1 &&
+      e.offsetLeft >= -1 && e.offsetLeft + e.offsetWidth <= felt2.clientWidth + 1 &&
       Math.abs(e.offsetWidth / e.offsetHeight - 7 / 12) < 0.02);
     const setting = ACT.S.table.n === 4;
 
@@ -472,12 +546,18 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     const closes = !document.querySelector('#table .felt') && !ACT.table.isOpen();
     /* Nothing it did was about the deck. */
     const deckUntouched = JSON.stringify({ w: ACT.S.w, done: ACT.S.pass.done.length, swipes: ACT.S.swipes }) === deckWas;
-    return { opened, dealsOne, bothSides, twoSided, printedRight, laidOut, setting,
-             shuffleKeepsTable, gatherReturns, closes, deckUntouched };
+    return { opened, dealsOne, bothSides, twoSided, twoFaced, oneSided, wontTurn,
+             laidOut, setting, shuffleKeepsTable, gatherReturns, closes, deckUntouched };
   });
 
-  // — and it can be handled: a tap turns a card over, a drag moves it —
-  await page.evaluate(() => { ACT.table.openTable(); ACT.table.setN(2); });
+  // — and it can be handled: a tap turns a card over, a drag moves it. Only a
+  //   two-sided card has a second side to turn to, so the pile is those. —
+  const packsWere = await page.evaluate(() => JSON.stringify(ACT.S.packs));
+  await page.evaluate(() => {
+    const two = ACT.PACKS.filter(p => p.twosided).map(p => p.id);
+    for (const k of Object.keys(ACT.S.packs)) ACT.S.packs[k] = two.includes(k);
+    ACT.table.openTable(); ACT.table.setN(2);
+  });
   await page.waitForTimeout(200);
   await page.click('.pile'); await page.waitForTimeout(320);
   await page.click('.pile'); await page.waitForTimeout(320);
@@ -497,10 +577,21 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await shot('14-table-handled');
   // a drag moves the card and must not also turn it over
   const dragMoves = Math.abs(tb1[0] - tb0[0]) > 40 && Math.abs(tb1[1] - tb0[1]) > 20 && tb1[2] === tb0[2];
-  await page.evaluate(() => ACT.table.closeTable());
+  await page.evaluate((w) => { ACT.table.closeTable(); ACT.S.packs = JSON.parse(w); ACT.save(); ACT.redeal(); }, packsWere);
   await page.waitForTimeout(300);
   table.tapTurns = tapTurns; table.dragMoves = dragMoves;
 
+  /* — a panel opened and closed inside one frame must not leave the host
+       taking taps. `.on` is added a frame late so the sheet has something to
+       slide in from, and that callback used to fire after the close and put it
+       back on an empty host: an invisible full-screen layer over the deck and
+       the table that ate every tap, with nothing on screen to say why. — */
+  const ghostPanel = await page.evaluate(async () => {
+    ACT.panels.menuPanel(); ACT.panels.closePanel();     // same tick, open and shut
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const h = document.getElementById('panelhost');
+    return !h.classList.contains('on') && getComputedStyle(h).pointerEvents === 'none';
+  });
   await page.waitForTimeout(300);
   const swReady = await page.evaluate(() => navigator.serviceWorker.ready.then(r => !!r.active).catch(() => false));
   await ctx.setOffline(true);
@@ -513,7 +604,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
     refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, oneButton, prefilled, rewritten, curation,
-    editPersisted, unedited, defEditable, table, persisted, swReady, offline, errors: errs });
+    editPersisted, unedited, defEditable, table, ghostPanel, persisted, swReady, offline, errors: errs });
   await browser.close();
   const ok = dealt === 3 && manifestOk && frontIsBare && emblems > 0 && flipped &&
     Object.values(cardShaped).every(Boolean) && Object.values(cornerIndex).every(Boolean) &&
@@ -523,7 +614,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
     mine && persisted && swReady && offline && prefilled && editPersisted && unedited &&
     defEditable && undoRound && Object.values(rounds).every(Boolean) &&
-    Object.values(table).every(Boolean) &&
+    Object.values(table).every(Boolean) && ghostPanel &&
     Object.values(oneButton).every(Boolean) &&
     Object.values(rewritten).every(Boolean) && Object.values(curation).every(Boolean) &&
     packs.shipsMoreThanOne && packs.off && packs.back && packs.adds && rowIsPackShaped && !errs.length;

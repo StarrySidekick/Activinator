@@ -70,41 +70,40 @@ body.tabled #table{display:flex}
 
 /* Type scales with the card, not with the screen: eight of them on a phone are
    eight small cards, and the word on one still has to be the loudest thing on
-   it. cqw is the card's own width, which is what makes one rule cover every
-   size the table lays out. */
-.tcard .face{container-type:inline-size}
+   it. `--tw` is the card's own width in pixels, written by table.js when it
+   places the card, which is what makes one rule cover every size the table
+   lays out.
+
+   It was a container query — `container-type:inline-size` on the face, and
+   `cqw` — which reads better and cost the flip: `container-type` computes to
+   `contain: layout style inline-size`, and layout containment on the very
+   element carrying `backface-visibility` and the half-turn is exactly the
+   thing that can flatten it. The face that should have been facing away came
+   through the front. One number set from JS has no opinion about containment. */
 .tcard .word{margin:auto 0; min-width:0}
 .tcard .t{
   font-family:var(--serif); font-weight:400; margin:0;
-  font-size:clamp(11px, 11cqw, 30px); line-height:1.15; letter-spacing:-.012em;
+  font-size:clamp(11px, calc(var(--tw) * .11), 30px); line-height:1.15; letter-spacing:-.012em;
   text-wrap:balance; hyphens:auto; overflow-wrap:anywhere;
 }
 .tcard .tdef{
-  margin:7% 0 0; font-size:clamp(8px, 5.2cqw, 13px); line-height:1.35;
+  margin:7% 0 0; font-size:clamp(8px, calc(var(--tw) * .052), 13px); line-height:1.35;
   color:var(--text-2); white-space:pre-line;
 }
 .tcard .idx{
-  position:absolute; display:flex; flex-direction:column; gap:4cqw;
+  position:absolute; display:flex; flex-direction:column; gap:calc(var(--tw) * .04);
   align-items:center; z-index:2;
 }
 .tcard .idx.tl{top:4%; left:6.5%}
 .tcard .idx.br{bottom:4%; right:6.5%; transform:rotate(180deg)}
-.tcard .idx .mark{width:7cqw; height:7cqw; max-width:17px; max-height:17px}
+.tcard .idx .mark{
+  width:clamp(7px, calc(var(--tw) * .07), 17px);
+  height:clamp(7px, calc(var(--tw) * .07), 17px);
+}
 
-/* The printed back, on a pack that is not two-sided: the same field of ink and
-   pattern inside a white margin that the decks on the Decks table are drawn
-   with. A card face down on a table is a card back, not a blank. */
-.tcard .face.printed{padding:6.5%; align-items:center; justify-content:center}
-.tcard .face.printed::before{
-  content:''; position:absolute; inset:3.8% 6.5%; border-radius:6% / 3.3%;
-  background-color:var(--ink); background-image:var(--pattern);
-  background-size:var(--size,12px 12px);
-  box-shadow:0 0 0 1px rgba(255,255,255,.22) inset;
-}
-.tcard .face.printed .pip{
-  position:relative; z-index:1; width:30%; aspect-ratio:1; height:auto;
-  color:rgba(245,240,228,.92);
-}
+/* A one-sided card has nothing on the other side, so it does not offer to turn
+   over. It can still be picked up and moved. */
+.tcard.oneside{cursor:grab}
 
 /* — the bar: the pile, and what you can do to it — */
 .tbar{
