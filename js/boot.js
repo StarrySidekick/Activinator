@@ -1,16 +1,20 @@
 /* Activinator — the entry point and the one listener set.
    Everything routes through act(): to add something the app can do, add a
    data-act and a case here. Nothing binds a listener inside a render. */
-import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId, remember,
-         donePass, undonePass } from './state.js';
+import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId,
+         remember } from './state.js';
 import { learn } from './taste.js';
-import { render, reset as redeal, goRound, say, takeBack, more, toast, top,
-         flip } from './deck.js';
-import { deal, cycle, fits } from './deal.js';
+import { buildPile, fits } from './deal.js';
 import { PACKS } from './data.js';
-import { wire as wireSwipe } from './swipe.js';
+import { toast } from './toast.js';
 import * as P from './panels.js';
 import * as T from './table.js';
+
+/* The app is the table. `redeal` is what everything that changes the pool calls
+   — switching a deck off, a filter, a restore — and it means "the pile is not
+   what it was, build it again". */
+const redeal = () => T.rebuild();
+const { render, say, takeBack, more, top, flip } = T;
 
 /* There is no server, so every way out of the app is a file the browser makes
    for itself. */
@@ -36,16 +40,11 @@ const act = (name, el) => {
     case 'backup': return P.backupPanel();
     case 'closepanel': return P.closePanel();
 
-    /* The table is a surface rather than a panel, so opening it closes the
-       panel you came from — there is nothing to go back to underneath it. It
-       deals from its own pile, teaches nothing and touches no round. */
-    case 'table':      P.closePanel(); return T.openTable();
-    case 'closetable': return T.closeTable();
     case 'dealone':    return T.dealOne();
     case 'tshuffle':   return T.shuffle();
     case 'tgather':    return T.gather();
     case 'tablen':     return T.setN(v);
-    case 'tshake':     return T.setShake();
+    case 'tshake':     P.closePanel(); return T.setShake().then(() => P.menuPanel());
 
     /* Speech synthesis is the one voice that works on a train: it is in the
        browser, it costs nothing, and on an iPhone the Italian voice is already
@@ -66,10 +65,11 @@ const act = (name, el) => {
     case 'saveedit': return P.saveEdit();
     case 'unedit':   return P.unedit();
 
-    case 'like': case 'dislike': case 'skip': return say(name);
-    case 'newpass': return goRound();
-    case 'more':  return more();
-    case 'never': return say('never');
+    /* A verdict from the back of a card names the card it is about: with a
+       spread out there is no "the" card. */
+    case 'like': case 'dislike': case 'skip': return say(name, id);
+    case 'more':  return more(id);
+    case 'never': return say('never', id);
 
     /* Context filters what is dealt and teaches nothing: a wet Tuesday is not
        evidence about what you are like. */
@@ -83,12 +83,8 @@ const act = (name, el) => {
       const c = byId(id); if (!c) return;
       const want = name === 'blike' ? 'like' : 'dislike';
       const had = (S.seen[id] || {}).v;
-      /* Judging one here counts exactly as judging it on a card, which means it
-         is out of this round too — or the deck would deal you the thing you
-         just made your mind up about. */
-      if (had === want) { delete S.seen[id]; undonePass(id); }
-      else { learn(c, want === 'like' ? 1 : 0, 1); S.seen[id] = { v:want, at:new Date().toISOString() };
-             donePass(id); }
+        if (had === want) delete S.seen[id];
+      else { learn(c, want === 'like' ? 1 : 0, 1); S.seen[id] = { v:want, at:new Date().toISOString() }; }
       save(); redeal();
       const box = document.getElementById('browerows');
       if (box) return P.browseSearch(document.querySelector('[data-in="q"]').value);
@@ -144,30 +140,25 @@ const wire = () => {
   /* A keyboard is a Mac, and on a Mac the arrows are the swipe. */
   document.addEventListener('keydown', (e) => {
     if (e.target.matches('input,textarea')) return;
-    /* Escape still closes the table; everything else on this keyboard is the
-       deck's, and the deck is underneath it. A card swiped out of sight is a
-       card you did not decide about. */
-    if (T.isOpen() && e.key !== 'Escape') return;
     const k = { ArrowRight:'like', ArrowLeft:'dislike', ArrowUp:'skip' }[e.key];
     if (k) { e.preventDefault(); return say(k); }
     // Down is the swipe that takes the last card back, on a keyboard too.
     if (e.key === 'ArrowDown') { e.preventDefault(); return takeBack(); }
     if (e.key === 'z' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); return takeBack(); }
-    if (e.key === 'Escape') return T.isOpen() ? T.closeTable() : P.closePanel();
-    if (e.key === ' ') { e.preventDefault(); flip(document.querySelector('.card.top')); }
+    if (e.key === 'Escape') return P.closePanel();
+    if (e.key === ' ') { e.preventDefault(); flip(document.querySelector('#deck .card.top')); }
   });
 
-  wireSwipe(document.getElementById('deck'));
 };
 
 load();
 wire();
-redeal();
+T.start();
 
 if ('serviceWorker' in navigator) {
   addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
 
 /* One handle for the console and for the smoke test. */
-window.ACT = { S, render, redeal, goRound, say, takeBack, top, pool, deal, cycle, fits, flip,
+window.ACT = { S, render, redeal, say, takeBack, top, pool, buildPile, fits, flip,
                PACKS, panels:P, table:T, save };

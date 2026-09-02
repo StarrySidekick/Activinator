@@ -78,10 +78,20 @@ const cardHTML = (c) => {
       </div>
     </div>
     <div class="face back">
+      ${/* A two-sided card leads its back with the meaning, set the way the word
+            is set on the front: that is the other side of the card, and it has
+            to be the loudest thing on it. What the app knows follows underneath,
+            because a card still has a back even when both its sides are
+            printed. */ ''}
+      ${c.twoSided ? `<div class="other">
+        <h2 class="t">${esc(String(c.d).split('\n')[0])}</h2>
+        ${String(c.d).split('\n').slice(1).join('\n').trim()
+          ? `<p class="tdef">${esc(String(c.d).split('\n').slice(1).join('\n'))}</p>` : ''}
+      </div>` : ''}
       <p class="kicker">${c.kind === 'wild' ? 'wildcard' : esc(TAGS[c.tags[0]] || 'what this is')}${
         c.edit ? `<span class="dot"></span><span class="k2">rewritten</span>` : ''}</p>
       <h3>${esc(c.t)}</h3>
-      ${c.d ? `<p class="def">${esc(c.d)}</p>` : ''}
+      ${c.d && !c.twoSided ? `<p class="def">${esc(c.d)}</p>` : ''}
       <p class="pnote" style="color:var(--text-3);margin-top:8px">${esc(lengthOf(c.min))}</p>
       <ul class="taglist">${c.tags.map(g => {
         const w = S.w[g] || 0;
@@ -92,10 +102,18 @@ const cardHTML = (c) => {
       <p class="why">${esc(c.why || '')}</p>
       ${r.length ? `<p class="pnote" style="color:var(--text-3);margin-top:6px">On the strength of
         ${r.map(x => esc(x.label) + (x.up ? '' : ' — against')).join(', ')}.</p>` : ''}
+      ${/* The verdict is on the back as well as under your thumb. With one card
+            out, a swipe is the verdict and these are a second way to it; with a
+            spread out, a drag moves the card you are holding, so this is the
+            only way — every card carries its own, named by id. */ ''}
+      <div class="backrow verdict">
+        <button data-act="like" data-id="${esc(c.id)}" class="yes">Like</button>
+        <button data-act="dislike" data-id="${esc(c.id)}" class="no">Don’t like</button>
+      </div>
       <div class="backrow">
-        <button data-act="more">More like this</button>
-        <button data-act="edit">Rewrite it</button>
-        <button data-act="never" class="never">Never again</button>
+        <button data-act="more" data-id="${esc(c.id)}">More like this</button>
+        <button data-act="edit" data-id="${esc(c.id)}">Rewrite it</button>
+        <button data-act="never" data-id="${esc(c.id)}" class="never">Never again</button>
       </div>
     </div>
    </div>

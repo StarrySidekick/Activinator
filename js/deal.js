@@ -7,19 +7,20 @@
    spend the rest of its life showing you that — so a fixed share of every hand
    is dealt against what it knows, and says so on its face.
 
-   **It deals in rounds.** Ranking says what comes first; the round says that
-   everything comes once. A card you have said something about is out until the
-   round ends, and the round ends when there is nothing left in it — which is a
-   screen you have to answer, not a silent reshuffle.
+   **It builds a pile, once, and then deals off the top of it.** That is the
+   whole of "nothing repeats until you have been through everything": a card
+   that has come off the pile is not in the pile any more, and the only way it
+   comes back is you shuffling it back in. There was a round here doing the same
+   job with bookkeeping — a list of what had been said about, and a screen at
+   the end of it — and a pile is the same guarantee without anything to keep.
 
-   It did not used to. Both draws picked at random from a wide slice of the
-   ranking — the top quarter of sixteen hundred cards is four hundred — and the
-   wildcard draw sorted by how well a tag was known and so did not even look at
-   what you had just been shown. The card you swiped a minute ago was eligible
-   again the moment it left the hand, and repeats turned up within a few dozen
-   swipes on a deck it would take all day to get through. */
+   The pile is stacked rather than jumbled: the top of it is what the model
+   thinks you will go for, with a share of wildcards mixed through at the rate
+   the nerve slider asks for, and no two neighbours leaning on the same tag. A
+   run of five outdoor cards reads as a broken app even when each one is
+   individually right. */
 import { S, pool } from './state.js';
-import { DURATIONS } from './data.js';
+import { DURATIONS, PACKS } from './data.js';
 import { scoreOf, chanceOf, reasons, warm } from './taste.js';
 
 /* What a verdict is worth next time round. Liked things come up more, disliked
@@ -60,21 +61,6 @@ const fits = (c) => {
 
 const live = (c) => (S.seen[c.id] || {}).v !== 'never';
 
-/* Where the round stands. The round belongs to the deck rather than to the
-   filter: `total` and `left` count everything switched on, because "how far
-   through the deck am I" should not change when you say you only have twenty
-   minutes. `fits` and `fitsLeft` are the same question about what can actually
-   be dealt this minute, which is what tells an empty screen which of the two
-   things has happened. */
-const cycle = () => {
-  const done = new Set(S.pass.done);
-  const there = pool().filter(live);
-  const here = there.filter(fits);
-  const left = there.filter(c => !done.has(c.id)).length;
-  return { n: S.pass.n, total: there.length, left, gone: there.length - left,
-           fits: here.length, fitsLeft: here.filter(c => !done.has(c.id)).length };
-};
-
 /* A dealt card is a seed plus the sentence explaining why it is in front of
    you, and nothing else. */
 let n = 0;
@@ -82,6 +68,11 @@ const cardOf = (seed, kind) => ({
   key: 'c' + (++n), id: seed.id, seed, kind,
   t: seed.t, tags: seed.tags, min: seed.min, cost: seed.cost,
   d: seed.d, lang: seed.lang,
+  /* A card in a two-sided pack is printed on both sides — the word on one, the
+     meaning on the other — so it can be dealt either way up and turned over to
+     check yourself. Everything else has one face and its back is what the app
+     knows about it. */
+  twoSided: !!((PACKS.find(p => p.id === seed.pack) || {}).twosided && seed.d),
   edit: seed.edit, was: seed.was          // a rewrite says so on the back of the card
 });
 
@@ -117,72 +108,79 @@ const fresher = (a, b) => {
 };
 const rand = a => a[(Math.random() * a.length) | 0];
 
-/* Deal `want` cards: mostly the top of the ranking, wildcards spliced in at the
-   rate the nerve slider asks for, and no two neighbours leaning on the same tag
-   — a run of five outdoor cards reads as a broken app even when each one is
-   individually right. */
-const deal = (want = 6, exclude = []) => {
-  const skip = new Set(exclude);
-  const done = new Set(S.pass.done);
-  /* The round is the hard part of this filter: a card you have said something
-     about is not dealt again until the round is over, however well it scores.
-     Nothing here starts a new round — an empty hand is a question for the
-     screen to ask, because a deck that quietly reshuffles is a deck you cannot
-     tell you have finished. */
-  const all = pool().filter(c => live(c) && fits(c) && !skip.has(c.id) && !done.has(c.id));
+/* Build the pile: every card that may be dealt, stacked in the order it will
+   come off. Seeds rather than dealt cards — the sentence on the back and the
+   odds are worked out when a card actually reaches the table, and doing it for
+   fifteen hundred cards up front is fifteen hundred sentences nobody reads.
+
+   The order is the old dealer's, run until it has used everything up instead of
+   until it has six: mostly the top of the ranking, wildcards spliced in at the
+   rate the nerve slider asks for, and no two neighbours leaning on the same tag.
+   What is left over when those runs dry goes on the bottom in whatever order it
+   comes, which is what the bottom of a pile is.
+
+   `recent` sinks what you have just been shown, so a reshuffle does not open on
+   the cards it closed with. */
+const buildPile = () => {
+  const all = pool().filter(c => live(c) && fits(c));
   if (!all.length) return [];
 
-  /* What you were just shown is out of the next hand as well as the last one.
-     Sinking it in the ranking was not enough: the wildcard draw sorts by how
-     well a tag is known and never reads the ranking at all, which is how the
-     card you swiped a minute ago came back labelled "a wildcard". Inside a
-     round the round itself covers this; it is the first hand after going round
-     again that needs it. A soft bar — if honouring it would leave too little to
-     deal from, it is dropped, because an empty hand is worse than a card you
-     saw a while ago. */
-  const back = new Set(S.recent);
-  const notLately = all.filter(c => !back.has(c.id));
-  const draw = notLately.length >= Math.max(want, 8) ? notLately : all;
-
-  const ranked = draw.map(c => ({ c, s: weightOf(c) })).sort((a, b) => b.s - a.s);
+  /* weightOf already sinks what is in `recent`, which is what keeps a reshuffle
+     from opening on the cards it closed with. */
+  const ranked = all.map(c => ({ c, s: weightOf(c) })).sort((a, b) => b.s - a.s);
   const cold = !warm();
   const nerve = cold ? 0.85 : S.nerve;
-  const strangers = draw.slice().sort(fresher);
+  const strangers = all.slice().sort(fresher);
 
   const out = [];
   const used = new Set();
   const lean = [];
   const takeable = (c) => !used.has(c.id) && !(c.tags.filter(g => lean.includes(g)).length >= 2);
 
-  while (out.length < want) {
-    const wild = Math.random() < nerve;
-    let seed = null;
-    if (wild) {
-      const bag = strangers.slice(0, Math.max(8, strangers.length >> 1)).filter(takeable);
-      seed = bag.length ? rand(bag) : null;
-    } else {
-      const top = ranked.slice(0, Math.max(6, ranked.length >> 2)).map(r => r.c).filter(takeable);
-      seed = top.length ? rand(top) : null;
+  /* Cursors rather than re-filtering the whole pool every time round. This runs
+     once per card, and re-filtering fifteen hundred cards fifteen hundred times
+     is the difference between opening the app and waiting for it. */
+  const rAt = { i: 0 }, sAt = { i: 0 };
+  /* A window off the top of what is left, rather than the very top card, or the
+     pile comes out in flat ranking order and every sitting opens the same way. */
+  const pick = (list, at, get) => {
+    const win = [];
+    for (let i = at.i; i < list.length && win.length < 12; i++) {
+      const c = get(list[i]);
+      if (takeable(c)) win.push(c);
     }
-    if (!seed) {
-      const any = all.filter(c => !used.has(c.id));
-      if (!any.length) break;
-      seed = rand(any);
-    }
-    used.add(seed.id);
-    lean.push(...seed.tags.slice(0, 2)); while (lean.length > 4) lean.shift();
+    return win.length ? win[(Math.random() * win.length) | 0] : null;
+  };
+  const rc = x => x.c, sc = x => x;
 
-    const card = cardOf(seed, 'plain');
-    /* A wildcard is a card dealt against what it knows, so on the first day it
-       knows nothing and there is nothing to deal against — labelling the whole
-       first hand "wildcard" teaches you that the word means nothing. */
-    card.wild = wild && !cold;
-    if (card.wild) card.kind = 'wild';
-    card.why = why(card);
-    card.odds = chanceOf(card);
-    out.push(card);
+  while (out.length < all.length) {
+    const wild = Math.random() < nerve;
+    let seed = wild ? pick(strangers, sAt, sc) : pick(ranked, rAt, rc);
+    /* Both windows can come back empty when what is left all leans the same
+       way. The lean rule is a nicety and running out of cards is not, so it
+       gives way rather than ending the pile early. */
+    if (!seed) seed = pick(ranked, rAt, rc) || pick(strangers, sAt, sc);
+    if (!seed) { for (const c of all) if (!used.has(c.id)) { seed = c; break; } }
+    if (!seed) break;
+
+    used.add(seed.id);
+    while (rAt.i < ranked.length && used.has(ranked[rAt.i].c.id)) rAt.i++;
+    while (sAt.i < strangers.length && used.has(strangers[sAt.i].id)) sAt.i++;
+    lean.push(...seed.tags.slice(0, 2)); while (lean.length > 4) lean.shift();
+    seed.wild = wild && !cold;
+    out.push(seed);
   }
   return out;
 };
 
-export { deal, cycle, fits, live, why, durationOfCard };
+/* One card, off the top of the pile and onto the table: the seed plus the
+   sentence explaining why it is in front of you, and nothing else. */
+const dealt = (seed) => {
+  const card = cardOf(seed, seed.wild ? 'wild' : 'plain');
+  card.wild = !!seed.wild;
+  card.why = why(card);
+  card.odds = chanceOf(card);
+  return card;
+};
+
+export { buildPile, dealt, cardOf, fits, live, why, durationOfCard };

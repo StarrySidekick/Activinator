@@ -9,15 +9,6 @@
   --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
   --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
   --top:env(safe-area-inset-top); --bot:env(safe-area-inset-bottom);
-  /* How wide a card is drawn, in one place: the deck reads it for the card
-     itself, and the one button reads it to sit on that card's corner rather
-     than float in the middle of the table. */
-  /* 0.5833 is 7/12, a tarot card's proportion. The card goes right out to the
-     left and right edges of the screen — no margin, no table down the sides —
-     so it is 100vw unless the height cannot take a card that wide, and then it
-     is whatever the height allows. There is no fixed cap: on anything wider
-     than a phone the height is what holds it in. */
-  --cardw:min(100vw, calc((100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px) * 0.5833));
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0;overscroll-behavior:none}
@@ -33,7 +24,18 @@ body{
 input,textarea,.pickme{user-select:text;-webkit-user-select:text}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 
-#frame{ height:100dvh; position:relative; overflow:hidden }
+/* The table: the felt, and the bar the pile sits in. The felt takes whatever
+   the bar leaves, and the layout works the cards out against that box — which
+   is why nothing here needs to know how big a card is. */
+#frame{ height:100dvh; display:flex; flex-direction:column; overflow:hidden;
+        padding-top:var(--top) }
+/* `z-index:0` makes the felt its own stacking context, which is what keeps the
+   cards inside it. Picking a card up puts it on top of the others by bumping
+   its z-index, and that counter only ever climbs — without this it eventually
+   climbs past the menu, and the panel opens behind the card. */
+#deck{ position:relative; z-index:0; flex:1 1 auto; min-height:0; overflow:hidden;
+       touch-action:none; margin:8px 0 }
+#tbar{ flex:0 0 auto }
 
 /* — the one button. It lives on the back of the card: the front is for
      deciding and the back is for understanding, and the menu is neither. Four
@@ -52,28 +54,20 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
      contains by depth rather than by the z-index of anything beside it — so
      the row of emblems at the head of the card took the taps meant for this,
      whatever z-index it was given. — */
+/* It used to sit on the top-right corner of the card and appear only once you
+   had turned one over, because there was nothing else on the screen for it to
+   belong to. There is a bar now — the table has one, permanently — so it lives
+   in the bar and is always there. Hiding the one control in the app when the
+   screen already has a row of buttons on it would be a puzzle, not restraint. */
 .settings{
-  /* On the card's own top-right corner, worked out from the same width the
-     card is drawn at — a button floating in the middle of the table belongs to
-     nothing. */
-  position:fixed; z-index:50;
-  /* 1.7143 is 12/7 — how tall the card is for its width, so this stays on the
-     card's own top corner and not in the air when the proportion changes. The
-     max is the notch: on a short screen the card reaches almost to the top of
-     the glass, and the corner it wants is underneath the status bar. */
-  top:max(calc(var(--top) + 6px), calc(50% - (var(--cardw) * 1.7143 / 2) + 9px));
-  right:calc(50% - var(--cardw) / 2 + 7px);
-  width:46px; height:46px; display:flex; align-items:center; justify-content:center;
-  color:var(--text-2); opacity:0; pointer-events:none; transform:scale(.9);
-  transition:opacity .22s ease, transform .22s ease;
+  position:absolute; right:6px; top:12px;
+  width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+  color:var(--dim); opacity:1; pointer-events:auto;
 }
-/* Reading a card, or looking at a screen with no card on it at all: the two
-   moments you are not in the middle of deciding something. */
-body.reading .settings, body.bare .settings{opacity:1; pointer-events:auto; transform:none}
+.settings:active{color:#e9e6df}
 .settings:active{transform:scale(.92)}
 .settings svg{width:25px;height:25px;fill:currentColor;overflow:visible}
 /* With no card under it there is no paper for it to be ink on. */
-body.bare .settings{color:var(--dim)}
 
 #toast{
   position:fixed; left:50%; bottom:calc(var(--bot) + 74px); transform:translateX(-50%) translateY(8px);

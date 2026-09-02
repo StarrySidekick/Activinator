@@ -108,7 +108,7 @@ const boot = async (browser, state) => {
        filter. */
     mineDealable: (() => {
       const c = ACT.pool().find(x => x.id === 'm1');
-      return !!c && ACT.deal(400, []).length > 0 &&
+      return !!c && ACT.buildPile().length > 0 &&
              (ACT.S.seen['m1'] || {}).v !== 'never' && ACT.fits(c);
     })(),
     // a state saved before packs existed takes the defaults each pack ships with
@@ -125,7 +125,7 @@ const boot = async (browser, state) => {
     // is no help here, because this saved state has core switched off.
     const core = ACT.PACKS.find(p => p.id === 'core').items;
     const twelve = core[12].id, twenty = core[20].id;
-    const dealable = () => { ACT.S.packs.core = true; const d = ACT.deal(400);
+    const dealable = () => { ACT.S.packs.core = true; const d = ACT.buildPile();
       ACT.S.packs.core = false; return d; };
     return {
       // core is off in this saved state, so the deck deals from what is left
@@ -149,7 +149,8 @@ const boot = async (browser, state) => {
     cards: document.querySelectorAll('#deck .card').length,
     v: ACT.S.v,
     editsEmpty: ACT.S.edits && Object.keys(ACT.S.edits).length === 0,
-    roundOne: ACT.S.pass.n === 1 && ACT.S.pass.done.length === 0,
+    // the round is gone; anything saved under it is dropped rather than carried
+    roundGone: !('pass' in ACT.S),
     packKept: ACT.S.packs.core === false,          // an opinion about a pack survives
     goneDropped: !('winter' in ACT.S.packs),       // a pack that no longer exists leaves
     newPackDefaulted: ACT.PACKS.filter(p => p.id !== 'core')
@@ -157,8 +158,7 @@ const boot = async (browser, state) => {
     ctxKept: ACT.S.ctx.where === 'outdoors',
     curates: ACT.panels.curationRows().length === 0,
     // a state from before the table existed arrives with a table it can open
-    tableDefaulted: ACT.S.table && ACT.S.table.n >= 1 && ACT.S.table.n <= 8 &&
-                    ACT.S.table.shake === true
+    tableDefaulted: ACT.S.table && ACT.S.table.n === 1 && ACT.S.table.shake === true
   }));
 
   // — from v4: a rewrite is carried across, cleaned against the vocabulary —
@@ -168,8 +168,7 @@ const boot = async (browser, state) => {
     return {
       orphanKept: !!ACT.S.edits.ZZZ,
       // a state from before the deck dealt in rounds starts round one, whole
-      roundOne: ACT.S.pass.n === 1 && ACT.S.pass.done.length === 0 &&
-                ACT.cycle().left === ACT.cycle().total,
+      roundGone: !('pass' in ACT.S),
       applied: c.t === 'Walk as far as you can get in half an hour' && c.edit === true,
       wasKept: c.was === 'Walk to the furthest point you can reach in thirty minutes',
       renamed: (c.tags || []).includes('friends'),     // social was renamed, not dropped
@@ -180,7 +179,7 @@ const boot = async (browser, state) => {
         l.startsWith('edit,') && l.includes('Walk as far as you can get in half an hour') &&
         l.includes('Walk to the furthest point you can reach in thirty minutes')),
       // and a table setting that is not a number goes back to one
-      tableFixed: ACT.S.table.n === 3 && ACT.S.table.shake === true
+      tableFixed: ACT.S.table.n === 1 && ACT.S.table.shake === true
     };
   }, idOf(REWROTE));
   await d.page.screenshot({ path:'test/shots/upgrade-v4.png' });
@@ -202,18 +201,18 @@ const boot = async (browser, state) => {
   };
   console.log(JSON.stringify(out, null, 1));
   await browser.close();
-  const v1ok = out.v1.cards === 3 && out.v1.v === 5 && out.v1.ctxReset && out.v1.seenDropped &&
+  const v1ok = out.v1.cards === 1 && out.v1.v === 6 && out.v1.ctxReset && out.v1.seenDropped &&
     out.v1.keptWeight && out.v1.renamedWeight && out.v1.droppedWeight && out.v1.listGone &&
     out.v1.mineDealable && out.v1.mineHasWhere && out.v1.mineHasDuration && out.v1.mineHasCost &&
     out.v1.mineRenamed && out.v1.packsDefaulted && !a.errs.length;
-  const v2ok = out.v2.cards >= 0 && out.v2.v === 5 && out.v2.remapped && out.v2.noPositionalIds &&
+  const v2ok = out.v2.cards >= 0 && out.v2.v === 6 && out.v2.remapped && out.v2.noPositionalIds &&
     out.v2.neverStillOut && out.v2.packKept && out.v2.newPackDefaulted && !b.errs.length;
-  const v3ok = out.v3.cards === 3 && out.v3.v === 5 && out.v3.editsEmpty && out.v3.roundOne &&
+  const v3ok = out.v3.cards === 1 && out.v3.v === 6 && out.v3.editsEmpty && out.v3.roundGone &&
     out.v3.tableDefaulted &&
     out.v3.packKept &&
     out.v3.goneDropped && out.v3.newPackDefaulted && out.v3.ctxKept && out.v3.curates &&
     !c.errs.length;
-  const v4ok = out.v4.orphanKept && out.v4.roundOne && out.v4.applied && out.v4.wasKept &&
+  const v4ok = out.v4.orphanKept && out.v4.roundGone && out.v4.applied && out.v4.wasKept &&
     out.v4.tableFixed && out.v4.renamed &&
     out.v4.cleaned && out.v4.inCuration && !d.errs.length;
   process.exit(v1ok && v2ok && v3ok && v4ok ? 0 : 1);

@@ -1,121 +1,21 @@
-/* Activinator — the table.
-   A surface rather than a sheet, so it takes the whole screen and the deck
-   waits underneath it. Everything about a card here is the deck's card at a
-   different size: same proportion, same corner cut, same stock, same turn. */
-#table{
-  position:fixed; inset:0; z-index:60;
-  display:none; flex-direction:column;
-  background:var(--ink);
-  opacity:0; transition:opacity .24s ease;
-}
-body.tabled #table{display:flex}
-#table.on{opacity:1}
-
-.thead{
-  flex:0 0 auto; display:flex; align-items:center; justify-content:space-between;
-  padding:calc(var(--top) + 10px) 14px 8px;
-}
-.thead h2{
-  font-family:var(--serif); font-weight:400; font-size:18px; color:#e9e6df; margin:0;
-}
-.thead .x{
-  width:34px; height:34px; border:0; background:none; color:var(--dim);
-  font-size:17px; line-height:1;
-}
-
-/* The felt: the only part cards live in, and the box their layout is worked
-   out against. `touch-action:none` because a drag here is a drag and not the
-   page scrolling under your finger. */
-.felt{
-  position:relative; flex:1 1 auto; min-height:0;
-  margin:0 6px; touch-action:none; overflow:hidden;
-}
-
-/* — a card on the table — */
-.tcard{
-  position:absolute; top:0; left:0;
-  aspect-ratio:7 / 12;
-  --radius:8.57% / 5%;
-  border-radius:var(--radius);
-  box-shadow:0 10px 22px -8px rgba(0,0,0,.75);
-  perspective:1000px;
-  transition:box-shadow .16s ease;
-  touch-action:none; cursor:grab;
-}
-/* Picked up: off the surface and a shade bigger, the way a card comes up in
-   your fingers. The transform is inline (it carries the card's own tilt), so
-   the lift is a shadow and a scale on the inside. */
-.tcard.held{box-shadow:0 22px 40px -10px rgba(0,0,0,.8); cursor:grabbing}
-.tcard.held .tcardin{transform:scale(1.04)}
-.tcardin{position:absolute; inset:0; border-radius:var(--radius)}
-
-/* One face is in the layout at a time — see the long note in deck.css. The
-   card never turns past 90°, so a face is only ever seen from the front, and
-   the one that is not showing is not there at all. Both faces at once with
-   `backface-visibility` holding one back is the tidier thing to write and it
-   is what put the front through the back, mirrored, on a browser that does not
-   honour it inside a 3D subtree. */
-.tcard .face{
-  position:absolute; inset:0; overflow:hidden;
-  border-radius:var(--radius);
-  background-color:var(--paper); color:var(--text);
-  background-image:radial-gradient(circle at 50% 50%, rgba(58,48,32,.05) .5px, transparent 1px);
-  background-size:3px 3px;
-  box-shadow:0 0 0 1px rgba(36,31,24,.14);
-  display:flex; flex-direction:column; justify-content:center;
-  padding:11% 8%;
-}
-.tcard .face.b{display:none}
-.tcard.flip .face.a{display:none}
-.tcard.flip .face.b{display:flex}
-
-/* Type scales with the card, not with the screen: eight of them on a phone are
-   eight small cards, and the word on one still has to be the loudest thing on
-   it. `--tw` is the card's own width in pixels, written by table.js when it
-   places the card, which is what makes one rule cover every size the table
-   lays out.
-
-   It was a container query — `container-type:inline-size` on the face, and
-   `cqw` — which reads better and cost the flip: `container-type` computes to
-   `contain: layout style inline-size`, and layout containment on the very
-   element carrying `backface-visibility` and the half-turn is exactly the
-   thing that can flatten it. The face that should have been facing away came
-   through the front. One number set from JS has no opinion about containment. */
-.tcard .word{margin:auto 0; min-width:0}
-.tcard .t{
-  font-family:var(--serif); font-weight:400; margin:0;
-  font-size:clamp(11px, calc(var(--tw) * .11), 30px); line-height:1.15; letter-spacing:-.012em;
-  text-wrap:balance; hyphens:auto; overflow-wrap:anywhere;
-}
-.tcard .tdef{
-  margin:7% 0 0; font-size:clamp(8px, calc(var(--tw) * .052), 13px); line-height:1.35;
-  color:var(--text-2); white-space:pre-line;
-}
-.tcard .idx{
-  position:absolute; display:flex; flex-direction:column; gap:calc(var(--tw) * .04);
-  align-items:center; z-index:2;
-}
-.tcard .idx.tl{top:4%; left:6.5%}
-.tcard .idx.br{bottom:4%; right:6.5%; transform:rotate(180deg)}
-.tcard .idx .mark{
-  width:clamp(7px, calc(var(--tw) * .07), 17px);
-  height:clamp(7px, calc(var(--tw) * .07), 17px);
-}
-
-/* A one-sided card has nothing on the other side, so it does not offer to turn
-   over. It can still be picked up and moved. */
-.tcard.oneside{cursor:grab}
-
-/* — the bar: the pile, and what you can do to it — */
-.tbar{
-  flex:0 0 auto; padding:10px 14px calc(var(--bot) + 12px);
+/* Activinator — the bar under the table.
+   The felt and the card itself are in base.css and deck.css; this is the pile,
+   what the table is laid out for, and the two things you can do to a pile. */
+/* — the bar: the pile, what the table is laid out for, and the one button.
+     It is always on screen, which is what makes the felt above it a table
+     rather than a card holder. — */
+#tbar{
+  position:relative;
+  padding:9px 14px calc(var(--bot) + 10px);
   border-top:1px solid #23262f; background:#151721;
 }
-.trow{display:flex; align-items:center; gap:10px; margin-top:10px}
+.trow{display:flex; align-items:center; gap:9px; margin-top:9px}
 .trow:first-child{margin-top:0}
-.tlabel{margin:0; font-size:12px; color:var(--dim-2); flex:0 0 auto}
+.tlabel{margin:0; font-size:11.5px; color:var(--dim-2); flex:0 0 auto}
+/* The chips share the row with the gear, so the row stops short of it. */
+.trow:first-child{padding-right:46px}
 .chips.tiny{gap:6px; margin:0}
-.chips.tiny button{padding:6px 12px; font-size:13px; min-width:38px; justify-content:center}
+.chips.tiny button{padding:5px 9px; font-size:13px; min-width:32px; justify-content:center}
 
 /* The pile is a small deck, drawn the way the decks on the Decks table are:
    two cards showing behind one, off true. It is the deal button, so it is the
@@ -123,7 +23,7 @@ body.tabled #table{display:flex}
 
    The slot keeps the pile's place in the row while the pile itself is off in
    your hand, so nothing beside it moves under your finger. */
-.pileslot{position:relative; flex:0 0 auto; width:44px; height:75px}
+.pileslot{position:relative; flex:0 0 auto; width:40px; height:68px}
 .pile{
   position:absolute; inset:0;
   padding:0; border:0; background:none;
@@ -167,22 +67,8 @@ body.tabled #table{display:flex}
 .pile.riffle i:nth-child(2){animation:riffle .34s ease .05s}
 .pile.riffle .pface{animation:riffle .34s ease .1s}
 
-/* The switch. A chip that says what it is and what it is set to, rather than a
-   slider you have to read the colour of. */
-.chip.toggle{
-  display:inline-flex; align-items:center; gap:8px;
-  border:1px solid #2e3240; border-radius:999px; padding:7px 8px 7px 13px;
-  font-size:12.5px; color:var(--dim); background:#1c1f29;
-}
-.chip.toggle span{
-  font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
-  padding:3px 9px; border-radius:999px; background:#2a2e3a; color:var(--dim-2);
-}
-.chip.toggle.on{color:#e9e6df; border-color:#3d4354}
-.chip.toggle.on span{background:var(--yes); color:#0f1410}
-
 .tbtn{
-  flex:1 1 0; border:1px solid #2e3240; border-radius:12px; padding:12px 8px;
+  flex:1 1 0; border:1px solid #2e3240; border-radius:12px; padding:11px 8px;
   font-size:13.5px; font-weight:600; color:#cfd3de; background:#1c1f29;
 }
 .tbtn:active{background:#242836}

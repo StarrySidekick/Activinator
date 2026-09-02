@@ -5,8 +5,8 @@
 import { S, save, APP_VERSION, all, pool, packOn, byId, baseById, exportJSON, importJSON } from './state.js';
 import { TAGS, GROUPS, PACKS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 import { opinions } from './taste.js';
-import { cycle } from './deal.js';
-import { reset as redeal, restack, toast } from './deck.js';
+import { rebuild as redeal, restack, pileSize } from './table.js';
+import { toast } from './toast.js';
 import { esc, emblemRow, markHTML, lengthOf } from './cards.js';
 
 const host = () => document.getElementById('panelhost');
@@ -52,9 +52,9 @@ const menuPanel = () => openPanel({ key:'menu', title:'Activinator', body: () =>
   <button class="pbtn" data-act="browse">All activities<small>${pool().length} of them, searchable</small></button>
   <button class="pbtn" data-act="decks">Decks<small>${PACKS.filter(p => packOn(p.id)).length} of ${PACKS.length} on the table</small></button>
   <button class="pbtn" data-act="add">Write your own<small>Anything it would never think of</small></button>
-  <button class="pbtn" data-act="table">The table<small>Deal them out and handle them — a place to try things</small></button>
   <button class="pbtn" data-act="curate">Curate<small>${curationRows().length} to take back to the packs</small></button>
   <button class="pbtn" data-act="taste">What it thinks you are like<small>${S.swipes} swipes in</small></button>
+  <button class="pbtn" data-act="tshake">Shake to shuffle<small>${S.table.shake ? 'On — shake the phone and the pile shuffles' : 'Off'}</small></button>
   <button class="pbtn" data-act="backup">Back it up<small>There is no server, so this is the only copy</small></button>
   <p class="pnote" style="text-align:center;color:var(--dim-2);margin-top:18px">Activinator ${esc(APP_VERSION)} —
   everything is on this device and nowhere else.</p>` });
@@ -104,7 +104,7 @@ const deckOf = (p) => {
 const packsPanel = () => openPanel({ key:'packs', title:'Decks', back:'menu', body: () => `
   <div class="table">${PACKS.map(deckOf).join('')}</div>
   <p class="pnote">Tap a deck to take it off the table or put it back. What you have said
-  about its cards is kept either way, and the round is not shortened by it — the deck you
+  about its cards is kept either way — the deck you
   put away simply is not dealt. They are built into the app, so they work with the
   aeroplane mode on.</p>
   ${S.mine.length ? `<div class="prow"><p class="plabel">Yours, as pack rows</p>
@@ -164,7 +164,8 @@ const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are 
   const bar = (o) => `<div class="bar ${o.v < 0 ? 'down' : ''}"><span class="bl">${markHTML(o.tag)}${esc(o.label)}</span>
     <span class="bt"><i style="${o.v > 0 ? 'left:50%' : 'right:50%;left:auto'};width:${Math.round(Math.abs(o.v) / max * 48)}%"></i></span></div>`;
   const n = v => Object.values(S.seen).filter(s => s.v === v).length;
-  const c = cycle();
+  const left = pileSize();
+  const total = pool().filter(c => (S.seen[c.id] || {}).v !== 'never').length;
   return `
   <div class="prow"><div class="stat">
     <span><b>${S.swipes}</b>swipes</span>
@@ -174,11 +175,12 @@ const tastePanel = () => openPanel({ key:'taste', title:'What it thinks you are 
   </div>${S.swipes < 12 ? `<p class="pnote">Under a dozen swipes it is mostly guessing, and it
     deals almost at random on purpose. Keep going.</p>` : ''}</div>
 
-  <div class="prow"><p class="plabel">Round ${c.n}</p>
-    <div class="rounds"><i style="width:${c.total ? Math.round(c.gone / c.total * 100) : 0}%"></i></div>
-    <p class="pnote">${c.gone} of ${c.total} this time round, ${c.left} to go. Nothing comes
-    back until you have been through the lot — and then the deck says so and waits. What you
-    have asked for filters the deck; it does not shorten the round.</p></div>
+  <div class="prow"><p class="plabel">The pile</p>
+    <div class="rounds"><i style="width:${total ? Math.round((total - left) / total * 100) : 0}%"></i></div>
+    <p class="pnote">${left} still in it, of ${total}. A card off the pile does not come back
+    until you gather them up and shuffle — which is all "nothing repeats" ever meant, and a
+    pile does it without keeping a list. What you have asked for decides what goes in the
+    pile when it is built.</p></div>
 
   ${up.length ? `<div class="prow"><p class="plabel">You go for</p>${up.map(bar).join('')}</div>` : ''}
   ${down.length ? `<div class="prow"><p class="plabel">You pass on</p>${down.map(bar).join('')}</div>` : ''}

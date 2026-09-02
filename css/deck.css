@@ -1,54 +1,45 @@
-/* Activinator — the deck.
-   A card is a printed card: cream stock, letterpress serif, a row of emblems
-   at the head. It fills the screen, so three of them are stacked exactly on
-   top of each other and only the top one listens. */
-/* The card is the screen. Nothing is laid out beside it and nothing floats over
-   it, so the deck is the whole frame with the safe areas kept clear of the
-   type. */
-#deck{
-  position:absolute; inset:0; touch-action:none;
-}
+/* Activinator — the card.
+   A printed card: cream stock, letterpress serif, an index in two corners. The
+   felt it lies on is #deck in base.css; where a card sits and how big it is are
+   written by table.js, because the layout decides both. */
 
-/* A card is a card, and now it is a tarot card: seven by twelve rather than the
-   poker five by seven. A phone is a tall narrow thing and a poker card is a
-   wide one, so at poker proportions the card could only ever be as tall as it
-   was wide-and-a-bit and left a third of the screen as table. A tarot card is
-   the shape the screen already is, so it fills it and still reads as a card,
-   with the corners rounded as a fraction of the box so it stays right whatever
-   size it is drawn.
+/* A card is a card, and a tarot card: seven by twelve rather than the poker
+   five by seven. A phone is a tall narrow thing and a poker card is a wide one,
+   so at poker proportions the card could only ever be as tall as it was
+   wide-and-a-bit and left a third of the screen as table.
 
-   It goes right out to the left and right edges of the screen. There is no
-   table down the sides — the only room is above and below, which is where a
-   seven-by-twelve card on a phone has room left over anyway.
-
-   The width is whichever is smaller: nearly all of the screen, or whatever the
-   height allows at that proportion. So it is as big as it can be and never
-   taller than the room. The transform is written inline by deck.js so a drag
-   can overwrite it every frame without fighting a stylesheet. */
+   Where it sits and how big it is are written by table.js, because the layout
+   decides both: at one card that is the full width of the felt, which is the
+   deck as it has always looked, and at more than one it is whatever fits.
+   `--tw` is the card's own width in pixels, and everything drawn inside the
+   card is measured from it — one rule covers a card the width of the screen and
+   eight of them at once. */
 .card{
-  position:absolute; top:50%; left:50%;
-  width:var(--cardw);
-  /* A tarot card is 70 by 120 mm — the size every tarot deck is printed at —
-     and its corners are cut to a 6 mm radius, a deeper cut than a poker card's
-     3.5 mm. As a fraction of the card that is 8.57% of the width and 5% of the
-     height, which is why the radius is written as two percentages: it is one
-     circular corner, measured against a box that is not square. On this phone
-     it comes out at 31 pixels. */
+  position:absolute; top:0; left:0;
   aspect-ratio:7 / 12;
-  margin:0; translate:-50% -50%;
+  /* A tarot card is 70 by 120 mm and its corners are cut to a 6 mm radius. As a
+     fraction of the card that is 8.57% of the width and 5% of the height, which
+     is why the radius is two percentages: it is one circular corner, measured
+     against a box that is not square. */
   --radius:8.57% / 5%;
   border-radius:var(--radius);
-  /* The weight of the card, cast on what is behind it. It lives out here
-     rather than on the face because the face turns over and this must not:
-     a shadow that swings round with the card is the single thing that made
-     every earlier version of the flip look like a rotating picture. */
-  box-shadow:0 14px 30px -10px rgba(0,0,0,.7);
+  /* The weight of the card, cast on what is behind it. It lives out here rather
+     than on the face because the face turns over and this must not: a shadow
+     that swings round with the card is the single thing that made every earlier
+     version of the flip look like a rotating picture. */
+  box-shadow:0 12px 26px -10px rgba(0,0,0,.72);
   transition:box-shadow .2s ease;
-  /* The vanishing point for the turn, on the card rather than on the deck, so
+  /* The vanishing point for the turn, on the card rather than on the felt, so
      it is always about this card's own middle wherever a drag has taken it. */
   perspective:1100px;
-  will-change:transform;
+  touch-action:none; will-change:transform;
 }
+/* Picked up: off the surface and a shade bigger, the way a card comes up in
+   your fingers. The transform is inline (a drag rewrites it), so the lift is a
+   shadow and a scale on the inside. */
+.card.held{box-shadow:0 22px 40px -10px rgba(0,0,0,.8)}
+.card.held .cardin{transform:scale(1.04)}
+
 .card.rest{transition:transform .34s cubic-bezier(.2,.8,.25,1), opacity .34s, box-shadow .2s ease}
 .card.gone{transition:transform .34s cubic-bezier(.3,.1,.3,1), opacity .3s; opacity:0}
 .card:not(.top){pointer-events:none}
@@ -120,7 +111,7 @@ body.turning #deck .card:not(.top){visibility:hidden}
   display:flex; flex-direction:column;
   /* Room down each side for the corner index, the way a card leaves room for
      its rank and suit. */
-  padding:13% 9.5%;
+  padding:11% 8.5%;
 }
 /* — the emblems, and then the activity. That is the whole front.
      The row stays in the flow: `.face>*` makes every direct child position
@@ -137,7 +128,8 @@ body.turning #deck .card:not(.top){visibility:hidden}
      Three, because a corner index is read at a glance and a column of seven
      silhouettes is a list. — */
 .face .idx{
-  position:absolute; display:flex; flex-direction:column; gap:6px;
+  position:absolute; display:flex; flex-direction:column;
+  gap:clamp(3px, calc(var(--tw) * .04), 8px);
   align-items:center; z-index:2;
 }
 /* `.face>*` sets every direct child position:relative — same specificity and
@@ -145,7 +137,10 @@ body.turning #deck .card:not(.top){visibility:hidden}
    corner it is the whole point of. */
 .face .idx.tl{top:4%; left:6.5%}
 .face .idx.br{bottom:4%; right:6.5%; transform:rotate(180deg)}
-.face .idx .mark{width:17px; height:17px}
+.face .idx .mark{
+  width:clamp(7px, calc(var(--tw) * .07), 18px);
+  height:clamp(7px, calc(var(--tw) * .07), 18px);
+}
 .marks{margin:0; display:flex; flex-wrap:wrap; gap:11px; align-items:center}
 /* A suit sits on the card, not in a chip. No background, no ring — the
    silhouette is the whole mark. */
@@ -160,7 +155,7 @@ body.turning #deck .card:not(.top){visibility:hidden}
 .face.back{background-color:var(--paper-2); overflow-y:auto}
 /* The one button sits in the top right of the back, so the kicker stops short
    of it. */
-.face.back .kicker{padding-right:46px}
+.face.back .kicker{padding-right:0}
 /* One face is in the layout at a time, and the swap happens at the join of the
    two halves, while the card is edge-on and there is nothing to see. `display`
    rather than `backface-visibility`: a face that is not there cannot show
@@ -178,8 +173,13 @@ body.turning #deck .card:not(.top){visibility:hidden}
 }
 .face>*{position:relative;z-index:1}
 
+/* Everything on the back is measured from `--tw` as well, or a card in a spread
+   is a full-size information panel inside a thumbnail: the tags ran off the
+   bottom and the verdict buttons were not on the card at all. The multipliers
+   are the old fixed sizes over 390, which is a card the width of a phone. */
 .kicker{
-  font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  font-size:clamp(7px, calc(var(--tw) * .028), 11px);
+  font-weight:700; letter-spacing:.14em; text-transform:uppercase;
   color:var(--text-3); margin:0; display:flex; gap:8px; align-items:center;
 }
 .kicker .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.55}
@@ -191,13 +191,13 @@ body.turning #deck .card:not(.top){visibility:hidden}
      and type sized for the smaller card read like a caption printed in the
      middle of a lot of cream. 8vw is the biggest that still lands the longest
      title in the deck inside the card. */
-  font-size:clamp(25px,8vw,38px); line-height:1.14; letter-spacing:-.012em;
+  font-size:clamp(11px, calc(var(--tw) * .095), 38px); line-height:1.14; letter-spacing:-.012em;
   text-wrap:balance;
   /* Floccinaucinihilipilification is a real card now. */
   hyphens:auto; overflow-wrap:anywhere;
 }
 .why{
-  margin:10px 0 0; font-size:13px; line-height:1.4; color:var(--text-2);
+  margin:2.5% 0 0; font-size:clamp(7px, calc(var(--tw) * .033), 13px); line-height:1.4; color:var(--text-2);
 }
 /* The definition is the other voice on the card: the word is the serif and
    the meaning is set apart, smaller and quieter. pre-line is what lets a verb
@@ -206,7 +206,7 @@ body.turning #deck .card:not(.top){visibility:hidden}
   margin:14px 0 0; font-size:14px; line-height:1.45; color:var(--text-2);
   white-space:pre-line; max-width:34em;
 }
-.back .def{font-size:13px;line-height:1.45;margin-top:8px}
+.back .def{font-size:clamp(7px, calc(var(--tw) * .033), 13px);line-height:1.45;margin-top:2%}
 .speak{
   margin:18px 0 0; width:46px; height:46px; border-radius:50%;
   border:1.5px solid rgba(30,26,20,.3); background:transparent; color:inherit;
@@ -216,31 +216,47 @@ body.turning #deck .card:not(.top){visibility:hidden}
 .speak .mark{width:20px;height:20px;display:block}
 /* — the back — */
 
-.back h3{
-  font-family:var(--serif); font-weight:400; font-size:21px; line-height:1.2; margin:0;
+/* The other side of a two-sided card: the meaning, set the way the word is set
+   on the front, with the detail under it. What the app knows follows below. */
+.other{margin:0 0 6% ; }
+.other .t{margin:0}
+.tdef{
+  margin:5% 0 0; font-size:clamp(8px, calc(var(--tw) * .045), 14px); line-height:1.4;
+  color:var(--text-2); white-space:pre-line;
 }
-.back .kicker{margin-bottom:12px}
-.odds{margin:18px 0 4px;font-size:13px;color:var(--text-2)}
-.odds b{font-family:var(--serif);font-size:16px;color:var(--text)}
-.taglist{display:flex;flex-wrap:wrap;gap:5px;margin:14px 0 0;padding:0;list-style:none}
-.taglist .mark{width:14px;height:14px}
-.taglist li{display:flex;align-items:center;gap:5px;
-  font-size:12px; padding:4px 9px; border-radius:999px;
+.back h3{
+  font-family:var(--serif); font-weight:400; line-height:1.2; margin:0;
+  font-size:clamp(11px, calc(var(--tw) * .054), 21px);
+}
+.back .kicker{margin-bottom:3%}
+.odds{margin:4% 0 1%;font-size:clamp(7px, calc(var(--tw) * .033), 13px);color:var(--text-2)}
+.odds b{font-family:var(--serif);font-size:1.22em;color:var(--text)}
+.taglist{display:flex;flex-wrap:wrap;gap:1.4%;margin:3.5% 0 0;padding:0;list-style:none}
+.taglist .mark{width:clamp(6px, calc(var(--tw) * .036), 14px);height:clamp(6px, calc(var(--tw) * .036), 14px)}
+.taglist li{display:flex;align-items:center;gap:.4em;
+  font-size:clamp(7px, calc(var(--tw) * .031), 12px); padding:.3em .75em; border-radius:999px;
   background:rgba(0,0,0,.06); color:var(--text-2);
 }
 .taglist li.up{background:rgba(111,143,94,.22);color:#3f5735}
 .taglist li.down{background:rgba(178,86,75,.18);color:#7d3a33}
-.backrow{margin-top:auto;display:flex;flex-wrap:wrap;gap:8px;padding-top:20px}
+.backrow{margin-top:auto;display:flex;flex-wrap:wrap;gap:2%;padding-top:4%}
 /* Three across on one line, which is what decides the size of the type here:
    the labels are words rather than icons, and a third of a phone is what each
    of them has. */
 .backrow button{
-  flex:1 1 28%; border:1px solid rgba(0,0,0,.18); border-radius:12px; padding:11px 4px;
-  font-size:12px; font-weight:600; color:var(--text-2); background:rgba(255,255,255,.45);
+  flex:1 1 28%; border:1px solid rgba(0,0,0,.18); border-radius:12px; padding:.75em .3em;
+  font-size:clamp(7px, calc(var(--tw) * .031), 12px); font-weight:600;
+  color:var(--text-2); background:rgba(255,255,255,.45);
 }
 .backrow button.never{color:var(--no);border-color:rgba(178,86,75,.35)}
+/* The verdict, on the back as well as under your thumb — and with a spread out
+   it is the only way to it. */
+.backrow.verdict{margin-top:auto;padding-top:3%}
+.backrow.verdict + .backrow{margin-top:0;padding-top:2%}
+.backrow button.yes{color:var(--yes);border-color:rgba(111,143,94,.45);font-size:clamp(7px, calc(var(--tw) * .034), 13px)}
+.backrow button.no{color:var(--no);border-color:rgba(178,86,75,.4);font-size:clamp(7px, calc(var(--tw) * .034), 13px)}
 .meter{
-  height:5px;border-radius:3px;background:rgba(0,0,0,.1);overflow:hidden;margin:8px 0 2px;
+  height:clamp(3px, calc(var(--tw) * .013), 5px);border-radius:3px;background:rgba(0,0,0,.1);overflow:hidden;margin:8px 0 2px;
 }
 .meter i{display:block;height:100%;background:var(--text-2)}
 

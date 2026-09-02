@@ -39,11 +39,11 @@ The smoke test exercises dealing, the shape of the card and the hand squared up 
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
 leaves the pool but "never again" does, the context filter, the one button, search,
 liking from the browser, writing your own, rewriting the card in front of you,
-the curation export, the table — dealing, both sides, the layout, shuffle
-against gather, a tap that turns and a drag that does not, and that none of it
-touched the deck — that a whole round deals everything exactly once and then
-says so, that a swipe down puts a card back into the round, persistence across a
-reload and an offline reload. Screenshots land in `test/shots/` — look
+the curation export, the table — the layout at every count, both sides landing,
+shuffle against gather, the pile in your hand, a tap that turns and a drag that
+does not — that the whole pile deals everything exactly once and then says so,
+that a swipe down puts a card back on the felt, persistence across a reload and
+an offline reload. Screenshots land in `test/shots/` — look
 at them, this is a visual app and a passing assertion doesn't mean it looks
 right.
 
@@ -317,38 +317,30 @@ the card on without saying anything about it, teaches nothing, and carries no
 weight. The only thing that takes an activity out for good is "never again", on
 the back of the card.
 
-**It deals in rounds, and a round ends on a screen you have to answer.** Say
-anything about a card — like, don't like, even skip — and it is out until the
-round is over. Ranking decides what comes first; the round decides that there
-is an end to it, and that everything gets there once. When there is nothing
-left, the deck says *that is the whole deck* and waits: going round again is a
-button, because a deck that quietly reshuffles is a deck you cannot tell you
-have finished. `S.pass` is the whole of it — which round you are on, and the
-ids it has already dealt. Menu → what it thinks you are like shows how far
-round you are.
+**It builds a pile, once, and deals off the top of it.** That is the whole of
+"nothing repeats until you have been through everything": a card that has come
+off the pile is not in the pile, and the only way it comes back is you gathering
+up and shuffling. When the pile is spent the screen says *that is the whole
+pile* and waits, because a deck that quietly reshuffles is a deck you cannot
+tell you have finished.
 
-It did not used to, and the symptom was cards coming back within a few dozen
-swipes on a deck that takes all day to get through. Both draws picked at
-**random from a wide slice** of the ranking — the top quarter of sixteen
-hundred cards is four hundred, and random draws from four hundred repeat inside
-about twenty-five. Worse, the card you had just swiped was eligible again the
-moment it left the hand: only the ranking sank it, and the wildcard draw sorts
-by how well a tag is known and never reads the ranking at all. So the thing you
-had just said no to could come straight back, labelled *a wildcard*.
+There was a round here doing the same job with bookkeeping — `S.pass`, a list of
+what you had said something about, a screen at the end and a "go round again"
+button, plus a rule that every verdict had to mark the round and every undo
+unmark it. It is gone. A pile is the same guarantee with nothing to keep, and it
+is the thing you were already holding.
 
-Recency survives all that, doing the one job the round cannot: the last forty
-you were shown are kept out of the **next** round's opening hand, so going
-round again does not start with the cards it just ended on. It is a soft bar —
-if honouring it would leave too little to deal, it is dropped, because an empty
-hand is worse than a card you saw a while ago.
+The pile is stacked rather than jumbled: the top of it is what the model thinks
+you will go for, with wildcards spliced through at the rate the nerve slider
+asks for, and no two neighbours leaning on the same tag — a run of five outdoor
+cards reads as a broken app even when each one is individually right. What you
+have asked for (Menu → Right now) decides what goes into the pile when it is
+built, so changing it rebuilds.
 
-**Running out of things that fit is not the end of a round.** Ask for twenty
-minutes and you can exhaust everything quick long before the round is done; the
-deck says so, counts what is still to come, and offers the filter first. Going
-round anyway is there and says what it costs, because it would throw away
-everything you got through outside the filter. The round belongs to the deck,
-not to the filter — which is also why the progress bar does not move when you
-change your mind about the afternoon.
+`buildPile()` runs once per card in the pool rather than re-filtering the pool
+per card: cursors into the ranked and the least-known orders, and a window off
+the top of what is left rather than the very top card, or every sitting opens
+the same way. Fifteen hundred cards in about fifty milliseconds.
 
 **A share of every hand is dealt against what it knows.** `S.nerve` (a slider,
 default 30%) is how often the dealer picks from the activities whose tags it
@@ -550,15 +542,14 @@ would disagree about what you think.
 | `data.js` | Joins the two, so everything else imports one place for both. |
 | `state.js` | The one localStorage key, the shape, the rewrites, export/import. Nothing else touches storage. |
 | `taste.js` | The model: `scoreOf`, `learn`, `unlearn`, `opinions`, `reasons`. |
-| `deal.js` | What gets dealt next — the round, filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
+| `deal.js` | What goes in the pile and in what order — filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
 | `cards.js` | How a card is printed: `cardHTML`, the accent colour, the wording of a length. The front is the title and nothing else; the back carries everything the app knows. |
-| `deck.js` | The hand, the verdicts, undo, the stack, the empty deck. |
-| `swipe.js` | Pointer drag, the two stamps, and the tap that flips. Right is like, left is not, up is neither — which is why up has no stamp — and down is not about this card at all: it takes the last one back. |
 | `panels.js` | Every panel: the hub, right now, all activities, taste, write your own, rewrite this card, curate, backup. |
-| `table.js` | The table: its own shuffled pile, dealing, dragging, turning a card over, shuffle and gather. Touches nothing the deck owns. |
+| `table.js` | The app: the pile, the felt, dealing, verdicts, undo, dragging, turning a card over, shuffle, gather and shake. |
+| `toast.js` | The one line of feedback, on its own so nothing has to import the table to say something. |
 | `boot.js` | One delegated listener set. To add an action, add a `data-act` and a case in `act()`. |
 
-Four stylesheets: `base.css` (the room), `deck.css` (the card), `panels.css`, `table.css`.
+Four stylesheets: `base.css` (the room, the felt and the frame), `deck.css` (the card), `panels.css`, `table.css` (the bar).
 
 After changing anything in `js/`, `css/` or `index.html`, bump `CACHE` in
 `sw.js` **and** `APP_VERSION` in `js/state.js`. Without the cache bump an
@@ -568,100 +559,99 @@ didn't deploy" — points at the wrong culprit. A new file must also be added to
 
 ## The table
 
-**Menu → The table.** A surface to handle cards on, rather than a deck that
-hands them to you one at a time. It is a place to try things: how big a card
-should be, what a spread reads like, whether a two-sided card is better than a
-card with the meaning printed under the word. Nothing tried here is a decision
-about the deck until it is moved into the deck.
+**The app is a table with a pile on it.** The felt is `#deck`, the bar under it
+holds the pile and the one button, and `js/table.js` is all of it: the pile, the
+layout, verdicts, dragging, the flip, the shake. It was a room off the side of
+the deck for two commits, a sandbox to try card handling in; it is the app now,
+and `deck.js` and `swipe.js` folded into it.
 
-It is deliberately walled off. It deals from **its own shuffled pile**, built
-when you open it from the packs that are switched on, minus anything you have
-said "never again" to. It teaches the taste model nothing, it does not touch
-the round, and closing it throws the whole table away. The smoke test asserts
-that last part — the weights, the round and the swipe count all have to come
-out the other side untouched.
+**Laid out for 1–8** is the one setting, and it decides both how big a card is
+drawn and what a drag means.
 
-- **Tap the pile to deal a card**, one at a time, as many as you like.
-- **Laid out for 1–8** is the one setting, and it is not really about how many
-  you get: it is what decides how big a card is drawn. The layout tries every
-  number of columns and keeps whichever gives the widest card, so four is two
-  by two on a phone and four in a row on anything wider, worked out rather than
-  chosen. A last row that does not fill goes in the middle. Deal past the
-  number it is laid out for and they stack a little down and across, clamped so
-  nothing walks off the edge — a card you cannot see is a card you have lost.
-  Type is sized in `cqw`, the card's own width, so one rule covers every size.
-- **Drag a card** anywhere. Picking one up brings it to the front. You can hang
-  it over the edge but not push it off: its middle stays on the felt, so there
-  is always something to pick back up.
-- **Tap a card to turn it over**, the same 460 ms rotation the deck uses. A tap
-  that moved less than nine pixels in under half a second is a tap; anything
-  else was a drag.
-- **Shake the phone to shuffle**, with a switch in the bar to turn it off.
-  `devicemotion` is behind a permission prompt on iOS that can only be asked
-  for from inside a gesture, so the switch itself is that gesture: turning it on
-  is what asks. Nothing is listened for while it is off, and the listener is
-  dropped when the table closes — an accelerometer listener that outlives its
-  screen is a battery bill for nothing. A shake is *direction changes*, not
-  speed: something fast in one direction is a throw, something that keeps
+- **At one** it is the deck as it has always been: a card the full width of the
+  screen, drag right to like and left to cut, up to pass, down to take the last
+  one back. The felt keeps itself full, so a verdict takes one away and the next
+  is already there.
+- **At more than one** it is a spread. A drag moves the card you are holding —
+  picking one up brings it to the front — and the verdict is on the back of each
+  card instead, named by id, because there is no "the" card any more.
+
+That split is not tidy, and it is the right one: at one card the swipe *is* the
+app, and at four there is a spread to arrange and no sensible way for a drag to
+mean both.
+
+The layout tries every number of columns and keeps whichever gives the widest
+card, so one is the full width of the felt, four is two by two on a phone and
+four in a row on anything wider — worked out rather than chosen. A last row that
+does not fill goes in the middle. Deal past the number and they stack a little
+down and across, clamped so nothing walks off the edge — a card you cannot see is
+a card you have lost. You can hang a card over the edge but not push it off: its
+middle stays on the felt, so there is always something to pick back up.
+
+**The pile.** Tap it to deal one, past what the table is laid out for if you
+like. **Shuffle** is the pile and leaves the felt alone. **Gather** is the felt:
+everything goes back in and the pile is shuffled, which is the only way round
+twice. They were briefly the same function, which made two buttons that did the
+same thing and no way to shuffle what you had not dealt yet.
+
+- **Shake the phone to shuffle**, with a switch in Menu → Shake to shuffle.
+  `devicemotion` is behind a permission prompt on iOS that can only be asked for
+  from inside a gesture, so the switch itself is that gesture: turning it on is
+  what asks. Nothing is listened for while it is off. A shake is *direction
+  changes*, not speed: fast in one direction is a throw, something that keeps
   reversing is a shake.
 - **Or pick the pile up and shake it in your hand**, which is how a deck is
-  actually shuffled by somebody standing up. Press and hold it for 320 ms and it
+  actually shuffled by somebody standing up. Press and hold for 320 ms and it
   comes off the table, scales up and follows your finger; reverse direction three
   times and it shuffles; let go and it drops back into its slot. A `.pileslot`
   holds its place in the bar while it is away, so nothing beside it moves under
-  your finger. A tap is still a tap and deals one card.
-- **Shuffle** is the pile and leaves the table alone. **Gather** is the table:
-  everything goes back in and the pile is shuffled. They were briefly the same
-  function, which made two buttons that did the same thing and no way at all to
-  shuffle what you had not dealt yet.
+  your finger.
 
 **Two-sided packs.** `"twosided": true` in `packs/index.json` — Words and
-Italian have it. A card in such a pack is printed on both sides: the word on
-one and the meaning on the other, rather than the meaning set under the word.
-The build refuses a row in a two-sided pack with no definition, because there
-would be nothing on the back of it.
+Italian have it. The word is on one side and the meaning on the other, and such
+a card is dealt on a random side, which is what makes it a deck you can test
+yourself with rather than read off. The build refuses a row in a two-sided pack
+with no definition, because there would be nothing on its back. On a verb card
+the meaning is a paragraph — the English first, then the tenses — so the first
+line is the headline and the rest goes under it small; that is what makes "one
+side the Italian, one side the English" true of a card that also has to carry a
+conjugation table.
 
-On a verb card the meaning is a paragraph — the English first, then the tenses
-— so the first line is set as the headline and the rest goes under it small.
-That is what makes "one side the Italian, one side the English" true of a card
-that also has to carry a conjugation table.
+Everything else is one-sided as far as the *front* goes, and always dealt face
+up. Every card still has a back — it is where the app tells you what it knows,
+and where the verdict buttons are — so a two-sided card leads its back with the
+meaning and puts the tags and odds below.
 
-**Every other pack is one-sided here**: one face, always dealt face up, and
-tapping it does nothing because there is nothing on the other side. There was a
-printed back for those cards for one version — the field of ink and pattern the
-decks on the Decks table are drawn with — and it bled through the front, so the
-pattern sat over the words. It is out until the two-sided dynamic is settled.
-The pattern classes it used are still in `panels.css`, where the Decks table
-uses them.
+There were printed card backs for a while, the field of ink and pattern the
+decks on the Decks table are drawn with. They bled through the front. The
+pattern classes are still in `panels.css` where the Decks table uses them.
 
-**Cards land on a random side**, where there is a second side to land on. On a
-two-sided pack that is the point: half arrive showing the meaning and half the
-word, which is a deck you can test yourself with rather than read off.
+**`z-index:0` on the felt is load-bearing.** Picking a card up puts it on top by
+bumping its z-index, and that counter only climbs. Without a stacking context on
+`#deck` it eventually climbs past `#panelhost`, and the menu opens *behind* the
+card — which looks like the menu being broken and is the cards being fine.
 
-**`setPointerCapture` throws on a pointer that is already gone**, rather than
-doing nothing, and an exception out of a `pointerdown` handler takes the rest
-of the gesture with it. Capture improves a drag; it is not required for one. It
-is in a `try` in both `swipe.js` and `table.js`.
-
-**Wire a host's listeners once, not once per open.** `#table` outlives the
-screen rendered into it, so a listener added in `openTable()` accumulates. The
-named handlers are deduped by identity and were fine; a click handler written
-inline is a new function every time, and after two visits to the table one tap
-on the pile dealt two cards. `wire()` is guarded by a flag.
-
-**A tap on the pile is handled in `pointerup`**, so that a press-and-hold can be
-a press-and-hold. That leaves the keyboard with nothing — a button activated by
-Enter or Space fires a click and no pointer events at all — so there is a click
-handler for `detail === 0`, which is exactly keyboard activation and a script's
-own `.click()`, and never a real tap.
-
-**Do not put `container-type` on a face that turns over.** The type here is
+**Do not put `container-type` on a face that turns over.** The type on a card is
 sized from `--tw`, the card's own width in pixels, written by `table.js` when it
 places the card. It was a container query, which reads far better — until you
-notice that `container-type` computes to `contain: layout style inline-size`,
-and layout containment on the very element carrying `backface-visibility` and
-the half-turn is exactly the thing that can flatten it. The face that should
-have been facing away came through the front.
+notice that `container-type` computes to `contain: layout style inline-size`, and
+layout containment on the very element carrying the half-turn is exactly the
+thing that can flatten it.
+
+**Wire a host's listeners once, not once per open.** `#frame` outlives what is
+rendered into it, so a listener added on each open accumulates. The named
+handlers dedupe by identity; a click handler written inline is a new function
+every time, and one tap on the pile started dealing two cards.
+
+**A tap on the pile is handled in `pointerup`**, so that a press-and-hold can be
+a press-and-hold. That leaves the keyboard with nothing — Enter or Space on a
+button fires a click and no pointer events at all — so there is a click handler
+for `detail === 0`, which is exactly keyboard activation and never a real tap.
+
+**`setPointerCapture` throws on a pointer that is already gone**, rather than
+doing nothing, and an exception out of a `pointerdown` handler takes the rest of
+the gesture with it. Capture improves a drag; it is not required for one. It is
+in a `try`.
 
 ## The aesthetics studio
 

@@ -32,11 +32,12 @@ and a passing assertion doesn't mean it looks right. Add a case to
   hand. The packs are the source of truth. Nothing in the app writes to them
   either: Menu → Curate exports what has been kept, cut and rewritten, and a
   session edits the CSVs by it. See "Curating" in the README.
-- The deck deals in **rounds**: anything you have said something about is out
-  until the round ends, and the end of a round is a screen with a button, never
-  a silent reshuffle. Anything that gives a verdict must mark the round
-  (`donePass`) and anything that takes one back must unmark it. See "It deals
-  in rounds" in the README.
+- The app is **a table with a pile on it**, and `js/table.js` is all of it: the
+  pile, the felt, verdicts, dragging, the flip. There is no round any more —
+  "nothing repeats until you have been through everything" is what a pile *is*,
+  not a rule the app keeps a list for. `S.table.n` is how many are laid out at
+  once, and it changes what a drag means: at one card a drag is the verdict, at
+  more than one it moves the card. See "The table" in the README.
 - `sw.js` reaps only `activinator-` caches. The app shares the
   `starrysidekick.github.io` origin with Bureau, and a cache store belongs to
   the origin, not to a scope — the general filter wiped Bureau's shell once.

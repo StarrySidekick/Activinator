@@ -15,18 +15,8 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   page.on('pageerror', e => errs.push('PAGEERROR: ' + e.message));
   const shot = async n => { await page.waitForTimeout(300); await page.screenshot({ path:`test/shots/${n}.png` }); };
-  // There is one button in the app and it is on the back of the card, so
-  // reaching the menu means turning a card over first.
-  const reading = () => page.evaluate(() => document.body.classList.contains('reading'));
-  const menu = async () => {
-    // Turn a card over first — and go by the state the app is actually in
-    // rather than by one tap, since a tap during a card leaving does nothing.
-    for (let i = 0; i < 4 && !(await reading()); i++) {
-      await page.locator('.card.top').click();
-      await page.waitForTimeout(560);
-    }
-    await page.click('.settings'); await page.waitForTimeout(400);
-  };
+  // There is one button in the app and it is in the bar, always on screen.
+  const menu = async () => { await page.click('.settings'); await page.waitForTimeout(400); };
 
   await page.goto(URL);
   await page.waitForTimeout(700);
@@ -38,21 +28,19 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     return j.name === 'Activinator' && j.icons.length === 3;
   });
 
-  // — a card is a card: seven by twelve, out to both edges of the screen, with
-  //   the rest of the hand squared up dead under it so what you see is one
-  //   card. The top card is the LAST in the DOM, because the hand is painted
-  //   back to front. —
+  // — a card is a card: seven by twelve, out to both edges of the screen, on
+  //   the felt above the bar. Laid out for one means one on the felt. —
   const cardShaped = await page.evaluate(() => {
-    const r = document.querySelector('.card.top').getBoundingClientRect();
-    const under = [...document.querySelectorAll('#deck .card:not(.top)')];
-    const same = (a) => Math.abs(a.left - r.left) < 0.5 && Math.abs(a.top - r.top) < 0.5 &&
-                        Math.abs(a.width - r.width) < 0.5 && Math.abs(a.height - r.height) < 0.5;
+    const f = document.getElementById('deck');
+    const cards = [...document.querySelectorAll('#deck .card')];
+    const r = cards[0].getBoundingClientRect();
     return {
       tarot: Math.abs(r.width / r.height - 7 / 12) < 0.01,
       edgeToEdge: r.left < 0.5 && innerWidth - r.right < 0.5,
-      roomAboveAndBelow: r.top > 8 && innerHeight - r.bottom > 8,
-      // squared up rather than fanned: the hand sits under it exactly
-      squareStack: under.length === 2 && under.every(c => same(c.getBoundingClientRect()))
+      // laid out for one means one on the felt, not a pile of three
+      justTheOne: cards.length === 1 && ACT.S.table.n === 1,
+      // and it sits on the felt, above the bar, not over it
+      aboveTheBar: r.bottom <= document.getElementById('tbar').getBoundingClientRect().top + 1
     };
   });
 
@@ -184,9 +172,9 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   const poolIsForever = await page.evaluate(() => {
     const id = ACT.pool()[0].id;
     for (const c of ACT.pool()) ACT.S.seen[c.id] = { v:'dislike', at:new Date().toISOString() };
-    const stillDeals = ACT.deal(3).length === 3;
+    const stillDeals = ACT.buildPile().length > 3;
     ACT.S.seen[id] = { v:'never', at:new Date().toISOString() };
-    const goneForGood = !ACT.deal(400).some(c => c.id === id);
+    const goneForGood = !ACT.buildPile().some(c => c.id === id);
     ACT.S.seen = {}; ACT.redeal();
     return stillDeals && goneForGood;
   });
@@ -197,7 +185,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     ACT.S.ctx = { who:'partner', where:'outdoors', time:'medium' };
     const WHO = ['solo','partner','friends','newpeople'];
     let ok = true;
-    for (let i = 0; i < 50 && ok; i++) for (const c of ACT.deal(6)) {
+    for (const c of ACT.buildPile()) {
       const named = WHO.filter(t => c.tags.includes(t));
       if (named.length && !named.includes('partner')) ok = false;
       if (!c.tags.includes('outdoors') && !c.tags.includes('anywhere')) ok = false;
@@ -209,22 +197,21 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
 
   // — one button in the whole app, on the back of the card, top right —
   const oneButton = await page.evaluate(async () => {
-    // one piece of chrome in the whole app, and no dock left anywhere
-    const only = document.querySelectorAll('body > button[data-act]').length === 1 &&
-                 !document.querySelector('.dock');
-    const hidden = getComputedStyle(document.querySelector('.settings')).opacity === '0';
-    ACT.flip(document.querySelector('.card.top'));
-    await new Promise(r => setTimeout(r, 550));
-    const st = document.querySelector('.settings');
+    /* One piece of chrome in the whole app. It used to hide until you turned a
+       card over, because there was nothing else on screen for it to belong to;
+       there is a bar now, so it lives in it and is always there. */
+    const st = document.querySelector('#tbar .settings');
+    const all = document.querySelectorAll('[data-act="menu"]');
     const r = st.getBoundingClientRect();
-    const out = { only, hidden,
-      shownWhenReading: getComputedStyle(st).opacity === '1',
-      topRight: r.top < innerHeight / 2 && r.left + r.width / 2 > innerWidth / 2,
+    const bar = document.getElementById('tbar').getBoundingClientRect();
+    return {
+      only: all.length === 1 && !document.querySelector('.dock'),
+      inTheBar: r.top >= bar.top - 1 && r.bottom <= bar.bottom + 1,
+      onTheRight: r.left + r.width / 2 > innerWidth / 2,
+      alwaysThere: getComputedStyle(st).opacity === '1' &&
+                   getComputedStyle(st).pointerEvents !== 'none',
+      big: r.width >= 40 && r.height >= 40         // a thumb has to land on it
     };
-    ACT.flip(document.querySelector('.card.top'));
-    await new Promise(r => setTimeout(r, 550));
-    out.hiddenAgain = getComputedStyle(st).opacity === '0';
-    return out;
   });
 
   // — a pack switched off leaves the pool; switched back on it returns, and
@@ -250,44 +237,45 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
              back: back === before, adds: withExtra === without + other.items.length };
   });
 
-  // — it deals in rounds: everything once, then it says so and waits. It used
-  //   not to — both draws picked at random from a wide slice of the ranking, so
-  //   the same card came back within a few dozen swipes. —
-  const rounds = await page.evaluate(async () => {
-    const packs = JSON.stringify(ACT.S.packs), pass = JSON.stringify(ACT.S.pass);
-    const seenWas = JSON.stringify(ACT.S.seen), recentWas = JSON.stringify(ACT.S.recent);
+  /* — the pile: everything once, and it says so when it is spent. There is no
+       round any more — a card off the pile is not in the pile, which is the same
+       guarantee with nothing to keep — so this asks it of the pile itself. — */
+  const pile = await page.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const packs = JSON.stringify(ACT.S.packs), seen = JSON.stringify(ACT.S.seen);
+    // one small deck, so the whole pile can actually be dealt out
     for (const k of Object.keys(ACT.S.packs)) ACT.S.packs[k] = (k === 'q-partner');
-    ACT.S.pass = { n:1, done:[] }; ACT.S.seen = {}; ACT.redeal();
-
-    const total = ACT.pool().length, dealt = [];
-    let guard = 0;
-    while (ACT.top() && guard++ < 400) { dealt.push(ACT.top().id); ACT.say(guard % 4 ? 'like' : 'dislike'); }
-    await new Promise(r => setTimeout(r, 420));
-
-    const n = ACT.S.pass.n;
+    ACT.S.seen = {}; ACT.S.table.n = 1; ACT.redeal();
+    await wait(80);
+    const total = ACT.table.pileSize() + ACT.table.onTable().length;
+    const got = [];
+    for (let i = 0; i < total + 4 && ACT.top(); i++) { got.push(ACT.top().id); ACT.say('like'); await wait(6); }
+    const head = document.querySelector('#deck .empty h2');
     const out = {
-      wholeDeck: total > 20 && dealt.length === total,
-      noRepeats: new Set(dealt).size === dealt.length,
-      saysSo: /whole deck/.test((document.querySelector('.empty h2') || {}).textContent || ''),
-      // it waits to be asked rather than reshuffling behind you
-      waits: ACT.S.pass.n === n,
-      goesRound: (ACT.goRound(), ACT.S.pass.n === n + 1 && ACT.cycle().left === total && !!ACT.top())
+      wholeDeck: got.length === total && total > 50,
+      noRepeats: new Set(got).size === got.length,
+      // and the screen says so rather than reshuffling behind your back
+      saysSo: !!head && /whole pile/i.test(head.textContent),
+      emptyPile: ACT.table.pileSize() === 0 && ACT.table.onTable().length === 0
     };
-    ACT.S.packs = JSON.parse(packs); ACT.S.pass = JSON.parse(pass);
-    ACT.S.seen = JSON.parse(seenWas); ACT.S.recent = JSON.parse(recentWas);
-    ACT.redeal();
+    // gathering up is the only way round twice, and it is a button
+    ACT.table.gather(); await wait(450);
+    out.gathers = ACT.table.pileSize() + ACT.table.onTable().length === total && !!ACT.top();
+    ACT.S.packs = JSON.parse(packs); ACT.S.seen = JSON.parse(seen); ACT.redeal();
+    await wait(80);
     return out;
   });
 
-  // — undo puts the card back into the round as well as into the hand —
-  const undoRound = await page.evaluate(async () => {
+  /* — a swipe down puts the card back on the felt and takes the verdict with
+       it — */
+  const undoBack = await page.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
     const t = ACT.top().id;
-    ACT.say('dislike');
-    await new Promise(r => setTimeout(r, 400));
-    const gone = ACT.S.pass.done.includes(t);
-    ACT.takeBack();
-    await new Promise(r => setTimeout(r, 200));
-    return gone && !ACT.S.pass.done.includes(t) && ACT.top().id === t;
+    ACT.say('like'); await wait(150);
+    const judged = !!ACT.S.seen[t] && ACT.top().id !== t;
+    ACT.takeBack(); await wait(150);
+    return judged && !ACT.S.seen[t] && ACT.top().id === t &&
+           ACT.table.onTable().length === ACT.S.table.n;
   });
 
   // — the one button reaches everything —
@@ -441,7 +429,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   await page.reload(); await page.waitForTimeout(700);
   const persisted = await page.evaluate(() => ACT.S.swipes > 10 && ACT.S.mine.length === 1);
   const editPersisted = await page.evaluate(([id, t]) =>
-    ACT.S.v === 5 && ACT.pool().find(c => c.id === id).t === t, [editId, 'A better way of putting it']);
+    ACT.S.v === 6 && ACT.pool().find(c => c.id === id).t === t, [editId, 'A better way of putting it']);
 
   // — and a rewrite can be taken back off, leaving the pack's own words —
   await page.evaluate(id => ACT.panels.editPanel(id), editId);
@@ -461,159 +449,82 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     ACT.panels.closePanel();
     return ok;
   });
-  // — the table: dealing, handling, and staying out of the deck's way —
-  const table = await page.evaluate(async () => {
+  /* — laid out for more than one: a spread you arrange rather than a card you
+       judge. The number decides how big a card is drawn, which is the whole of
+       "how many can I see at once". — */
+  const spread = await page.evaluate(async () => {
     const wait = ms => new Promise(r => setTimeout(r, ms));
     const T = ACT.table;
-    const deckWas = JSON.stringify({ w: ACT.S.w, done: ACT.S.pass.done.length, swipes: ACT.S.swipes });
-    ACT.panels.closePanel();
-    T.openTable();
-    await wait(120);
-    const felt = document.querySelector('#table .felt');
-    const opened = !!felt && T.pileSize() > 0;
+    const out = {};
+    for (const n of [1, 2, 3, 4, 6, 8]) {
+      T.setN(n); await wait(80);
+      const f = document.getElementById('deck');
+      const cards = [...document.querySelectorAll('#deck .card')];
+      const fits = cards.length === n && cards.every(e =>
+        e.offsetTop >= -1 && e.offsetTop + e.offsetHeight <= f.clientHeight + 1 &&
+        e.offsetLeft >= -1 && e.offsetLeft + e.offsetWidth <= f.clientWidth + 1 &&
+        Math.abs(e.offsetWidth / e.offsetHeight - 7 / 12) < 0.02);
+      out['fits' + n] = fits;
+      if (n === 1) out.oneIsFlush = cards[0].offsetWidth === f.clientWidth;
+    }
+    T.setN(4); await wait(80);
+    return out;
+  });
 
-    /* Dealt one at a time off the pile, and the pile knows it. */
-    const p0 = T.pileSize();
-    document.querySelector('.pile').click(); await wait(320);
-    const dealsOne = T.onTable().length === 1 && T.pileSize() === p0 - 1;
-
-    const packs = ACT.PACKS;
-    const two = packs.filter(p => p.twosided).map(p => p.id);
+  /* — two-sided cards land on a random side, one-sided ones face up — */
+  const sides = await page.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const T = ACT.table;
+    const was = JSON.stringify(ACT.S.packs);
+    const two = ACT.PACKS.filter(p => p.twosided).map(p => p.id);
     const twoSided = two.length === 2 && two.includes('words') && two.includes('italian') &&
-      packs.every(p => !p.twosided || p.items.every(a => !!a.d));
+      ACT.PACKS.every(p => !p.twosided || p.items.every(a => !!a.d));
 
     /* Only a two-sided pack has a second side, so the coin is only tossed for
-       those. Deal twenty of them: landing all one way up is a one in half a
-       million coincidence, and landing all one way up every run is a bug. So
-       the pile is narrowed to those packs to ask the question at all. */
-    const was = JSON.stringify(ACT.S.packs);
+       those: the pile is narrowed to ask the question at all. Twenty landing all
+       one way up is a one in half a million coincidence. */
     for (const k of Object.keys(ACT.S.packs)) ACT.S.packs[k] = two.includes(k);
-    T.closeTable(); T.openTable(); await wait(120);
-    for (let i = 0; i < 20; i++) { document.querySelector('.pile').click(); await wait(28); }
-    const sides = new Set(T.onTable().map(o => o.side));
-    const bothSides = sides.has(0) && sides.has(1);
-    /* Two sides means two faces, and the other one is the meaning in words —
-       never a printed pattern, which bled through the front and is gone.
+    T.setN(8); ACT.redeal(); await wait(120);
+    for (let i = 0; i < 14; i++) { ACT.table.dealOne(); await wait(12); }
+    const seen = new Set(T.onTable().map(o => o.side));
+    const bothSides = seen.has(0) && seen.has(1);
 
-       Asked of each card against its own pack rather than of the whole table.
-       Switching every pack but the two-sided ones off does not empty the pile
-       of one-sided cards: anything you wrote yourself is in the pool whatever
-       the packs say, by design, and this test writes one earlier. Demanding two
-       faces of everything on the table failed on the runs that dealt it. */
-    const twoFaced = T.onTable().every((o, i) => {
+    /* Asked of each card against its own pack rather than of the whole felt:
+       anything you wrote yourself is in the pool whatever the packs say, by
+       design, and this test writes one earlier. */
+    const rightFaces = T.onTable().every((o, i) => {
       const seed = ACT.pool().find(c => c.id === o.id) || {};
       const p = ACT.PACKS.find(x => x.id === seed.pack) || {};
       const both = !!(p.twosided && seed.d);
-      const e = document.querySelectorAll('.tcard')[i];
-      return e.querySelectorAll('.face').length === (both ? 2 : 1) &&
-             !e.querySelector('.printed') &&
-             e.classList.contains('oneside') === !both &&
-             (both || o.side === 0) &&
-             (!both || !!e.querySelector('.face.b .t'));
+      const e = document.querySelectorAll('#deck .card')[i];
+      return !e.querySelector('.printed') && (both || o.side === 0);
     });
 
-    /* And a one-sided pack has one face, is always dealt face up, and does not
-       turn over when you tap it — there is nothing on the other side. */
-    ACT.S.packs = JSON.parse(was);
     for (const k of Object.keys(ACT.S.packs)) ACT.S.packs[k] = (k === 'core');
-    T.closeTable(); T.openTable(); await wait(120);
-    for (let i = 0; i < 8; i++) { document.querySelector('.pile').click(); await wait(28); }
-    const ones = [...document.querySelectorAll('.tcard')];
-    const oneSided = ones.length === 8 &&
-      ones.every(e => e.querySelectorAll('.face').length === 1 &&
-                      e.classList.contains('oneside') && !e.classList.contains('flip')) &&
-      T.onTable().every(o => o.side === 0);
-    ones[0].click(); await wait(600);
-    const wontTurn = !ones[0].classList.contains('flip');
-    ACT.S.packs = JSON.parse(was);
-    T.closeTable(); T.openTable(); await wait(120);
-    for (let i = 0; i < 20; i++) { document.querySelector('.pile').click(); await wait(28); }
+    ACT.redeal(); await wait(120);
+    const oneSided = T.onTable().every(o => o.side === 0);
+    ACT.S.packs = JSON.parse(was); T.setN(2); ACT.redeal(); await wait(120);
+    return { twoSided, bothSides, rightFaces, oneSided };
+  });
 
-    /* Laid out for the number you asked for, inside the felt, at a card's
-       proportion. The rect is the rotated box, so measure the layout box. */
-    T.setN(4); await wait(60);
-    /* Re-asked for, not the one captured at the top: opening the table again
-       replaces the whole screen, and the old node measures nothing at all. */
-    const felt2 = document.querySelector('#table .felt');
-    const cards = [...document.querySelectorAll('.tcard')];
-    const laidOut = cards.length > 8 && cards.every(e =>
-      e.offsetTop >= -1 && e.offsetTop + e.offsetHeight <= felt2.clientHeight + 1 &&
-      e.offsetLeft >= -1 && e.offsetLeft + e.offsetWidth <= felt2.clientWidth + 1 &&
-      Math.abs(e.offsetWidth / e.offsetHeight - 7 / 12) < 0.02);
-    const setting = ACT.S.table.n === 4;
-
-    /* Shuffle is the pile and leaves the table alone; gather is the table and
-       ends in a shuffle. They were briefly one function. */
+  /* — shuffle is the pile and leaves the felt alone; gather is the felt and
+       ends in a shuffle. They were briefly one function. — */
+  const piles = await page.evaluate(async () => {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const T = ACT.table;
     const outWas = T.onTable().length, pileWas = T.pileSize();
     T.shuffle(); await wait(60);
-    const shuffleKeepsTable = T.onTable().length === outWas && T.pileSize() === pileWas;
-    T.gather(); await wait(400);
-    const gatherReturns = T.onTable().length === 0 && T.pileSize() === pileWas + outWas;
-
-    T.closeTable(); await wait(300);
-    const closes = !document.querySelector('#table .felt') && !ACT.table.isOpen();
-    /* Nothing it did was about the deck. */
-    const deckUntouched = JSON.stringify({ w: ACT.S.w, done: ACT.S.pass.done.length, swipes: ACT.S.swipes }) === deckWas;
-    return { opened, dealsOne, bothSides, twoSided, twoFaced, oneSided, wontTurn,
-             laidOut, setting, shuffleKeepsTable, gatherReturns, closes, deckUntouched };
+    const shuffleKeepsFelt = T.onTable().length === outWas && T.pileSize() === pileWas;
+    T.gather(); await wait(450);
+    /* Everything comes back and the felt refills to what it is laid out for. */
+    const gatherReturns = T.onTable().length === ACT.S.table.n &&
+                          T.pileSize() + T.onTable().length >= pileWas + outWas;
+    return { shuffleKeepsFelt, gatherReturns };
   });
 
-  // — and it can be handled: a tap turns a card over, a drag moves it. Only a
-  //   two-sided card has a second side to turn to, so the pile is those. —
-  const packsWere = await page.evaluate(() => JSON.stringify(ACT.S.packs));
-  await page.evaluate(() => {
-    const two = ACT.PACKS.filter(p => p.twosided).map(p => p.id);
-    for (const k of Object.keys(ACT.S.packs)) ACT.S.packs[k] = two.includes(k);
-    ACT.table.openTable(); ACT.table.setN(2);
-  });
-  await page.waitForTimeout(200);
-  await page.click('.pile'); await page.waitForTimeout(320);
-  await page.click('.pile'); await page.waitForTimeout(320);
-  await shot('13-table');
-  const tc = await page.locator('.tcard').first();
-  const wasFlipped = await tc.evaluate(e => e.classList.contains('flip'));
-  await tc.click(); await page.waitForTimeout(600);
-  const tapTurns = await tc.evaluate((e, was) => e.classList.contains('flip') !== was, wasFlipped);
-  /* And it is never drawn mirrored on the way. One face in the layout at a
-     time, and the container never past 90° — a negative m11 is a face seen from
-     behind, which is text backwards.
-
-     The sampler is armed first and the turn started by a real tap, because a
-     hand-made PointerEvent is not a pointer: setPointerCapture throws on one,
-     and the throw comes out of the app's own pointerdown handler. */
-  await page.evaluate(() => {
-    const card = document.querySelector('.tcard');
-    const inner = card.querySelector('.tcardin');
-    window.__turn = [];
-    const t0 = performance.now();
-    const tick = () => {
-      const t = getComputedStyle(inner).transform;
-      window.__turn.push([+new DOMMatrixReadOnly(t === 'none' ? '' : t).m11.toFixed(3),
-        [...card.querySelectorAll('.face')].filter(f => getComputedStyle(f).display !== 'none').length]);
-      if (performance.now() - t0 < 800) requestAnimationFrame(tick);
-    };
-    requestAnimationFrame(tick);
-  });
-  await tc.click();
-  await page.waitForTimeout(850);
-  const tableTurnClean = await page.evaluate(() => {
-    const seen = window.__turn || [];
-    return seen.length > 10 && seen.every(s => s[0] >= -0.01 && s[1] === 1) &&
-           Math.min(...seen.map(s => Math.abs(s[0]))) < 0.12;
-  });
-  const tb0 = await tc.evaluate(e => [e.offsetLeft, e.offsetTop, e.classList.contains('flip')]);
-  const tbox = await tc.boundingBox();
-  await page.mouse.move(tbox.x + tbox.width / 2, tbox.y + tbox.height / 2);
-  await page.mouse.down();
-  for (let i = 1; i <= 8; i++) { await page.mouse.move(tbox.x + tbox.width / 2 + i * 11, tbox.y + tbox.height / 2 + i * 7); await page.waitForTimeout(12); }
-  await page.mouse.up();
-  await page.waitForTimeout(300);
-  const tb1 = await tc.evaluate(e => [e.offsetLeft, e.offsetTop, e.classList.contains('flip')]);
-  await shot('14-table-handled');
-  // a drag moves the card and must not also turn it over
-  const dragMoves = Math.abs(tb1[0] - tb0[0]) > 40 && Math.abs(tb1[1] - tb0[1]) > 20 && tb1[2] === tb0[2];
   /* — the pile: a tap deals one, a press picks it up, a shake in your hand
        shuffles it, and letting go drops it back in its slot. — */
+  await shot('13-table');
   const pileBox = await page.locator('.pile').boundingBox();
   const dealtBefore = await page.evaluate(() => ACT.table.onTable().length);
   await page.mouse.move(pileBox.x + pileBox.width / 2, pileBox.y + pileBox.height / 2);
@@ -637,26 +548,66 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     const a = p.getBoundingClientRect(), b = slot.getBoundingClientRect();
     return Math.abs(a.left - b.left) < 2 && Math.abs(a.top - b.top) < 2;
   });
-  // and picking it up is not dealing: no card came off during any of that
   const heldDealtNothing = await page.evaluate(d => ACT.table.onTable().length === d, dealtBefore);
   await page.click('.pile'); await page.waitForTimeout(320);
   const tapDeals = await page.evaluate(d => ACT.table.onTable().length === d + 1, dealtBefore);
   const shakeSwitch = await page.evaluate(async () => {
     const was = ACT.S.table.shake;
-    document.querySelector('[data-act="tshake"]').click();
-    await new Promise(r => setTimeout(r, 120));
+    await ACT.table.setShake(!was);
     const flipped = ACT.S.table.shake !== was;
-    document.querySelector('[data-act="tshake"]').click();
-    await new Promise(r => setTimeout(r, 120));
+    await ACT.table.setShake(was);
     return flipped && ACT.S.table.shake === was;
   });
-  Object.assign(table, { lifted, follows, shookShuffles, dropped, heldDealtNothing,
-                         tapDeals, shakeSwitch,
-                         straightDragIsNotAShake: !/Shuffled/.test(quietSoFar) });
-  await page.evaluate((w) => { ACT.table.closeTable(); ACT.S.packs = JSON.parse(w); ACT.save(); ACT.redeal(); }, packsWere);
+
+  /* — and a card can be handled: a tap turns it over, a drag moves it and does
+       not judge it. Two on the felt, so a drag is a move. — */
+  const tc = page.locator('#deck .card').first();
+  const wasFlipped = await tc.evaluate(e => e.classList.contains('flip'));
+  await tc.click(); await page.waitForTimeout(620);
+  const tapTurns = await tc.evaluate((e, was) => e.classList.contains('flip') !== was, wasFlipped);
+  await tc.click(); await page.waitForTimeout(620);
+  const tb0 = await tc.evaluate(e => [e.offsetLeft, e.offsetTop, e.classList.contains('flip')]);
+  const seenBefore = await page.evaluate(() => Object.keys(ACT.S.seen).length);
+  const tbox = await tc.boundingBox();
+  await page.mouse.move(tbox.x + tbox.width / 2, tbox.y + tbox.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) { await page.mouse.move(tbox.x + tbox.width / 2 + i * 11, tbox.y + tbox.height / 2 + i * 7); await page.waitForTimeout(12); }
+  await page.mouse.up();
   await page.waitForTimeout(300);
-  table.tapTurns = tapTurns; table.dragMoves = dragMoves;
-  table.turnClean = tableTurnClean;
+  const tb1 = await tc.evaluate(e => [e.offsetLeft, e.offsetTop, e.classList.contains('flip')]);
+  await shot('14-table-handled');
+  const dragMoves = Math.abs(tb1[0] - tb0[0]) > 40 && Math.abs(tb1[1] - tb0[1]) > 20 &&
+    tb1[2] === tb0[2] &&
+    await page.evaluate(n => Object.keys(ACT.S.seen).length === n, seenBefore);
+
+  /* And the turn is never drawn mirrored: one face in the layout at a time, and
+     the container never past 90°. A negative m11 is a face seen from behind. */
+  await page.evaluate(() => {
+    const card = document.querySelector('#deck .card');
+    const inner = card.querySelector('.cardin');
+    window.__turn = [];
+    const t0 = performance.now();
+    const tick = () => {
+      const t = getComputedStyle(inner).transform;
+      window.__turn.push([+new DOMMatrixReadOnly(t === 'none' ? '' : t).m11.toFixed(3),
+        [...card.querySelectorAll('.face')].filter(f => getComputedStyle(f).display !== 'none').length]);
+      if (performance.now() - t0 < 800) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+  await tc.click();
+  await page.waitForTimeout(850);
+  const turnClean = await page.evaluate(() => {
+    const seen = window.__turn || [];
+    return seen.length > 10 && seen.every(s => s[0] >= -0.01 && s[1] === 1) &&
+           Math.min(...seen.map(s => Math.abs(s[0]))) < 0.12;
+  });
+  await page.evaluate(() => { ACT.table.setN(1); });
+  await page.waitForTimeout(300);
+
+  const table = { ...spread, ...sides, ...piles, lifted, follows, shookShuffles, dropped,
+    heldDealtNothing, tapDeals, shakeSwitch, tapTurns, dragMoves, turnClean,
+    straightDragIsNotAShake: !/Shuffled/.test(quietSoFar) };
 
   /* — a panel opened and closed inside one frame must not leave the host
        taking taps. `.on` is added a frame late so the sheet has something to
@@ -680,17 +631,17 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   console.log({ dealt, manifestOk, cardShaped, frontIsBare, cornerIndex, emblems, packs, turn, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
     ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
-    refusedBare, mine, mineRow, rowIsPackShaped, rounds, undoRound, oneButton, prefilled, rewritten, curation,
+    refusedBare, mine, mineRow, rowIsPackShaped, pile, undoBack, oneButton, prefilled, rewritten, curation,
     editPersisted, unedited, defEditable, table, ghostPanel, persisted, swReady, offline, errors: errs });
   await browser.close();
-  const ok = dealt === 3 && manifestOk && frontIsBare && emblems > 0 && flipped &&
+  const ok = dealt === 1 && manifestOk && frontIsBare && emblems > 0 && flipped &&
     Object.values(cardShaped).every(Boolean) && Object.values(cornerIndex).every(Boolean) &&
     Object.values(turn).every(Boolean) &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
     searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
     mine && persisted && swReady && offline && prefilled && editPersisted && unedited &&
-    defEditable && undoRound && Object.values(rounds).every(Boolean) &&
+    defEditable && undoBack && Object.values(pile).every(Boolean) &&
     Object.values(table).every(Boolean) && ghostPanel &&
     Object.values(oneButton).every(Boolean) &&
     Object.values(rewritten).every(Boolean) && Object.values(curation).every(Boolean) &&
