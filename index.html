@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>Activinator</title>
+<link rel="manifest" href="manifest.webmanifest">
+<!-- The card sits on the table rather than being the screen, so the screen's
+     colour is the room's, and Safari's own bars match the table the card is
+     lying on. -->
+<meta name="theme-color" content="#14151c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Activinator">
+<meta name="description" content="A deck of things to actually go and do. Swipe the ones you fancy; it works out what you are like.">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192">
+<link rel="icon" href="icons/icon-32.png" sizes="32x32">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/deck.css">
+<link rel="stylesheet" href="css/panels.css">
+<link rel="stylesheet" href="css/table.css">
+</head>
+<body>
+<!-- The app is a table with a pile on it: the felt, and the bar the pile sits
+     in. The felt keeps the id `deck` because that is what it is — what is
+     dealt out of the pile and onto the table. -->
+<div id="frame">
+  <main id="deck"></main>
+  <div id="tbar"></div>
+</div>
+
+<div id="panelhost"></div>
+<div id="toast"></div>
+<script type="module" src="js/boot.js"></script>
+</body>
+</html>
