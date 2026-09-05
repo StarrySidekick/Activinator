@@ -6,6 +6,7 @@ import { S, save, setUndo, getUndo, remember, pool } from './state.js';
 import { deal } from './deal.js';
 import { learn, unlearn } from './taste.js';
 import { cardHTML } from './cards.js';
+import { offerNow } from './hour.js';
 
 const $ = s => document.querySelector(s);
 const HAND = 3;                       // how many are in the DOM at once
@@ -57,6 +58,36 @@ const emptyHTML = () => pool().length === 0
       <button data-act="ctx">Change what you asked for</button>
     </div>`;
 
+/* The clock's offer, on the face of the deck. Dismissed per session rather
+   than saved: the hour changes, and a "no thanks" at eleven should not still
+   be silencing it a week on. See hour.js for why this offers instead of
+   filtering. */
+let dismissed = null;
+const suggestHTML = () => {
+  const s = offerNow(S.ctx, dismissed);
+  if (!s) return '';
+  return `<div class="suggest" data-sid="${s.id}">
+    <button class="stake" data-act="takesuggest">${s.line}</button>
+    <button class="sno" data-act="nosuggest" aria-label="No thanks">✕</button>
+  </div>`;
+};
+
+/* Taking it writes ordinary context — the same fields Right now writes — so
+   what the clock suggested is visible and undoable exactly where you would
+   look for it. It teaches the model nothing, like every other filter. */
+const takeSuggest = () => {
+  const s = offerNow(S.ctx, dismissed);
+  if (!s) return;
+  Object.assign(S.ctx, s.ctx);
+  save(); reset();
+  toast('Asked for something short, at home');
+};
+const noSuggest = () => {
+  const s = offerNow(S.ctx, dismissed);
+  if (s) dismissed = s.id;
+  render();
+};
+
 const render = () => {
   const deck = $('#deck');
   deck.innerHTML = Q.length
@@ -65,6 +96,7 @@ const render = () => {
   const els = [...deck.querySelectorAll('.card')].reverse();
   els.forEach((el, i) => { el.style.zIndex = 10 - i; });
   place(els);
+  deck.insertAdjacentHTML('beforeend', suggestHTML());
   $('.dock .undo').classList.toggle('on', !!getUndo());
 };
 
@@ -123,4 +155,4 @@ const more = () => {
   render();
 };
 
-export { Q, render, refill, reset, say, takeBack, more, toast, top };
+export { Q, render, refill, reset, say, takeBack, more, toast, top, takeSuggest, noSuggest };

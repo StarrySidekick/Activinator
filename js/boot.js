@@ -3,7 +3,7 @@
    data-act and a case here. Nothing binds a listener inside a render. */
 import { S, load, save, reset as wipeAll, exportJSON, importJSON, pool, byId, remember } from './state.js';
 import { learn } from './taste.js';
-import { render, reset as redeal, say, takeBack, more, toast, top } from './deck.js';
+import { render, reset as redeal, say, takeBack, more, toast, top, takeSuggest, noSuggest } from './deck.js';
 import { deal } from './deal.js';
 import { PACKS } from './data.js';
 import { wire as wireSwipe } from './swipe.js';
@@ -28,6 +28,11 @@ const act = (name, el) => {
 
     /* Context filters what is dealt and teaches nothing: a wet Tuesday is not
        evidence about what you are like. */
+    /* The clock offers; you decide. Taking it writes ordinary context, so the
+       hour never filters anything you did not ask it to. See hour.js. */
+    case 'takesuggest': return takeSuggest();
+    case 'nosuggest':   return noSuggest();
+
     case 'setwho':   S.ctx.who = v; break;
     case 'setwhere': S.ctx.where = v; break;
     case 'settime':  S.ctx.time = v; break;

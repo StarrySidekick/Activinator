@@ -135,3 +135,29 @@
   border:1px solid var(--ink-3); border-radius:12px; padding:11px 18px;
   font-size:13.5px; color:#cfd3de; background:#191b24;
 }
+
+
+/* The clock's offer — see js/hour.js. It sits at the foot of the deck, over
+   the card but clear of the dock, and it is the only thing on this screen that
+   is not a card. Dressed as the toast is, in the app's own paper and ink: a
+   first pass built it out of its own dark panel and it read as an advert
+   dropped onto somebody else's page. One line, so it cannot wrap into a
+   paragraph on a narrow phone. */
+.suggest {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--bot) + 74px);
+  z-index: 60; display: flex; align-items: stretch;
+  max-width: 88vw;
+  border-radius: 999px; overflow: hidden;
+  background: #e9e6df; color: var(--ink);
+  box-shadow: 0 2px 12px rgba(20,21,28,.14);
+}
+.suggest button {
+  font: inherit; font-size: 13px; font-weight: 500; color: var(--ink);
+  background: none; border: 0; cursor: pointer;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.suggest .stake { padding: 9px 8px 9px 15px; text-align: left; }
+.suggest .sno   { padding: 9px 14px 9px 8px; color: var(--text-3); font-size: 15px; line-height: 1; }
+.suggest .sno:hover { color: var(--ink); }
+.suggest button:active { opacity: .6; }

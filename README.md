@@ -300,8 +300,35 @@ didn't deploy" — points at the wrong culprit. A new file must also be added to
 - Sync between devices. Export/import JSON is the bridge, as in Bureau.
 - Anything that phones home. There is no server and there is not going to be
   one; the whole model is a few dozen numbers in localStorage.
-- Time of day and weather as context. Both are obvious and both need care —
-  a filter you didn't set is a filter you can't understand.
+- Weather as context. Time of day landed (below); weather wants a network call
+  and a decision about what a forecast is allowed to say, so it waits.
+
+## The clock offers; it never filters
+
+At half past eleven the deck will cheerfully hand you a farmers market. The
+obvious fix — quietly dropping cards that don't suit the hour — is the one
+thing the deferred note above forbade: *a filter you didn't set is a filter you
+can't understand*. You would never see it happen and you could never find the
+switch.
+
+So `js/hour.js` never filters. It **offers**, once, on the face of the deck, and
+what you tap writes ordinary `ctx` — the same three fields the Right now panel
+writes, visible there afterwards, cleared like anything else you set. The
+difference between a filter you did not set and one you set in one tap is the
+whole of that file.
+
+One rule, because one is honestly defensible and a table of them would be a
+horoscope: **late is 22:00 to 06:00**, and it suggests something short, at home.
+It declines to show in three cases, each one where offering would presume — the
+hour has nothing to say, you have already set a where or a duration yourself, or
+you dismissed it. Dismissal is per session rather than saved: the hour changes,
+and a "no thanks" at eleven should not still be silencing it next week.
+
+Weather would slot in beside it as a second rule of the same shape.
+
+`node test/hour.mjs` covers it without a browser — it takes an injectable clock,
+because a test that had to run at midnight to check the midnight case would
+never get run.
 
 ## Style
 
