@@ -1,5 +1,11 @@
 # Activinator — working notes for Claude Code
 
+> **Read [`INTENT.md`](INTENT.md) first.** It records what this project is for
+> and what Timothy wants next, in his own words, dated. Where it disagrees with
+> this file about *direction* it is newer and wins; where it disagrees about
+> *mechanics* — how the code works, what was decided deliberately, the
+> invariants — this file wins.
+
 Activinator is Timothy's deck of things to actually go and do — one activity at
 a time, full screen, swipe right on what you'd probably do. It is a personal
 app, not a product, and design decisions should be made for one user.
