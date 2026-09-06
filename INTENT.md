@@ -33,6 +33,32 @@ are *genuinely* random rather than random in the way a generator is random.
 More of Timothy's own input in the loop, whether that is him writing them, him
 curating them, or the app drawing on something real in the world.
 
+**First step taken 2026-09-06: the deck now says whose cards these are.** A
+content problem needs a size before it needs a solution, and there was no way to
+ask how much of the deck was placeholder. Every pack row can carry a `source` —
+`seed`, `mine` or `folk` — a pack can declare a default, and the build prints the
+split on every run. It is authoring-only and is never emitted into
+`js/activities.js`; the app has no use for it.
+
+**The number today is 238 of 1,498, or 16%**, and all of that is the Words and
+Italian packs, which are real dictionary entries and real conjugations rather
+than suggestions somebody generated. **Core, Questions, Ask a partner, Tableaus
+and Visualizations are 1,260 rows of placeholder**, which is the honest picture
+and is now printed rather than felt.
+
+`node scripts/build-activities.mjs --placeholders` lists them so they can be
+rewritten in a sitting instead of hunted one at a time.
+
+**The loop is closed at the other end too.** `S.mine` already let him write
+activities on the device and export them as pack rows; those rows now come out
+marked `mine`, so pasting one into a pack moves the number without anything
+further to remember.
+
+**What this does not do** is make a single card better. It counts. The actual
+work — rewriting 1,260 rows, or finding a source of activities that is real
+rather than generated — is still ahead, and this is the instrument for telling
+whether it is going anywhere.
+
 ## Two structural notes he raised, worth designing around
 
 - **The language elements are almost their own thing**, separate from the

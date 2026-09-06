@@ -6,7 +6,8 @@
 // CSV and the generated file. Nothing fetches anything at runtime: the app has
 // to open on a train.
 //
-// Columns: title, minutes, cost, tags, definition (optional)
+// Columns: title, minutes, cost, tags, then definition and source (both
+// optional, either order)
 //   minutes    a whole number. The duration band is worked out from it.
 //   cost       free | frugal | costly (0 | 1 | 2 also accepted)
 //   tags       space-separated, all from the vocabulary, and NOT duration or
@@ -15,6 +16,10 @@
 //   definition on cards that teach a word, the meaning — printed separately
 //              from the word itself. Newlines survive (quote the cell), which
 //              is how a verb card carries its conjugations.
+//   source     seed | mine | folk. Who wrote the row. Authoring-only: it is
+//              counted here and never emitted into js/activities.js. Absent
+//              means seed, because everything written before the column
+//              existed was generated. `--placeholders` lists what is left.
 //
 // A pack may declare "lang" in index.json (e.g. "it-IT"); its cards then get
 // a speak button that says the title out loud in that language.
@@ -55,9 +60,31 @@ const parseCSV = (text) => {
   return rows.filter(r => r.some(v => v.trim()));
 };
 
+/* Who wrote a row.
+   -----------------------------------------------------------------------
+   Timothy's own reason for not using this app: "the activities and card
+   content are AI generated and I want a way for that not to be the case."
+   That is not a feature request, it is a content problem, and the first thing
+   a content problem needs is a way to see how big it is.
+
+   So every row can say where it came from. It is deliberately AUTHORING-ONLY
+   and is not emitted into js/activities.js — the app has no use for it, and
+   shipping a field nothing reads to fifteen hundred cards is dead weight. The
+   build counts it, and `--placeholders` prints the rows still waiting.
+
+   Absent means `seed`, because that is the honest default: everything written
+   before this column existed was generated. */
+const SOURCES = ['seed', 'mine', 'folk'];
+const SOURCE_NOTE = {
+  seed: 'generated, still a placeholder',
+  mine: "Timothy's own",
+  folk: 'a real thing that exists — a known game, a tradition, a standard exercise'
+};
+
 const WHERE = GROUPS.find(g => g[0] === 'Where')[1];
 const HARD  = GROUPS.find(g => g[0] === 'How hard')[1];
 const errors = [];
+const provenance = [];
 const titles = new Map();
 
 const build = (meta) => {
@@ -69,6 +96,8 @@ const build = (meta) => {
     errors.push(`index.json: ${meta.id} wants the mark "${meta.mark}", which is not drawn`);
   /* A two-sided pack prints its meaning on the other side of the card rather
      than under the word, so every card in it has to have a meaning to print. */
+  if ('source' in meta && !SOURCES.includes(meta.source))
+    errors.push(`index.json: ${meta.id} — "source" must be ${SOURCES.join(' | ')}, not ${JSON.stringify(meta.source)}`);
   if ('twosided' in meta && typeof meta.twosided !== 'boolean')
     errors.push(`index.json: ${meta.id} — "twosided" is true or false, not ${JSON.stringify(meta.twosided)}`);
   if (!existsSync(new URL(file, dir))) { errors.push(`${file}: no such pack`); return null; }
@@ -77,8 +106,14 @@ const build = (meta) => {
   const want = ['title', 'minutes', 'cost', 'tags'];
   if (want.some((w, i) => head[i] !== w))
     errors.push(`${file}:1  header must be "${want.join(',')}" — found "${head.join(',')}"`);
-  if (head.length > 4 && head[4] !== 'definition')
-    errors.push(`${file}:1  the only fifth column is "definition" — found "${head[4]}"`);
+  /* Two optional columns after the four, in either order. `source` is who wrote
+     the row and is authoring-only — see the note by SOURCES. */
+  const OPTIONAL = ['definition', 'source'];
+  const extra = head.slice(4).filter(Boolean);
+  const stray = extra.filter(h => !OPTIONAL.includes(h));
+  if (stray.length)
+    errors.push(`${file}:1  the only optional columns are ${OPTIONAL.join(' and ')} — found "${stray.join('", "')}"`);
+  const col = Object.fromEntries(OPTIONAL.map(h => [h, head.indexOf(h)]));
 
   const items = [];
   rows.forEach((r, n) => {
@@ -105,8 +140,20 @@ const build = (meta) => {
     if (hard.length !== 1) errors.push(`${at}  needs exactly one of ${HARD.join(' | ')}, found ${hard.length}`);
 
     const item = { id: idOf(t), t, tags: [...new Set(tags.concat(durationOf(min), COSTS[cost]))], min, cost };
-    const d = (r[4] || '').trim();
+    const d = col.definition >= 0 ? (r[col.definition] || '').trim() : '';
     if (d) item.d = d;
+
+    /* A pack may declare its own default in index.json — the Italian and Words
+       packs are real conjugations and real dictionary entries, which is a
+       different thing from a generated suggestion however the row was typed.
+       A row may still override its pack. */
+    const src = (col.source >= 0 ? (r[col.source] || '').trim().toLowerCase() : '')
+      || meta.source || 'seed';
+    if (!SOURCES.includes(src))
+      errors.push(`${at}  source must be ${SOURCES.join(' | ')}, found "${r[col.source]}"`);
+    /* Not attached to the item — authoring only. Carried alongside so the
+       tally and --placeholders can find it. */
+    provenance.push({ src, at, pack: meta.id, title: t });
     if (meta.lang) item.lang = meta.lang;
     if (meta.twosided && !d)
       errors.push(`${at}  ${meta.id} is two-sided, so this row needs a definition to print on the other side`);
@@ -168,6 +215,44 @@ ${p.items.map(a => `    {id:'${a.id}',t:${JSON.stringify(a.t)},tags:${JSON.strin
   ]},`).join('\n')}
 ];
 `;
+/* How much of the deck is still generated, per pack.
+   Printed on every build, because the number Timothy cares about here is not
+   how many cards there are but how many of them are his. */
+const sayProvenance = () => {
+  const byPack = new Map();
+  for (const r of provenance) {
+    const p = byPack.get(r.pack) || byPack.set(r.pack, { seed: 0, mine: 0, folk: 0 }).get(r.pack);
+    p[r.src]++;
+  }
+  const seed = provenance.filter(r => r.src === 'seed').length;
+  const own = provenance.length - seed;
+  console.log('\nwhose cards these are');
+  for (const [pack, p] of byPack) {
+    const n = p.seed + p.mine + p.folk;
+    const pct = n ? Math.round(((n - p.seed) / n) * 100) : 0;
+    console.log(`  ${String(n - p.seed).padStart(4)} of ${String(n).padEnd(5)} ${String(pct + '%').padStart(4)}  ${pack}`);
+  }
+  console.log(`  ${String(own).padStart(4)} of ${String(provenance.length).padEnd(5)} ` +
+    `${String(Math.round((own / provenance.length) * 100) + '%').padStart(4)}  all packs, not generated`);
+  if (seed) console.log(`\n  node scripts/build-activities.mjs --placeholders   lists the ${seed} still waiting`);
+};
+
+/* The rows still marked seed, so they can be rewritten in a sitting rather than
+   hunted for one at a time. */
+const sayPlaceholders = () => {
+  const seeds = provenance.filter(r => r.src === 'seed');
+  if (!seeds.length) { console.log('nothing is marked seed — every card says where it came from'); return; }
+  let pack = null;
+  for (const r of seeds) {
+    if (r.pack !== pack) { pack = r.pack; console.log(`\n${pack}`); }
+    console.log(`  ${r.at.padEnd(22)} ${r.title}`);
+  }
+  console.log(`\n${seeds.length} rows still generated. Mark one \`mine\` in its source column once it is yours,`);
+  console.log('or `folk` if it is a real thing that already exists in the world.');
+};
+
+if (process.argv.includes('--placeholders')) { sayPlaceholders(); process.exit(0); }
+
 const dupes = near();
 const sayDupes = () => {
   if (!dupes.length) return;
@@ -189,6 +274,7 @@ if (process.argv.includes('--check')) {
     process.exit(1);
   }
   console.log(`js/activities.js is up to date (${packs.reduce((n, p) => n + p.items.length, 0)} activities)`);
+  sayProvenance();
   sayDupes();
   process.exit(0);
 }
@@ -196,4 +282,5 @@ if (process.argv.includes('--check')) {
 writeFileSync(target, out);
 console.log(packs.map(p => `${p.items.length.toString().padStart(4)}  ${p.id}${p.on ? '' : '  (off by default)'}`).join('\n'));
 console.log(`${packs.reduce((n, p) => n + p.items.length, 0)} activities → js/activities.js`);
+sayProvenance();
 sayDupes();

@@ -111,13 +111,14 @@ const packsPanel = () => openPanel({ key:'packs', title:'Decks', back:'menu', bo
     <textarea class="field pickme" style="min-height:96px;font-size:11px" readonly>${esc(mineCSV())}</textarea>
     <p class="pnote">${S.mine.length} written on this device, and they live only on it.
     Paste these into a pack — a CSV in packs/, or the spreadsheet you build one from —
-    and they ship with the app instead of sitting on one phone.</p></div>` : ''}` });
+    and they ship with the app instead of sitting on one phone. The last column
+    says they are yours rather than generated, which is what the build counts.</p></div>` : ''}` });
 
 /* What you have written, in the shape a pack is written in. Duration and cost
    are columns on the way out because they are columns on the way in — the tags
    for them are derived, and a row carrying both would be refused by the build. */
 const mineCSV = () => S.mine.map(a =>
-  [q(a.t), a.min, COSTS[a.cost] || 'free', q(packTags(a))].join(',')).join('\n');
+  [q(a.t), a.min, COSTS[a.cost] || 'free', q(packTags(a)), 'mine'].join(',')).join('\n');
 
 /* — everything there is, searchable. The deck decides what you see; this is
      for when you want to go and look. — */
