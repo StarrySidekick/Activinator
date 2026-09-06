@@ -73,6 +73,11 @@ const act = (name, el) => {
 
     /* Context filters what is dealt and teaches nothing: a wet Tuesday is not
        evidence about what you are like. */
+    /* The clock offers; you decide. Taking it writes ordinary context, so the
+       hour never filters anything you did not ask it to. See js/hour.js. */
+    case 'takesuggest': return T.takeSuggest();
+    case 'nosuggest':   return T.noSuggest();
+
     case 'setwho':   S.ctx.who = v; break;
     case 'setwhere': S.ctx.where = v; break;
     case 'settime':  S.ctx.time = v; break;

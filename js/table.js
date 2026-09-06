@@ -18,6 +18,7 @@
    card you are holding, because there is a spread to arrange and a verdict you
    can give from the back of any of them. */
 import { S, save, setUndo, getUndo, remember, pool, byId } from './state.js';
+import { offerNow } from './hour.js';
 import { buildPile, dealt, why } from './deal.js';
 import { learn, unlearn, chanceOf } from './taste.js';
 import { cardHTML } from './cards.js';
@@ -122,10 +123,46 @@ const addCard = (o) => {
   place(o);
 };
 
+/* The clock's offer, on the edge of the felt. Dismissed per session rather
+   than saved: the hour changes, and a "no thanks" at eleven should not still
+   be silencing it a week on. See hour.js for why this offers rather than
+   filters. */
+let dismissed = null;
+/* Into its own host, never into the felt: `addCard` reads
+   `felt().lastElementChild` as the card it has just laid down, so anything
+   appended to #deck is treated as a card the moment the next one arrives. */
+const syncSuggest = () => {
+  const host = document.getElementById('suggesthost');
+  if (!host) return;
+  const s = offerNow(S.ctx, dismissed);
+  host.innerHTML = s ? `<div class="suggest">
+    <button class="stake" data-act="takesuggest">${s.line}</button>
+    <button class="sno" data-act="nosuggest" aria-label="No thanks">✕</button>
+  </div>` : '';
+};
+
+/* Taking it writes ordinary context — the same three fields Right now writes —
+   so what the clock suggested is visible and undoable exactly where you would
+   look for it. It teaches the model nothing, like every other filter, and it
+   restacks rather than re-rendering because the pile itself has changed. */
+const takeSuggest = () => {
+  const s = offerNow(S.ctx, dismissed);
+  if (!s) return;
+  Object.assign(S.ctx, s.ctx);
+  save(); rebuild();
+  toast('Asked for something short, at home');
+};
+const noSuggest = () => {
+  const s = offerNow(S.ctx, dismissed);
+  if (s) dismissed = s.id;
+  syncSuggest();
+};
+
 const render = () => {
   const f = felt();
   f.innerHTML = OUT.length ? '' : emptyHTML();
   OUT.forEach(addCard);
+  syncSuggest();
   know();
 };
 
@@ -665,6 +702,7 @@ const start = () => {
 };
 
 export { start, render, restack, rebuild, gather, shuffle, setN, setShake, say, takeBack,
+  takeSuggest, noSuggest,
          more, flip, top, relay, dealOne, know, verdictOf };
 export const onTable = () => OUT.map(o => ({ id: o.c.id, t: o.c.t, side: o.side }));
 export const pileSize = () => PILE.length;

@@ -671,8 +671,47 @@ intended workflow, here as anywhere else.
 - Sync between devices. Export/import JSON is the bridge, as in Bureau.
 - Anything that phones home. There is no server and there is not going to be
   one; the whole model is a few dozen numbers in localStorage.
-- Time of day and weather as context. Both are obvious and both need care —
-  a filter you didn't set is a filter you can't understand.
+- Weather as context. Time of day landed (see "The clock offers" below); weather
+  wants a network call and a decision about what a forecast is allowed to say,
+  so it waits.
+
+## The clock offers; it never filters
+
+At half past eleven the table will cheerfully deal you a farmers market. The
+obvious fix — quietly dropping cards that don't suit the hour — is the one thing
+the deferred note above forbade: *a filter you didn't set is a filter you can't
+understand*. You would never see it happen and you could never find the switch.
+
+So `js/hour.js` never filters. It **offers**, once, in the strip between the
+felt and the bar, and what you tap writes ordinary `ctx` — the same three fields
+Right now writes, visible there afterwards and cleared like anything else you
+set. The difference between a filter you did not set and one you set in one tap
+is the whole of that file.
+
+One rule, because one is honestly defensible and a table of them would be a
+horoscope: **late is 22:00 to 06:00**, and it asks for something short, at home.
+It declines to show in three cases, each where offering would presume — the hour
+has nothing to say, you have already set a where or a duration yourself, or you
+dismissed it. Dismissal is per session rather than saved: the hour changes, and
+a "no thanks" at eleven should not still be silencing it next week.
+
+What it does to the table was measured rather than assumed. Every card in every
+deck carries a place tag, so nothing is silently emptied: Activities goes 649 to
+111 — which is the point, those are the things you can actually do at home in a
+short evening — questions trim to 235 and 83, and Words, Italian, Tableaus and
+Visualizations are untouched, being `anywhere` and quick. 869 cards remain on
+the table.
+
+**It is a row, not an overlay, and it is not in the felt.** `addCard` takes
+`felt().lastElementChild` as the card it has just laid down, so anything
+appended to `#deck` becomes a card the moment the next one arrives — hence
+`#suggesthost`, its own element between `#deck` and `#tbar`. An overlay was
+tried first and sat on top of the deck chips and crowded Shuffle and Gather.
+
+Weather would slot in beside it as a second rule of the same shape.
+`node test/hour.mjs` covers it without a browser — it takes an injectable clock,
+because a test that had to run at midnight to check the midnight case would
+never get run.
 
 ## Style
 

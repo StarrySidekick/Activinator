@@ -16,6 +16,7 @@ scripts/serve.sh                        # http://localhost:8010
 node scripts/build-activities.mjs       # packs/*.csv → js/activities.js
 node test/smoke.mjs                     # headless check, needs the server running
 node test/upgrade.mjs                   # boots from old saved states
+node test/hour.mjs                      # the clock's rule, no browser needed
 ```
 
 Tests need Playwright (`npm i`). Run the smoke test after any non-trivial

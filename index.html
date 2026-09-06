@@ -28,6 +28,13 @@
      dealt out of the pile and onto the table. -->
 <div id="frame">
   <main id="deck"></main>
+  <!-- The clock's offer, in the strip between the felt and the bar. Its own
+       element, deliberately NOT inside the felt: `addCard` takes
+       `lastElementChild` as the card it has just laid down, so anything
+       appended to #deck is treated as a card. A row rather than an overlay —
+       it takes its own space when it is there and none when it is not, so it
+       never covers the decks or the buttons. -->
+  <div id="suggesthost"></div>
   <div id="tbar"></div>
 </div>
 
