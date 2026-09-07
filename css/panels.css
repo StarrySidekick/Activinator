@@ -1,0 +1,199 @@
+/* Activinator — panels.
+   One at a time, up from the bottom, over a deck that stays where it was.
+   A panel is never a centred card on a scrim: it comes out of the edge you
+   pressed, and it covers the deck rather than replacing it. */
+#panelhost{position:fixed;inset:0;z-index:60;pointer-events:none}
+#panelhost.on{pointer-events:auto}
+.scrim{
+  position:absolute;inset:0;background:rgba(8,9,13,.55);opacity:0;
+  transition:opacity .24s; backdrop-filter:blur(2px);
+}
+#panelhost.on .scrim{opacity:1}
+
+.panel{
+  position:absolute; left:0; right:0; bottom:0;
+  max-height:88dvh; display:flex; flex-direction:column;
+  background:#1a1c26; border-radius:20px 20px 0 0;
+  border-top:1px solid #2c2f3c;
+  transform:translateY(101%); transition:transform .28s cubic-bezier(.2,.85,.3,1);
+  padding-bottom:var(--bot);
+  box-shadow:0 -20px 50px -20px rgba(0,0,0,.8);
+}
+#panelhost.on .panel{transform:translateY(0)}
+@media (min-width:760px){ .panel{max-width:520px;margin:0 auto} }
+
+.phead{
+  display:flex; align-items:center; gap:10px; padding:16px 18px 12px;
+  border-bottom:1px solid #262936; flex:0 0 auto;
+}
+.phead h2{margin:0;font-size:15px;font-weight:600;letter-spacing:.01em;flex:1}
+.phead .x[data-act="menu"]{font-size:24px;margin-right:-2px}
+.phead .x{color:var(--dim);font-size:20px;line-height:1;padding:4px 6px}
+.phead .grab{
+  position:absolute;top:7px;left:50%;transform:translateX(-50%);
+  width:38px;height:4px;border-radius:2px;background:#333747;
+}
+.pbody{overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 18px 22px}
+
+.prow{padding:12px 0;border-bottom:1px solid #23262f}
+.prow:last-child{border-bottom:0}
+.plabel{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim-2);margin:0 0 9px}
+.pnote{font-size:12.5px;color:var(--dim);line-height:1.5;margin:8px 0 0}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips button .mark{width:15px;height:15px;margin-right:6px;color:#cfd3de}
+.chips button.on .mark{color:#14151c}
+.chips button .mark.red{color:#c2685f}
+.chips button.on .mark.red{color:var(--suit-red)}
+.chips button{
+  display:inline-flex; align-items:center;
+  font-size:13px; padding:8px 12px; border-radius:999px;
+  border:1px solid #2e3240; background:#20232e; color:#b8bdcb;
+}
+.chips button.on{background:var(--paper);color:#14151c;border-color:var(--paper);font-weight:600}
+
+.pbtn{
+  display:block;width:100%;text-align:left;padding:13px 14px;border-radius:12px;
+  border:1px solid #2c3040;background:#20232e;color:#cfd3de;font-size:14px;margin-top:8px;
+}
+.pbtn.warn{color:#e0a49c;border-color:#3a2724}
+.pbtn small{display:block;color:var(--dim-2);font-size:12px;margin-top:3px}
+
+/* — the list — */
+.item{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-bottom:1px solid #23262f}
+.item:last-child{border-bottom:0}
+.tick{
+  flex:0 0 auto;width:23px;height:23px;border-radius:7px;border:1.5px solid #3a3f50;
+  margin-top:2px; display:flex;align-items:center;justify-content:center;color:transparent;
+  font-size:13px;
+}
+.item.done .tick{background:var(--yes);border-color:var(--yes);color:#0f1410}
+.item.done .itxt{color:var(--dim-2);text-decoration:line-through}
+.iwrap{flex:1;min-width:0}
+.itxt{font-family:var(--serif);font-size:16px;line-height:1.3;color:#e9e6df}
+.imeta{font-size:11.5px;color:var(--dim-2);margin-top:4px;display:flex;gap:8px;flex-wrap:wrap}
+.imeta .nowtag{color:var(--now);font-weight:600}
+.item .del{color:var(--dim-2);font-size:17px;padding:2px 4px;flex:0 0 auto}
+
+/* — the table of decks —
+   A deck is drawn as a deck: a stack of cards face down, in the ink that pack
+   is printed in, with one of the drawn marks as the emblem on the back. A list
+   of names with tickboxes is a settings screen; eight decks laid out on a table
+   is the thing you are actually choosing between.
+
+   The proportions are a real card's — seven by twelve, the tarot size the deck
+   itself is drawn at — and the corner radius is a percentage of that so it
+   stays right at any size. A deck on this table has to be the same card as the
+   one dealt off it, or the table is a picture of a different deck. */
+.table{display:grid; grid-template-columns:1fr 1fr; gap:20px 16px; padding:6px 0 4px}
+.deck{
+  display:flex; flex-direction:column; align-items:center; gap:0;
+  padding:0; background:none; border:0; text-align:center;
+}
+.stack{position:relative; display:block; width:100%; aspect-ratio:7/12; margin-bottom:9px}
+
+/* The two behind are the rest of the deck: the same card, a degree or two off
+   true, showing along one edge the way a squared-up pile never quite is. */
+.stack i, .stack .face{
+  position:absolute; inset:0; border-radius:8.57% / 5%;
+  background:var(--paper); box-shadow:0 2px 6px -1px rgba(0,0,0,.55);
+}
+.stack i:nth-child(1){transform:rotate(-2.4deg) translate(-2px,2px)}
+.stack i:nth-child(2){transform:rotate(1.6deg) translate(2px,1px)}
+.stack .face{
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 8px 18px -6px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.25) inset;
+  /* A card back is a field of pattern inside a white margin, not a printed
+     rectangle to the edge — the margin is what stops it looking like a tile. */
+  padding:6.5%;
+}
+/* The field: the ink, the pattern, and a hairline keyline inside it. */
+.deck .face::before{
+  content:''; position:absolute; inset:3.8% 6.5%; border-radius:6% / 3.3%;
+  background-color:var(--ink); background-image:var(--pattern);
+  box-shadow:0 0 0 1px rgba(255,255,255,.22) inset;
+}
+.deck .pip{
+  position:relative; z-index:1; width:34%; aspect-ratio:1;
+  color:rgba(245,240,228,.92);
+}
+.deck .pip svg{width:100%;height:100%}
+
+.dname{font-family:var(--serif); font-size:15px; color:#e9e6df; line-height:1.2}
+.dcount{font-size:11.5px; color:var(--dim-2); margin-top:2px}
+
+/* Off is off the table: face down, squared up, and the colour gone out of it.
+   A deck you have put away is still a deck, so it is dimmed rather than
+   crossed out. */
+.deck.off .stack{opacity:.34; filter:saturate(.15)}
+.deck.off .stack i{transform:none}
+.deck.off .dname{color:var(--dim)}
+.deck.on .stack{transition:transform .16s}
+.deck:active .stack{transform:scale(.97)}
+
+/* — the backs. Eight fields, each a repeating print rather than a picture:
+     what a card back is, and cheap enough to be drawn by the stylesheet. — */
+.back-lattice  {--pattern:repeating-linear-gradient(45deg,rgba(255,255,255,.16) 0 1px,transparent 1px 7px),
+                          repeating-linear-gradient(-45deg,rgba(255,255,255,.16) 0 1px,transparent 1px 7px)}
+.back-rays     {--pattern:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.15) 0deg 6deg,transparent 6deg 12deg)}
+.back-pips     {--pattern:radial-gradient(circle at 50% 42%,rgba(255,255,255,.2) 2.4px,transparent 2.6px),
+                          radial-gradient(circle at 0% 92%,rgba(255,255,255,.2) 2.4px,transparent 2.6px),
+                          radial-gradient(circle at 100% 92%,rgba(255,255,255,.2) 2.4px,transparent 2.6px);
+                --size:16px 16px}
+.back-weave    {--pattern:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 2px,transparent 2px 8px),
+                          repeating-linear-gradient(0deg,rgba(255,255,255,.14) 0 2px,transparent 2px 8px)}
+.back-rule     {--pattern:repeating-linear-gradient(0deg,rgba(255,255,255,.17) 0 1px,transparent 1px 6px)}
+.back-scales   {--pattern:radial-gradient(circle at 50% 100%,transparent 5px,rgba(255,255,255,.16) 5px 6px,transparent 6px);
+                --size:14px 9px}
+.back-diamonds {--pattern:repeating-linear-gradient(45deg,rgba(255,255,255,.15) 0 1px,transparent 1px 9px),
+                          repeating-linear-gradient(-45deg,rgba(255,255,255,.15) 0 1px,transparent 1px 9px);
+                --size:13px 13px}
+.back-orbits   {--pattern:radial-gradient(circle at 50% 50%,transparent 6px,rgba(255,255,255,.15) 6px 7px,transparent 7px);
+                --size:20px 20px}
+.deck .face::before{background-size:var(--size,12px 12px)}
+
+/* — all activities — */
+.brow{
+  display:flex; align-items:center; gap:8px; padding:11px 0;
+  border-bottom:1px solid #23262f;
+}
+.brow:last-child{border-bottom:0}
+.bwrap{flex:1;min-width:0}
+.btitle{font-family:var(--serif);font-size:15.5px;line-height:1.25;color:#e9e6df}
+.brow.dislike .btitle,.brow.never .btitle{color:var(--dim-2)}
+.brow .marks{margin:6px 0 0;gap:8px}
+.brow .mark{width:15px;height:15px;color:#7f8698}
+.brow .mark.red{color:#a95f58}
+.bset{
+  flex:0 0 auto; width:30px; height:30px; border-radius:50%; font-size:14px;
+  border:1px solid #2e3240; background:#20232e; color:var(--dim-2);
+}
+.brow.like .bset.like{background:var(--yes);border-color:var(--yes);color:#0f1410}
+.brow.dislike .bset.dis{background:var(--no);border-color:var(--no);color:#fff}
+.bstate{display:none}
+
+/* — taste — */
+.bar{display:flex;align-items:center;gap:10px;padding:6px 0;font-size:13px}
+.bar .bl{flex:0 0 42%;color:#cfd3de;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  display:flex;align-items:center;gap:7px}
+.bar .bl .mark{width:15px;height:15px;flex:0 0 auto;color:#8f96a8}
+.bar .bl .mark.red{color:#b5615a}
+.bar .bt{flex:1;height:8px;background:#23262f;border-radius:4px;position:relative;overflow:hidden}
+.bar .bt i{position:absolute;top:0;bottom:0;left:50%;background:var(--yes);border-radius:4px}
+.bar.down .bt i{background:var(--no)}
+.bar .bt::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:#31354444}
+.stat{display:flex;gap:18px;font-size:13px;color:var(--dim);margin-bottom:4px}
+.stat b{display:block;font-family:var(--serif);font-size:24px;color:#e9e6df;font-weight:400}
+
+/* How far round the deck you are. The card's own meter is drawn for cream
+   paper and vanishes on a panel, so the panel has its own. */
+.rounds{height:6px;border-radius:3px;background:#23262f;overflow:hidden;margin:2px 0 0}
+.rounds i{display:block;height:100%;background:var(--yes);border-radius:3px}
+
+input[type=range]{width:100%;accent-color:var(--yes)}
+.field{
+  width:100%;background:#20232e;border:1px solid #2c3040;border-radius:11px;
+  padding:11px 12px;color:#e9e6df;font-size:15px;font-family:var(--sans);
+}
+.field:focus{outline:none;border-color:#454b5e}
+textarea.field{min-height:74px;resize:vertical;line-height:1.4}

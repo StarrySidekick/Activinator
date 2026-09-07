@@ -1,0 +1,82 @@
+/* Activinator — the furniture the deck sits in.
+   Dark room, lit card. Everything that is not the card is deliberately quiet. */
+:root{
+  --ink:#14151c; --ink-2:#1c1e27; --ink-3:#282b37;
+  --paper:#F5F0E4; --paper-2:#E8E1D0; --paper-3:#D8D0BC;
+  --text:#241f18; --text-2:#5c5346; --text-3:#8b8172;
+  --dim:#7b8092; --dim-2:#4a4f5f;
+  --yes:#6F8F5E; --no:#B2564B; --now:#C08A3E; --suit-red:#9E3B34;
+  --serif:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --top:env(safe-area-inset-top); --bot:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;overscroll-behavior:none}
+body{
+  background:var(--ink); color:#e9e6df; font-family:var(--sans);
+  /* A room, not a rectangle: one soft light above the deck. */
+  background-image:radial-gradient(120% 70% at 50% 6%,#22242f 0%,#14151c 62%);
+  background-attachment:fixed;
+}
+/* Nothing on the deck is selectable — a drag that highlights a word is a drag
+   that stopped being a swipe. Fields and prose opt back in. */
+#frame{user-select:none;-webkit-user-select:none}
+input,textarea,.pickme{user-select:text;-webkit-user-select:text}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+
+/* The table: the felt, and the bar the pile sits in. The felt takes whatever
+   the bar leaves, and the layout works the cards out against that box — which
+   is why nothing here needs to know how big a card is. */
+#frame{ height:100dvh; display:flex; flex-direction:column; overflow:hidden;
+        padding-top:var(--top) }
+/* `z-index:0` makes the felt its own stacking context, which is what keeps the
+   cards inside it. Picking a card up puts it on top of the others by bumping
+   its z-index, and that counter only ever climbs — without this it eventually
+   climbs past the menu, and the panel opens behind the card. */
+#deck{ position:relative; z-index:0; flex:1 1 auto; min-height:0; overflow:hidden;
+       touch-action:none; margin:8px 0 }
+#tbar{ flex:0 0 auto }
+
+/* — the one button. It lives on the back of the card: the front is for
+     deciding and the back is for understanding, and the menu is neither. Four
+     marks in the corners were four things in front of the one thing you are
+     meant to be looking at, and every one of them but this was a quick link
+     into it.
+
+     It is printed rather than built — a solid silhouette on the paper, the way
+     a suit is printed in the corner of a playing card, with no disc, no rule
+     and no shadow. A gear, because it is the one control in the app and it
+     should say what it is without having to be learned. The drawn marks are
+     the vocabulary; this is not part of it.
+
+     It sits outside #frame rather than in it. The deck carries a `perspective`
+     and the cards are `preserve-3d`, and a 3D rendering context sorts what it
+     contains by depth rather than by the z-index of anything beside it — so
+     the row of emblems at the head of the card took the taps meant for this,
+     whatever z-index it was given. — */
+/* It used to sit on the top-right corner of the card and appear only once you
+   had turned one over, because there was nothing else on the screen for it to
+   belong to. There is a bar now — the table has one, permanently — so it lives
+   in the bar and is always there. Hiding the one control in the app when the
+   screen already has a row of buttons on it would be a puzzle, not restraint. */
+.settings{
+  position:absolute; right:6px; top:12px;
+  width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+  color:var(--dim); opacity:1; pointer-events:auto;
+}
+.settings:active{color:#e9e6df}
+.settings:active{transform:scale(.92)}
+.settings svg{width:25px;height:25px;fill:currentColor;overflow:visible}
+/* With no card under it there is no paper for it to be ink on. */
+
+#toast{
+  position:fixed; left:50%; bottom:calc(var(--bot) + 74px); transform:translateX(-50%) translateY(8px);
+  background:#e9e6df; color:#14151c; font-size:13px; font-weight:500;
+  padding:9px 15px; border-radius:999px; opacity:0; pointer-events:none;
+  transition:opacity .18s, transform .18s; z-index:80; max-width:80vw; text-align:center;
+}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (min-width:760px){
+  #frame{max-width:520px;margin:0 auto}
+}

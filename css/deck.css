@@ -1,0 +1,286 @@
+/* Activinator — the card.
+   A printed card: cream stock, letterpress serif, an index in two corners. The
+   felt it lies on is #deck in base.css; where a card sits and how big it is are
+   written by table.js, because the layout decides both. */
+
+/* A card is a card, and a tarot card: seven by twelve rather than the poker
+   five by seven. A phone is a tall narrow thing and a poker card is a wide one,
+   so at poker proportions the card could only ever be as tall as it was
+   wide-and-a-bit and left a third of the screen as table.
+
+   Where it sits and how big it is are written by table.js, because the layout
+   decides both: at one card that is the full width of the felt, which is the
+   deck as it has always looked, and at more than one it is whatever fits.
+   `--tw` is the card's own width in pixels, and everything drawn inside the
+   card is measured from it — one rule covers a card the width of the screen and
+   eight of them at once. */
+.card{
+  position:absolute; top:0; left:0;
+  aspect-ratio:7 / 12;
+  /* A tarot card is 70 by 120 mm and its corners are cut to a 6 mm radius. As a
+     fraction of the card that is 8.57% of the width and 5% of the height, which
+     is why the radius is two percentages: it is one circular corner, measured
+     against a box that is not square. */
+  --radius:8.57% / 5%;
+  border-radius:var(--radius);
+  /* The weight of the card, cast on what is behind it. It lives out here rather
+     than on the face because the face turns over and this must not: a shadow
+     that swings round with the card is the single thing that made every earlier
+     version of the flip look like a rotating picture. */
+  box-shadow:0 12px 26px -10px rgba(0,0,0,.72);
+  transition:box-shadow .2s ease;
+  /* The vanishing point for the turn, on the card rather than on the felt, so
+     it is always about this card's own middle wherever a drag has taken it. */
+  perspective:1100px;
+  touch-action:none; will-change:transform;
+}
+/* Picked up: off the surface and a shade bigger, the way a card comes up in
+   your fingers. The transform is inline (a drag rewrites it), so the lift is a
+   shadow and a scale on the inside. */
+.card.held{box-shadow:0 22px 40px -10px rgba(0,0,0,.8)}
+.card.held .cardin{transform:scale(1.04)}
+
+.card.rest{transition:transform .34s cubic-bezier(.2,.8,.25,1), opacity .34s, box-shadow .2s ease}
+.card.gone{transition:transform .34s cubic-bezier(.3,.1,.3,1), opacity .3s; opacity:0}
+.card:not(.top){pointer-events:none}
+
+/* — turning a card over —
+   One movement that carries all the way through, rather than something that
+   goes out and comes back. A squeeze to nothing and out again is the same
+   motion twice, once forwards and once in reverse, and however it is eased it
+   reads as the card springing back rather than turning over — which is what it
+   kept being told.
+
+   So it is a real rotation again: a single 180° sweep about the card's own
+   vertical axis, one transition, no halves and no timer in the middle. It
+   turns *negative*, which brings the right edge up out of the screen towards
+   you — the way you turn a card you are holding. Rotating the other way pushes
+   that edge away and reads as the card going backwards, which is the other
+   thing it kept being told.
+
+   The two things that made 3D look wrong before are fixed rather than avoided:
+   the shadow is on .card and does not rotate, and the rest of the hand is
+   hidden for the length of the turn so the gap shows the room and not another
+   identical cream card.
+
+   **It is one rotation but two halves, and it never turns past 90°.** The first
+   half takes the card to edge-on, the face is swapped while there is nothing on
+   screen to see, and the second half opens it out from edge-on the other way.
+   Both halves are real `rotateY` with the card's own perspective, so it reads
+   as one continuous sweep — the near edge crosses the middle and comes out the
+   far side, which is what a card does.
+
+   The version before this turned the whole 180° in one go, with both faces on
+   the card at once and `backface-visibility` holding back whichever faced away.
+   That is the tidier thing to write and it depends on the browser honouring
+   `backface-visibility` inside a `preserve-3d` subtree. Where it does not, both
+   faces paint and they are coplanar, so what you get is the *front* showing
+   through the back, mirrored — text backwards. Turning only to 90° cannot
+   produce that: there is one face in the layout at a time, `display:none` on
+   the other, and nothing is ever rotated far enough to be seen from behind.
+
+   The timing is written by flip() in deck.js rather than by a class, because
+   the two halves need a transition turned off between them. */
+.cardin{position:absolute; inset:0; border-radius:var(--radius)}
+/* A card lifts off the pile as you turn it, and drops back. */
+.card.turning{box-shadow:0 30px 46px -12px rgba(0,0,0,.72)}
+/* Only the hand behind the one turning. The card itself must stay painted, or
+   there is nothing to turn. */
+body.turning #deck .card:not(.top){visibility:hidden}
+
+
+.face{
+  position:absolute; inset:0; overflow:hidden;
+  background-color:var(--paper); color:var(--text);
+  /* The air-cushion finish: a card is embossed with a fine grid of dimples
+     about half a millimetre apart, which is what stops a pile of them sticking
+     together. At the size a card is drawn here that is a three-pixel pitch, and
+     it wants to be almost too faint to see — a texture you can find but never
+     notice is the difference between paper and a rectangle of cream. */
+  background-image:radial-gradient(circle at 50% 50%, rgba(58,48,32,.05) .5px, transparent 1px);
+  background-size:3px 3px;
+  /* The radius has to be named, not inherited: `inherit` takes the value from
+     the parent element, and .cardin between here and the card had none — so
+     every corner in the app was square while the card that painted nothing was
+     the only thing rounded. */
+  border-radius:var(--radius);
+  /* A hairline of the ink it is printed on. This one does belong to the face
+     and turns with it; the weight of the card is a shadow on .card, which does
+     not. */
+  box-shadow:0 0 0 1px rgba(36,31,24,.14);
+  display:flex; flex-direction:column;
+  /* Room down each side for the corner index, the way a card leaves room for
+     its rank and suit. */
+  padding:11% 8.5%;
+}
+/* — the emblems, and then the activity. That is the whole front.
+     The row stays in the flow: `.face>*` makes every direct child position
+     relative, so an absolutely-placed row of marks quietly became a centred
+     one and sat on top of the title. — */
+.face.front{justify-content:center}
+
+/* — the index. On a playing card the corners carry the rank and the suit, in
+     two opposite corners, the second one upside down so it reads whichever way
+     up the card is held. Ours carry what kind of thing the card is: the three
+     most particular of its marks, in the vocabulary's own order. The rest are
+     on the back with everything else the app knows.
+
+     Three, because a corner index is read at a glance and a column of seven
+     silhouettes is a list. — */
+.face .idx{
+  position:absolute; display:flex; flex-direction:column;
+  gap:clamp(3px, calc(var(--tw) * .04), 8px);
+  align-items:center; z-index:2;
+}
+/* `.face>*` sets every direct child position:relative — same specificity and
+   later in the file — so the index has to be named by its class to stay in the
+   corner it is the whole point of. */
+.face .idx.tl{top:4%; left:6.5%}
+.face .idx.br{bottom:4%; right:6.5%; transform:rotate(180deg)}
+.face .idx .mark{
+  width:clamp(7px, calc(var(--tw) * .07), 18px);
+  height:clamp(7px, calc(var(--tw) * .07), 18px);
+}
+.marks{margin:0; display:flex; flex-wrap:wrap; gap:11px; align-items:center}
+/* A suit sits on the card, not in a chip. No background, no ring — the
+   silhouette is the whole mark. */
+.mark{display:inline-flex; width:20px; height:20px; flex:0 0 auto; color:var(--text)}
+.mark svg{width:100%; height:100%; fill:currentColor; display:block}
+.mark.red{color:var(--suit-red)}
+/* auto above and below: the activity sits in the middle of what the emblems
+   leave, however many of them there are. */
+/* The word and its definition centre together; on a plain card the group is
+   just the title, so nothing moves. */
+.face.front .word{margin:auto 0}
+.face.back{background-color:var(--paper-2); overflow-y:auto}
+/* The one button sits in the top right of the back, so the kicker stops short
+   of it. */
+.face.back .kicker{padding-right:0}
+/* One face is in the layout at a time, and the swap happens at the join of the
+   two halves, while the card is edge-on and there is nothing to see. `display`
+   rather than `backface-visibility`: a face that is not there cannot show
+   through the one that is, whatever the browser thinks of a 3D subtree. */
+.card .face.back{display:none}
+.card.flip .face.front{display:none}
+.card.flip .face.back{display:flex}
+
+/* Paper, not a rectangle of cream: a faint tooth, printed under everything. */
+.face::after{
+  content:''; position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background:
+    radial-gradient(60% 40% at 15% 8%,rgba(255,255,255,.7),transparent 70%),
+    radial-gradient(80% 60% at 90% 100%,rgba(140,120,90,.14),transparent 70%);
+}
+.face>*{position:relative;z-index:1}
+
+/* Everything on the back is measured from `--tw` as well, or a card in a spread
+   is a full-size information panel inside a thumbnail: the tags ran off the
+   bottom and the verdict buttons were not on the card at all. The multipliers
+   are the old fixed sizes over 390, which is a card the width of a phone. */
+.kicker{
+  font-size:clamp(7px, calc(var(--tw) * .028), 11px);
+  font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--text-3); margin:0; display:flex; gap:8px; align-items:center;
+}
+.kicker .dot{width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.55}
+.kicker .k2{color:var(--text-3);font-weight:600;letter-spacing:.1em}
+
+.t{
+  font-family:var(--serif); font-weight:400; margin:0;
+  /* A tarot card gives the title half again as much room as a poker one did,
+     and type sized for the smaller card read like a caption printed in the
+     middle of a lot of cream. 8vw is the biggest that still lands the longest
+     title in the deck inside the card. */
+  font-size:clamp(11px, calc(var(--tw) * .095), 38px); line-height:1.14; letter-spacing:-.012em;
+  text-wrap:balance;
+  /* Floccinaucinihilipilification is a real card now. */
+  hyphens:auto; overflow-wrap:anywhere;
+}
+.why{
+  margin:2.5% 0 0; font-size:clamp(7px, calc(var(--tw) * .033), 13px); line-height:1.4; color:var(--text-2);
+}
+/* The definition is the other voice on the card: the word is the serif and
+   the meaning is set apart, smaller and quieter. pre-line is what lets a verb
+   card keep its conjugations one tense to a line. */
+.def{
+  margin:14px 0 0; font-size:14px; line-height:1.45; color:var(--text-2);
+  white-space:pre-line; max-width:34em;
+}
+.back .def{font-size:clamp(7px, calc(var(--tw) * .033), 13px);line-height:1.45;margin-top:2%}
+.speak{
+  margin:18px 0 0; width:46px; height:46px; border-radius:50%;
+  border:1.5px solid rgba(30,26,20,.3); background:transparent; color:inherit;
+  display:flex; align-items:center; justify-content:center; padding:0; cursor:pointer;
+}
+.speak:active{background:rgba(30,26,20,.08)}
+.speak .mark{width:20px;height:20px;display:block}
+/* — the back — */
+
+/* The other side of a two-sided card: the meaning, set the way the word is set
+   on the front, with the detail under it. What the app knows follows below. */
+.other{margin:0 0 6% ; }
+.other .t{margin:0}
+.tdef{
+  margin:5% 0 0; font-size:clamp(8px, calc(var(--tw) * .045), 14px); line-height:1.4;
+  color:var(--text-2); white-space:pre-line;
+}
+.back h3{
+  font-family:var(--serif); font-weight:400; line-height:1.2; margin:0;
+  font-size:clamp(11px, calc(var(--tw) * .054), 21px);
+}
+.back .kicker{margin-bottom:3%}
+.odds{margin:4% 0 1%;font-size:clamp(7px, calc(var(--tw) * .033), 13px);color:var(--text-2)}
+.odds b{font-family:var(--serif);font-size:1.22em;color:var(--text)}
+.taglist{display:flex;flex-wrap:wrap;gap:1.4%;margin:3.5% 0 0;padding:0;list-style:none}
+.taglist .mark{width:clamp(6px, calc(var(--tw) * .036), 14px);height:clamp(6px, calc(var(--tw) * .036), 14px)}
+.taglist li{display:flex;align-items:center;gap:.4em;
+  font-size:clamp(7px, calc(var(--tw) * .031), 12px); padding:.3em .75em; border-radius:999px;
+  background:rgba(0,0,0,.06); color:var(--text-2);
+}
+.taglist li.up{background:rgba(111,143,94,.22);color:#3f5735}
+.taglist li.down{background:rgba(178,86,75,.18);color:#7d3a33}
+.backrow{margin-top:auto;display:flex;flex-wrap:wrap;gap:2%;padding-top:4%}
+/* Three across on one line, which is what decides the size of the type here:
+   the labels are words rather than icons, and a third of a phone is what each
+   of them has. */
+.backrow button{
+  flex:1 1 28%; border:1px solid rgba(0,0,0,.18); border-radius:12px; padding:.75em .3em;
+  font-size:clamp(7px, calc(var(--tw) * .031), 12px); font-weight:600;
+  color:var(--text-2); background:rgba(255,255,255,.45);
+}
+.backrow button.never{color:var(--no);border-color:rgba(178,86,75,.35)}
+/* The verdict, on the back as well as under your thumb — and with a spread out
+   it is the only way to it. */
+.backrow.verdict{margin-top:auto;padding-top:3%}
+.backrow.verdict + .backrow{margin-top:0;padding-top:2%}
+.backrow button.yes{color:var(--yes);border-color:rgba(111,143,94,.45);font-size:clamp(7px, calc(var(--tw) * .034), 13px)}
+.backrow button.no{color:var(--no);border-color:rgba(178,86,75,.4);font-size:clamp(7px, calc(var(--tw) * .034), 13px)}
+.meter{
+  height:clamp(3px, calc(var(--tw) * .013), 5px);border-radius:3px;background:rgba(0,0,0,.1);overflow:hidden;margin:8px 0 2px;
+}
+.meter i{display:block;height:100%;background:var(--text-2)}
+
+/* — the stamps, inked on as you pull — */
+.stamp{
+  position:absolute; top:26%; z-index:3; font-family:var(--serif);
+  font-size:26px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  padding:6px 14px; border:3px solid currentColor; border-radius:8px;
+  opacity:0; pointer-events:none;
+}
+.stamp.s-yes{left:26px;transform:rotate(-13deg);color:var(--yes)}
+.stamp.s-no {right:26px;transform:rotate(13deg);color:var(--no);font-size:22px}
+
+/* — the empty deck — */
+.empty{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:14px; text-align:center;
+  color:var(--dim); padding:30px;
+}
+.empty h2{font-family:var(--serif);font-weight:400;font-size:23px;color:#e9e6df;margin:0}
+.empty p{margin:0;font-size:14px;line-height:1.5;max-width:26ch}
+.empty button{
+  border:1px solid var(--ink-3); border-radius:12px; padding:11px 18px;
+  font-size:13.5px; color:#cfd3de; background:#191b24;
+}
+/* The second way out of the end of a round is a way out, not the answer. */
+.empty button.quiet{border-color:transparent;background:none;color:var(--dim);padding:4px 8px}
