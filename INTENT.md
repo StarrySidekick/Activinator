@@ -80,3 +80,43 @@ The **"the clock offers; it never filters"** work is **merged**. It landed as
 Scheduled-run notes describing it as stranded on
 `claude/daily-task-automation-c9qrrv` are out of date — that branch points at the
 same commit as `main`.
+
+## A housekeeping note, 2026-09-09
+
+**GitHub's own default branch for this repo is stale and should be
+repointed.** It is still set to `claude/activitnator-bespoke-migration-8c9ylk`,
+which stopped moving on 2026-08-26. `main` has 31 commits past that point —
+the whole table rework, the tarot card, the flip, the aesthetics-studio
+split, the question packs, "the clock offers" — none of which the registered
+default branch has. A scheduled run briefed to "branch from the default
+branch, well ahead of main" is being pointed at exactly the wrong one; this
+session found `main` and a further branch a day ahead of it
+(`claude/epic-cori-b23q2h`, one unmerged commit: "Search reads the meaning
+too, not only the word") and built on that instead, flagging the discrepancy
+rather than quietly discarding a month of work. Whoever next has GitHub open:
+Settings → Branches → change the default to `main` (or merge and delete the
+stale one) so this stops recurring.
+
+Otherwise: a full pass tonight (smoke, upgrade, hour — all green against the
+state left by the search fix) found nothing broken and nothing rotten. One
+real small thing fixed: `icons/icon-32.png` has been referenced by
+`index.html` since the very first commit and was never in `sw.js`'s `SHELL`,
+so the tab favicon was never actually available offline. `CACHE`/
+`APP_VERSION` bumped to v31/0.31 with it.
+
+**On the actual content problem, deliberately not touched:** the honest
+next step is still rewriting or replacing the 1,260 `seed` rows, and that is
+still not something to solve by having an AI write different placeholder
+text — that is the same failure mode with new words. What this session did
+add is `scripts/folk-hints.mjs`, wired into `--placeholders`: it flags a
+`seed` row whose title already names an actual game, poetic form or
+tradition ("Would you rather", a haiku, a pub quiz, twenty questions) rather
+than describing a generic activity. It does not reclassify anything —
+the `source` column is untouched, on purpose, because moving that number by
+a script's own guess is exactly what the instrument exists to catch rather
+than do. **22 rows hit tonight** (`node scripts/build-activities.mjs
+--placeholders`, printed inline as `— names "X", maybe folk?`) — mostly the
+sixteen "Would you rather" questions, plus a pub quiz, hide and seek, a
+jigsaw, twenty questions, a crossword and a time capsule. Marking those
+`folk` is a two-minute pass through an already-short list, and it is a real
+number moving for a real reason rather than a metric being nudged.
