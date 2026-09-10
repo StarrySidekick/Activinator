@@ -73,6 +73,22 @@ whether it is going anywhere.
 Tasks from **Bureau** being pullable into Activinator's lists. Not now, but do
 not build anything that makes it harder.
 
+**Second step, 2026-09-10: curating a card used to end at "take it to a
+session."** Menu → Curate could tell you what had been kept, cut and
+rewritten, but turning that file into edits in `packs/*.csv` meant reading
+eight columns by eye and finding the matching row by hand — friction on the
+one loop that actually lets Timothy fix a card himself.
+`node scripts/apply-curation.mjs <curation.csv>` does that mechanically now:
+a cut or an out removes the row, a keep or an edit writes the row's own words
+into the pack (matched by `was` when it was rewritten before it was judged),
+and it rebuilds `js/activities.js` at the end. It touches only the rows a
+verdict actually names — a pack round-trips byte-identical when nothing in it
+changed — and it never touches a row's `source` column, so applying a rewrite
+does not by itself claim the words are his; that judgment is still his to make
+by hand in the CSV. Verified against a real export from a running instance of
+the app, not only against synthetic rows. This is still the instrument, not the
+content — the 1,260 placeholder rows are exactly where they were.
+
 ## Already done, contrary to older notes
 
 The **"the clock offers; it never filters"** work is **merged**. It landed as

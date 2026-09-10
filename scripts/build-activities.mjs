@@ -38,27 +38,10 @@
 // and build anyway: some of those pairs are deliberate.
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { TAGS, GROUPS, MARKS, DURATIONS, COSTS, durationOf, idOf } from '../js/vocab.js';
+import { parseCSV } from './csv.mjs';
 
 const dir = new URL('../packs/', import.meta.url);
 const read = (f) => readFileSync(new URL(f, dir), 'utf8');
-
-/* A real CSV parser, because a title like "Skateboard, badly, in an empty car
-   park" is exactly the kind of row a split(',') loses. */
-const parseCSV = (text) => {
-  const rows = []; let row = [], cell = '', q = false;
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (q) {
-      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
-      else cell += c;
-    } else if (c === '"') q = true;
-    else if (c === ',') { row.push(cell); cell = ''; }
-    else if (c === '\n') { row.push(cell); rows.push(row); row = []; cell = ''; }
-    else if (c !== '\r') cell += c;
-  }
-  if (cell || row.length) { row.push(cell); rows.push(row); }
-  return rows.filter(r => r.some(v => v.trim()));
-};
 
 /* Who wrote a row.
    -----------------------------------------------------------------------
