@@ -9,6 +9,8 @@
 
   { "id": "words",          "name": "Words",          "note": "Words you might not know, and what they mean.",
     "on": true, "mark": "read",      "ink": "#4A4159", "back": "weave", "twosided": true, "source": "folk" },
+  { "id": "quotes",         "name": "Quotes",         "note": "Verified — actually said or written by the person named.",
+    "on": true, "mark": "writing",   "ink": "#54473A", "back": "rule", "source": "folk" },
   { "id": "italian",        "name": "Italian",        "note": "A word, its meaning, and a voice to say it.",
     "on": true, "mark": "listen",    "ink": "#3F5A57", "back": "scales", "lang": "it-IT", "twosided": true, "source": "folk" },
 

@@ -40,11 +40,19 @@ ask how much of the deck was placeholder. Every pack row can carry a `source` �
 split on every run. It is authoring-only and is never emitted into
 `js/activities.js`; the app has no use for it.
 
-**The number today is 238 of 1,498, or 16%**, and all of that is the Words and
-Italian packs, which are real dictionary entries and real conjugations rather
-than suggestions somebody generated. **Core, Questions, Ask a partner, Tableaus
-and Visualizations are 1,260 rows of placeholder**, which is the honest picture
-and is now printed rather than felt.
+**The number today is 347 of 1,607, or 22%.** Words and Italian (real dictionary
+entries and conjugations) are joined by a third pack that was never generated:
+**Quotes**, 109 lines verified as actually said or written by the person
+named — cut from the deck on 2026-09-01 in an unrelated card-geometry commit
+and restored on 2026-09-11, since a pack of genuinely real content going
+missing is exactly the kind of thing this count exists to catch. One line in
+it was a paraphrase rather than the words actually written (Toni Morrison's
+"If you surrender to the air, you can ride it" — the novel says "surrendered…
+could"); it now reads as printed in *Song of Solomon*, with the book named
+the way every other literary quote in the pack names its source.
+**Core, Questions, Ask a partner, Tableaus and Visualizations are still 1,260
+rows of placeholder**, which is the honest picture and is now printed rather
+than felt.
 
 `node scripts/build-activities.mjs --placeholders` lists them so they can be
 rewritten in a sitting instead of hunted one at a time.
