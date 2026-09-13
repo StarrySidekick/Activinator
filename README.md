@@ -146,7 +146,9 @@ pack a saved state has never heard of takes the default it ships with, which is
 what lets a new pack arrive in an update without being silently disabled — and
 lets one you switched off stay off.
 
-`packs/winter.csv` is an example pack, off by default. Delete it or fill it in.
+`packs/winter.csv` is a seasonal pack, off by default so it does not show up
+outside winter. It already has real rows in it — switch it on in Packs to see
+them, or add more the same three ways as any other pack.
 
 ## How it works
 

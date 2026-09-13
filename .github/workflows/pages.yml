@@ -1,5 +1,13 @@
-# Publishes the app to GitHub Pages on every push to main, at
-# https://starrysidekick.github.io/Activinator/.
+# Publishes the app to GitHub Pages on every push to main or to the repo's
+# registered default branch, at https://starrysidekick.github.io/Activinator/.
+#
+# Both are listed because the two have drifted apart once already: this repo's
+# default branch on GitHub is claude/activitnator-bespoke-migration-8c9ylk, an
+# older point on this same history than main's tip, and a push trigger keyed
+# on `main` alone means a push to the actual default branch deploys nothing —
+# silently, since the job just never runs. See INTENT.md for how that
+# happened and what still needs sorting out about it. If the default branch
+# changes again, add its name here rather than replacing main's.
 #
 # The deploy is a force-push of the assembled site to the gh-pages branch,
 # which Pages serves. Not the artifact flow Bureau uses: that flow needs the
@@ -22,7 +30,7 @@ name: Deploy to Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/activitnator-bespoke-migration-8c9ylk]
   workflow_dispatch:
 
 permissions:
