@@ -20,9 +20,11 @@ undo arithmetic, ids from titles) are all recorded there.
 ```bash
 scripts/serve.sh                        # http://localhost:8010
 node scripts/build-activities.mjs       # packs/*.csv → js/activities.js
+node scripts/apply-curation.mjs f.csv   # a Curate export → edits to packs/*.csv
 node test/smoke.mjs                     # headless check, needs the server running
 node test/upgrade.mjs                   # boots from old saved states
 node test/hour.mjs                      # the clock's rule, no browser needed
+node test/curate.mjs                    # apply-curation's own logic, no browser
 ```
 
 Tests need Playwright (`npm i`). Run the smoke test after any non-trivial
@@ -37,8 +39,9 @@ and a passing assertion doesn't mean it looks right. Add a case to
   `SHELL` in `sw.js` or it won't be there offline.
 - `js/activities.js` is **generated** from `packs/*.csv` — never edit it by
   hand. The packs are the source of truth. Nothing in the app writes to them
-  either: Menu → Curate exports what has been kept, cut and rewritten, and a
-  session edits the CSVs by it. See "Curating" in the README.
+  either: Menu → Curate exports what has been kept, cut and rewritten, and
+  `node scripts/apply-curation.mjs <file>` (or a session, by hand) edits the
+  CSVs from it. See "Curating" in the README.
 - The app is **a table with a pile on it**, and `js/table.js` is all of it: the
   pile, the felt, verdicts, dragging, the flip. There is no round any more —
   "nothing repeats until you have been through everything" is what a pile *is*,

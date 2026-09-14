@@ -19,8 +19,10 @@ arrangement that moving repositories did not change.
 ```bash
 scripts/serve.sh                        # http://localhost:8010
 node scripts/build-activities.mjs       # packs/*.csv → js/activities.js
+node scripts/apply-curation.mjs f.csv   # a Curate export → edits to packs/*.csv
 node test/smoke.mjs                     # headless check, needs the server running
 node test/upgrade.mjs                   # boots from old saved states
+node test/curate.mjs                    # apply-curation's own logic, no browser
 ```
 
 Open it over http, never as a `file://` URL — the service worker won't register
@@ -234,7 +236,21 @@ in there. The middle columns are exactly a pack row — `definition` included, s
 a kept word card keeps its meaning — and a keeper pastes into a CSV unedited; `was` is the title the pack still has, and it is filled in
 only for a rewrite — that is the row the new one replaces, since a rewritten
 title no longer matches anything in the file. Take it to a session, or edit the
-packs by it yourself.
+packs by it yourself, or run:
+
+    node scripts/apply-curation.mjs path/to/curation.csv
+
+It reads a downloaded curation file and does mechanically what "edit the packs
+by it" means: a `cut` or `out` removes that row from its pack, a `keep` or
+`edit` writes the row's own title, minutes, cost, tags and definition into the
+row named by `was` (or by its own title, when there is no `was`), and then it
+rebuilds `js/activities.js` the same way `node scripts/build-activities.mjs`
+does. A pack the file never touches is left on disk exactly as it was — nothing
+in it is reformatted for no reason. `--dry-run` reports what would happen
+without writing anything, and a row for a card written on the phone (`mine`) is
+reported separately, because there is no pack CSV for it to land in. Nothing
+about a card's `source` column is touched by this — it only ever moves the
+words and the verdict, never the question of who wrote them.
 
 Switching a pack off hides its cards from the deck and changes nothing here.
 
@@ -548,6 +564,10 @@ would disagree about what you think.
 | `table.js` | The app: the pile, the felt, dealing, verdicts, undo, dragging, turning a card over, shuffle, gather and shake. |
 | `toast.js` | The one line of feedback, on its own so nothing has to import the table to say something. |
 | `boot.js` | One delegated listener set. To add an action, add a `data-act` and a case in `act()`. |
+
+`scripts/csv.mjs` is the CSV reader and writer the build and the curation
+tools share, `scripts/curation.mjs` is what `apply-curation.mjs` is built on,
+and `test/curate.mjs` is its test — see "Curating" above.
 
 Four stylesheets: `base.css` (the room, the felt and the frame), `deck.css` (the card), `panels.css`, `table.css` (the bar).
 
