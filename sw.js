@@ -3,7 +3,7 @@
    launch picks it up. A new file must also be added to SHELL or it will not be
    there offline. An already-open page finishes on the old assets, so a bump
    takes effect on the second launch, not the first. */
-const CACHE = 'activinator-v30';
+const CACHE = 'activinator-v31';
 const SHELL = [
   './', './index.html',
   './css/base.css', './css/deck.css', './css/panels.css', './css/table.css',
@@ -12,7 +12,7 @@ const SHELL = [
   './js/hour.js', './js/toast.js',
   './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/maskable-512.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png', './icons/icon-32.png'
 ];
 
 /* cache:'reload' so a bump cannot refill the new cache from the browser's own

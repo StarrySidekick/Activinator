@@ -19,7 +19,9 @@
 //   source     seed | mine | folk. Who wrote the row. Authoring-only: it is
 //              counted here and never emitted into js/activities.js. Absent
 //              means seed, because everything written before the column
-//              existed was generated. `--placeholders` lists what is left.
+//              existed was generated. `--placeholders` lists what is left,
+//              flagging (never reclassifying) a title that already names an
+//              actual game or tradition — see folk-hints.mjs.
 //
 // A pack may declare "lang" in index.json (e.g. "it-IT"); its cards then get
 // a speak button that says the title out loud in that language.
@@ -38,6 +40,7 @@
 // and build anyway: some of those pairs are deliberate.
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { TAGS, GROUPS, MARKS, DURATIONS, COSTS, durationOf, idOf } from '../js/vocab.js';
+import { folkHint } from './folk-hints.mjs';
 
 const dir = new URL('../packs/', import.meta.url);
 const read = (f) => readFileSync(new URL(f, dir), 'utf8');
@@ -238,17 +241,26 @@ const sayProvenance = () => {
 };
 
 /* The rows still marked seed, so they can be rewritten in a sitting rather than
-   hunted for one at a time. */
+   hunted for one at a time. A row whose title names an actual game, poetic
+   form or tradition — "Would you rather", a haiku, a pub quiz — is flagged:
+   see scripts/folk-hints.mjs for what that means and, as importantly, what it
+   does not mean. Nothing here reclassifies anything; the source column is
+   still hand-written and stays that way. */
 const sayPlaceholders = () => {
   const seeds = provenance.filter(r => r.src === 'seed');
   if (!seeds.length) { console.log('nothing is marked seed — every card says where it came from'); return; }
   let pack = null;
+  let hinted = 0;
   for (const r of seeds) {
     if (r.pack !== pack) { pack = r.pack; console.log(`\n${pack}`); }
-    console.log(`  ${r.at.padEnd(22)} ${r.title}`);
+    const hint = folkHint(r.title);
+    if (hint) hinted++;
+    console.log(`  ${r.at.padEnd(22)} ${r.title}${hint ? `  — names "${hint}", maybe folk?` : ''}`);
   }
   console.log(`\n${seeds.length} rows still generated. Mark one \`mine\` in its source column once it is yours,`);
   console.log('or `folk` if it is a real thing that already exists in the world.');
+  if (hinted) console.log(`\n${hinted} of them name something with an actual name already — read those first;`
+    + ' a hint is a place to look, not a verdict.');
 };
 
 if (process.argv.includes('--placeholders')) { sayPlaceholders(); process.exit(0); }

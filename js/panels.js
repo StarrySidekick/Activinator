@@ -121,12 +121,18 @@ const mineCSV = () => S.mine.map(a =>
   [q(a.t), a.min, COSTS[a.cost] || 'free', q(packTags(a)), 'mine'].join(',')).join('\n');
 
 /* — everything there is, searchable. The deck decides what you see; this is
-     for when you want to go and look. — */
+     for when you want to go and look.
+
+     The definition counts too. A word card's title is the word itself, so a
+     search that only reads the title cannot find "Petrichor" by typing "rain"
+     — which is exactly the direction you remember a meaning from, on a card
+     whose whole reason for existing is that the word was the unfamiliar half. — */
 let QUERY = '';
 const matches = (c) => {
   if (!QUERY) return true;
   const q = QUERY.toLowerCase();
-  return c.t.toLowerCase().includes(q) || c.tags.some(g => (TAGS[g] || g).includes(q));
+  return c.t.toLowerCase().includes(q) || (c.d || '').toLowerCase().includes(q) ||
+    c.tags.some(g => (TAGS[g] || g).includes(q));
 };
 const MARK = { like:'♥', dislike:'✕', never:'⊘' };
 const browseRows = () => {
@@ -144,7 +150,7 @@ const browseRows = () => {
   }).join('');
 };
 const browsePanel = () => openPanel({ key:'browse', title:'All activities', back:'menu', body: () => `
-  <input class="field" data-in="q" placeholder="Search — a word, or a tag" value="${esc(QUERY)}">
+  <input class="field" data-in="q" placeholder="Search — a word, a meaning, or a tag" value="${esc(QUERY)}">
   <p class="pnote">${pool().filter(matches).length} of ${pool().length}. Liking one here counts
   the same as liking it on a card.</p>
   <div id="browerows">${browseRows()}</div>` });

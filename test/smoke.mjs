@@ -297,6 +297,19 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   const searched = await page.locator('.brow').count();
   const keptFocus = await page.evaluate(() => document.activeElement.dataset.in === 'q');
   await shot('06-browse');
+
+  // — search reads the definition too, not only the title: "Petrichor" is
+  //   found by "rain" (the word that is in its meaning, not in it) — or a word
+  //   card is only findable by remembering the one word you didn't know. —
+  await page.fill('[data-in="q"]', 'petrichor');
+  await page.waitForTimeout(300);
+  const byTitleFirst = (await page.locator('.brow').count()) > 0;
+  await page.fill('[data-in="q"]', 'rain');
+  await page.waitForTimeout(300);
+  const byDefinition = (await page.locator('.brow .btitle', { hasText: 'Petrichor' }).count()) > 0;
+  await page.fill('[data-in="q"]', '');
+  await page.waitForTimeout(300);
+
   await page.locator('.brow .bset.like').first().click();
   await page.waitForTimeout(300);
   const browseLiked = await page.evaluate(() => Object.values(ACT.S.seen).some(s => s.v === 'like'));
@@ -630,7 +643,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
 
   console.log({ dealt, manifestOk, cardShaped, frontIsBare, cornerIndex, emblems, packs, turn, flipped, frontHidden,
     flipsBack, liked, moved, learned, undone, backAgain, unlearned, skipped, poolIsForever,
-    ctxHonoured, menuOpen, ctxKept, allRows, searched, keptFocus, browseLiked, bars,
+    ctxHonoured, menuOpen, ctxKept, allRows, searched, byTitleFirst, byDefinition, keptFocus, browseLiked, bars,
     refusedBare, mine, mineRow, rowIsPackShaped, pile, undoBack, oneButton, prefilled, rewritten, curation,
     editPersisted, unedited, defEditable, table, ghostPanel, persisted, swReady, offline, errors: errs });
   await browser.close();
@@ -639,7 +652,7 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
     Object.values(turn).every(Boolean) &&
     frontHidden && flipsBack && liked && moved && learned && undone && backAgain && unlearned &&
     skipped && poolIsForever && ctxHonoured && menuOpen && ctxKept && allRows > 250 &&
-    searched > 0 && searched < allRows && keptFocus && browseLiked && bars > 0 && refusedBare &&
+    searched > 0 && searched < allRows && byTitleFirst && byDefinition && keptFocus && browseLiked && bars > 0 && refusedBare &&
     mine && persisted && swReady && offline && prefilled && editPersisted && unedited &&
     defEditable && undoBack && Object.values(pile).every(Boolean) &&
     Object.values(table).every(Boolean) && ghostPanel &&
