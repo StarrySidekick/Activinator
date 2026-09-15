@@ -337,12 +337,19 @@ const curationRows = () => all()
    the row a rewrite replaces, since a rewritten title is a different string
    from the one in the CSV. `definition` is empty on everything but the packs
    that carry one, and it is here rather than left out because a kept word card
-   without its meaning is not a row anybody can paste back. */
+   without its meaning is not a row anybody can paste back.
+
+   `source` closes the same loop `mineCSV` closes for Write Your Own. A
+   rewrite is Timothy sitting down and typing the exact words that end up on
+   the card — that is authorship, whatever the row said before — so an `edit`
+   verdict carries `mine` here, and pasting it back over a `seed` row is what
+   moves the "whose cards these are" count without a second thing to remember.
+   Left blank on keep/cut/out: nothing about who wrote it changed. */
 const q = (v) => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
 const packTags = (c) => c.tags.filter(g => !DURATIONS.includes(g) && !COSTS.includes(g)).join(' ');
-const curationCSV = () => ['verdict,pack,title,minutes,cost,tags,definition,was',
+const curationCSV = () => ['verdict,pack,title,minutes,cost,tags,definition,source,was',
   ...curationRows().map(({ v, c }) => [v, c.pack || 'mine', q(c.t), c.min,
-    COSTS[c.cost] || 'free', q(packTags(c)), q(c.d || ''),
+    COSTS[c.cost] || 'free', q(packTags(c)), q(c.d || ''), v === 'edit' ? 'mine' : '',
     q(c.edit && c.was !== c.t ? c.was : '')].join(','))
 ].join('\n');
 
@@ -365,7 +372,8 @@ const curatePanel = () => openPanel({ key:'curate', title:'Curate', back:'menu',
     <p class="pnote">One row per verdict, in the columns a pack is written in with the
     verdict in front. Take it to a session and the packs get edited by it: what kept
     stays, what was cut or went out comes out, and a rewritten row replaces the one named
-    in the last column. Nothing here changes a pack on its own — the CSVs in packs/ are
+    in the last column, marked mine in its source — the words are yours now, whatever the
+    card said before. Nothing here changes a pack on its own — the CSVs in packs/ are
     still the only thing the deck is built from.</p></div>`
   : `<p class="pnote">Nothing judged yet. Swipe a few and they turn up here.</p>`}`;
 } });

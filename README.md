@@ -225,16 +225,23 @@ truth and nothing in the app writes to them.
 
 Menu → Curate is every card you have judged or rewritten, as one file:
 
-    verdict,pack,title,minutes,cost,tags,definition,was
-    keep,core,Draw everybody on the bus,45,free,create visualart drawing engaging indoors,,
+    verdict,pack,title,minutes,cost,tags,definition,source,was
+    keep,core,Draw everybody on the bus,45,free,create visualart drawing engaging indoors,,,
 
 `keep` is a swipe right, `cut` a swipe left, `out` is "never again", and `edit`
 is one you rewrote but have not judged yet. A skip is not a verdict and is not
 in there. The middle columns are exactly a pack row — `definition` included, so
-a kept word card keeps its meaning — and a keeper pastes into a CSV unedited; `was` is the title the pack still has, and it is filled in
-only for a rewrite — that is the row the new one replaces, since a rewritten
-title no longer matches anything in the file. Take it to a session, or edit the
-packs by it yourself.
+a kept word card keeps its meaning — and a keeper pastes into a CSV unedited;
+`was` is the title the pack still has, and it is filled in only for a rewrite —
+that is the row the new one replaces, since a rewritten title no longer matches
+anything in the file. Take it to a session, or edit the packs by it yourself.
+
+`source` closes the loop the same way `mineCSV` does for Write Your Own: an
+`edit` row carries `mine`, because rewriting a card is sitting down and typing
+the exact words that end up on it, whatever the row said before. Blank on
+keep, cut and out — nothing about who wrote it changed. Paste a rewritten row
+over a `seed` one and `--placeholders` has one fewer to list, without a second
+thing to remember.
 
 Switching a pack off hides its cards from the deck and changes nothing here.
 

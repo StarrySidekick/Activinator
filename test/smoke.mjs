@@ -410,18 +410,22 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   const lines = records(await page.evaluate(() => document.querySelector('.pbody textarea').value));
   const row = lines.find(l => l.includes('A better way of putting it'));
   const curation = {
-    head: lines[0] === 'verdict,pack,title,minutes,cost,tags,definition,was',
+    head: lines[0] === 'verdict,pack,title,minutes,cost,tags,definition,source,was',
     keeps: lines.some(l => l.startsWith('keep,')),
     cuts: lines.some(l => l.startsWith('cut,')),
     // the title it used to have is the last column, because that is the row a
     // rewrite replaces and a rewritten title no longer matches the CSV
     rewrite: !!row && /^(edit|keep|cut|out),/.test(row) && row.includes(was),
+    // an edit is Timothy's own words landing on the card, whatever it said
+    // before — the source column says so, the way mineCSV already does for
+    // Write Your Own
+    rewriteIsMine: !!row && cells(row)[7] === 'mine',
     // a skip is not a verdict, so it is not in here
     noSkips: !lines.some(l => l.startsWith('skip,')),
-    /* Eight columns on every row, quotes and embedded newlines and all. This is
+    /* Nine columns on every row, quotes and embedded newlines and all. This is
        the assertion that would have caught the split above, and the one that
        says the file is pasteable rather than merely present. */
-    eightColumns: lines.length > 3 && lines.every(l => cells(l).length === 8)
+    nineColumns: lines.length > 3 && lines.every(l => cells(l).length === 9)
   };
   await page.click('.panel .x[aria-label="Close"]'); await page.waitForTimeout(300);
 

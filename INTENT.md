@@ -54,6 +54,16 @@ activities on the device and export them as pack rows; those rows now come out
 marked `mine`, so pasting one into a pack moves the number without anything
 further to remember.
 
+**And now in the middle: 2026-09-15, a rewrite marks itself too.** Rewriting a
+card on the back of it was already how curating works — see "Curating" in the
+README — but the curation export (`verdict,pack,title,minutes,cost,tags,
+definition,was`) had no `source` column, so a session applying a rewritten row
+back to a pack had to remember, by hand, that the words were his now. The
+export now carries `source`, and an `edit` verdict fills it with `mine` — the
+same fact `mineCSV` already states for Write Your Own, stated here too. Three
+ways in (write one, rewrite one, mark a real thing `folk`) now all land the
+same way when pasted back.
+
 **What this does not do** is make a single card better. It counts. The actual
 work — rewriting 1,260 rows, or finding a source of activities that is real
 rather than generated — is still ahead, and this is the instrument for telling
