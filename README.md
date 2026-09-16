@@ -21,6 +21,7 @@ scripts/serve.sh                        # http://localhost:8010
 node scripts/build-activities.mjs       # packs/*.csv → js/activities.js
 node test/smoke.mjs                     # headless check, needs the server running
 node test/upgrade.mjs                   # boots from old saved states
+node test/version.mjs                   # CACHE and APP_VERSION agree, SHELL is complete
 ```
 
 Open it over http, never as a `file://` URL — the service worker won't register
@@ -146,7 +147,9 @@ pack a saved state has never heard of takes the default it ships with, which is
 what lets a new pack arrive in an update without being silently disabled — and
 lets one you switched off stay off.
 
-`packs/winter.csv` is an example pack, off by default. Delete it or fill it in.
+`packs/winter.csv` is a seasonal pack, off by default so it does not show up
+outside winter. It already has real rows in it — switch it on in Packs to see
+them, or add more the same three ways as any other pack.
 
 ## How it works
 
@@ -293,7 +296,8 @@ After changing anything in `js/`, `css/` or `index.html`, bump `CACHE` in
 `sw.js` **and** `APP_VERSION` in `js/state.js`. Without the cache bump an
 installed copy keeps serving the old version, and the symptom — "my change
 didn't deploy" — points at the wrong culprit. A new file must also be added to
-`SHELL` in `sw.js` or it won't be there offline.
+`SHELL` in `sw.js` or it won't be there offline. `node test/version.mjs`
+checks both — no server, no browser — so this is caught rather than forgotten.
 
 ## Not yet
 

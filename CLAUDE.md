@@ -27,7 +27,8 @@ and a passing assertion doesn't mean it looks right. Add a case to
 
 - After changing anything in `js/`, `css/` or `index.html`, bump `CACHE` in
   `sw.js` **and** `APP_VERSION` in `js/state.js`. A new file must also join
-  `SHELL` in `sw.js` or it won't be there offline.
+  `SHELL` in `sw.js` or it won't be there offline. `node test/version.mjs`
+  checks all three, no server needed — run it after any such change.
 - `js/activities.js` is **generated** from `packs/*.csv` — never edit it by
   hand. The packs are the source of truth.
 - `sw.js` reaps only `activinator-` caches. The app shares the

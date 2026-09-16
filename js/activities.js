@@ -307,7 +307,7 @@ export const PACKS = [
     {id:'a1kb8unw',t:"Draw one small thing in the corner of a page",tags:["create","drawing","visualart","home","solo","casual","quick","free"],min:4,cost:0},
     {id:'a1a7k3y9',t:"Take one photograph of something completely ordinary",tags:["create","visualart","anywhere","solo","casual","quick","free"],min:3,cost:0},
   ]},
-  { id:"winter", name:"Winter", note:"An example pack — delete it or fill it in.", on:false, items:[
+  { id:"winter", name:"Winter", note:"Seasonal — off by default, real rows inside.", on:false, items:[
     {id:'akq6yua',t:"Walk somewhere in the snow before anybody else has",tags:["travel","move","outdoors","mindful","engaging","medium","free"],min:60,cost:0},
     {id:'avl1qcv',t:"Make a fire and sit in front of it doing nothing",tags:["mindful","indoors","engaging","medium","free"],min:90,cost:0},
     {id:'atku33c',t:"Cook something that takes all afternoon on purpose",tags:["eat","create","indoors","engaging","long","frugal"],min:240,cost:1},

@@ -1,4 +1,4 @@
 [
   { "id": "core",   "name": "The core deck", "note": "Everything the app shipped with.", "on": true },
-  { "id": "winter", "name": "Winter",        "note": "An example pack — delete it or fill it in.", "on": false }
+  { "id": "winter", "name": "Winter",        "note": "Seasonal — off by default, real rows inside.", "on": false }
 ]
