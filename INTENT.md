@@ -40,11 +40,21 @@ ask how much of the deck was placeholder. Every pack row can carry a `source` �
 split on every run. It is authoring-only and is never emitted into
 `js/activities.js`; the app has no use for it.
 
-**The number today is 238 of 1,498, or 16%**, and all of that is the Words and
-Italian packs, which are real dictionary entries and real conjugations rather
-than suggestions somebody generated. **Core, Questions, Ask a partner, Tableaus
-and Visualizations are 1,260 rows of placeholder**, which is the honest picture
-and is now printed rather than felt.
+**The number today is 288 of 1,548, or 19%**, and all of that is still the Words
+and Italian packs, which are real dictionary entries and real conjugations
+rather than suggestions somebody generated. **Core, Questions, Ask a partner,
+Tableaus and Visualizations are still 1,260 rows of placeholder, untouched** —
+which is the honest picture and is now printed rather than felt.
+
+**2026-09-17: Words grew by 24 and Italian by 26**, both real — established
+English words with their standard dictionary meanings, and common Italian
+vocabulary with correct gender and translation, not invented. That moved the
+real fraction from 16% to 19%. **This is not the fix Timothy asked for.** It
+adds to the one corner of the deck that was already real rather than touching
+the 1,260 placeholder rows, and it is not "his own input" or "something real in
+the world" either — it is still an AI session choosing what goes on a card,
+just one that happens to be checkable against a dictionary instead of invented.
+Recorded here so it is not mistaken for progress on the actual problem.
 
 `node scripts/build-activities.mjs --placeholders` lists them so they can be
 rewritten in a sitting instead of hunted one at a time.
