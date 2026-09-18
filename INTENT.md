@@ -59,6 +59,24 @@ work — rewriting 1,260 rows, or finding a source of activities that is real
 rather than generated — is still ahead, and this is the instrument for telling
 whether it is going anywhere.
 
+**2026-09-18: 21 rows in `core.csv` turned out to already be `folk` and just
+hadn't been marked.** Chess, darts finished on a double, table football,
+conkers and marbles, hide and seek, twenty questions, a pub quiz, a crossword,
+a jigsaw, stone-skimming, juggling three balls, a pull-up, a reef or bowline
+knot, riding with no hands, ten thousand steps, a folk tale, a folk dance and
+rug-beating "as though it were 1890" are all real, named, pre-existing things —
+the row just wraps one in a sentence, it does not invent one — so they meet the
+build's own bar for `folk` (`node scripts/build-activities.mjs`'s own words:
+"a known game, a tradition, a standard exercise"). That is a reclassification,
+not new writing, and it moves the printed number from 238/1,498 (16%) to
+259/1,498 (17%). It does not touch the harder problem: 628 of core's 649 rows
+are still a generated sentence about a made-up scenario rather than a real
+thing, and no amount of relabelling fixes that — an AI going back through the
+same 628 rows to make them *sound* more authentic would be the identical
+failure in a better disguise. What would actually move this: Timothy writing
+some, or a real source (a folk-game reference, a list of standard exercises,
+Proximi's own listings) the build can be pointed at, per the plan above.
+
 ## Two structural notes he raised, worth designing around
 
 - **The language elements are almost their own thing**, separate from the

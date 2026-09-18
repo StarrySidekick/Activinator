@@ -129,8 +129,8 @@ Fix somebody else’s broken thing,60,free,repair kindness engaging anywhere,see
 "Learn how the boiler, the fuse box or the lock actually works",40,free,repair learn engaging home,seed
 Try a class you would be visibly bad at,90,costly,try learn challenging indoors newpeople friends,seed
 Learn twenty words of a language you will never speak,30,free,try learn casual anywhere,seed
-Teach yourself one knot,15,free,try learn casual anywhere,seed
-Learn to do one pull-up,20,frugal,try move challenging home,seed
+Teach yourself one knot,15,free,try learn casual anywhere,folk
+Learn to do one pull-up,20,frugal,try move challenging home,folk
 Learn to fold one good paper thing,30,free,try create casual mindful home,seed
 Learn to make one cocktail properly,40,frugal,try eat learn engaging home,seed
 Cook with one ingredient you have never used,90,frugal,try eat engaging home,seed
@@ -138,7 +138,7 @@ Learn five trees on your own street,40,free,try learn casual outdoors,seed
 Learn to identify five birds by their sound,45,free,try learn mindful engaging outdoors,seed
 Try the food you decided you hated as a child,40,frugal,try eat funny casual anywhere,seed
 Learn one card trick well enough to fool somebody,60,free,try play funny engaging home,seed
-Learn to juggle three things,45,free,try play move challenging anywhere,seed
+Learn to juggle three things,45,free,try play move challenging anywhere,folk
 Write with your other hand for a whole day,20,free,try funny casual anywhere,seed
 Learn to whistle properly,20,free,try funny casual anywhere,seed
 "Find out where your water comes from, then go and look at it",90,free,try learn engaging anywhere,seed
@@ -215,23 +215,23 @@ Pick something wild and eat it,60,free,eat try learn engaging outdoors,seed
 Eat a meal with no phone anywhere in the room,45,free,eat mindful casual anywhere,seed
 Make something you have only ever bought,90,frugal,eat create try engaging home,seed
 Play a board game with actual people at an actual table,120,frugal,play friends funny engaging home,seed
-Go to a pub quiz and lose,150,frugal,play friends funny engaging indoors newpeople,seed
+Go to a pub quiz and lose,150,frugal,play friends funny engaging indoors newpeople,folk
 Play the game you loved as a child,60,free,play nostalgic funny casual home,seed
 Learn a card game nobody you know plays,45,free,play try learn engaging home,seed
-Fly a kite badly,60,frugal,play funny move casual outdoors,seed
+Fly a kite badly,60,frugal,play funny move casual outdoors,folk
 Take up a sport you are too old to start,90,frugal,play move try challenging friends indoors newpeople,seed
 Throw something at a wall and catch it a thousand times,30,free,play move mindful casual anywhere,seed
-Play hide and seek with somebody far too old for it,30,free,play funny friends romantic casual home,seed
+Play hide and seek with somebody far too old for it,30,free,play funny friends romantic casual home,folk
 Set a puzzle going and leave it out all week,30,frugal,play mindful casual home,seed
-"Skateboard, badly, in an empty car park",60,frugal,play move funny adventurous casual outdoors,seed
-Play chess against a stranger in a park,60,free,play challenging outdoors newpeople friends,seed
-Do a jigsaw and talk the whole way through it,150,frugal,play romantic mindful friends casual home partner,seed
-Play twenty questions about something real,20,free,play funny friends casual anywhere,seed
+"Skateboard, badly, in an empty car park",60,frugal,play move funny adventurous casual outdoors,folk
+Play chess against a stranger in a park,60,free,play challenging outdoors newpeople friends,folk
+Do a jigsaw and talk the whole way through it,150,frugal,play romantic mindful friends casual home partner,folk
+Play twenty questions about something real,20,free,play funny friends casual anywhere,folk
 Swim somewhere outdoors,90,frugal,play move adventurous engaging outdoors,seed
 Invent a game out of the things on the table,30,free,play funny friends create casual anywhere,seed
 Play arcade games with actual coins,60,frugal,play nostalgic funny friends casual indoors,seed
 "Run the loop you always mean to run, slowly",40,free,move engaging outdoors,seed
-Walk ten thousand steps in one go,120,free,move challenging outdoors,seed
+Walk ten thousand steps in one go,120,free,move challenging outdoors,folk
 Swim lengths until you lose count,60,frugal,move mindful engaging outdoors,seed
 Carry something heavy up a hill,45,free,move challenging outdoors,seed
 Do the exercise you are worst at,30,free,move challenging try home,seed
@@ -288,13 +288,13 @@ Find the most abandoned-looking building near you and go and look,60,free,spooky
 Watch the horror film you have been avoiding,110,free,spooky watch challenging home,seed
 Learn one genuinely unsettling fact and sit with it,20,free,spooky learn casual anywhere,seed
 Go somewhere very quiet at three in the morning,60,free,spooky adventurous challenging outdoors,seed
-Read a folk tale from wherever your family is from,45,free,spooky read nostalgic learn engaging anywhere,seed
+Read a folk tale from wherever your family is from,45,free,spooky read nostalgic learn engaging anywhere,folk
 Make a playlist for a haunting,40,free,spooky create music funny casual anywhere,seed
 Step outside and look up for two minutes,2,free,mindful outdoors casual,seed
 Send somebody a photograph of what you can see right now,2,free,kindness anywhere casual,seed
 Write one sentence about today,3,free,create writing home solo casual,seed
 Learn one word in another language,3,free,learn try anywhere solo casual,seed
-Stand on one leg until you cannot,2,free,move play funny anywhere casual,seed
+Stand on one leg until you cannot,2,free,move play funny anywhere casual,folk
 Put on one song and do nothing else,4,free,listen music mindful home solo casual,seed
 Look up what your street is named after,4,free,learn read anywhere solo casual,seed
 Water the plants,4,free,clean mindful home solo casual,seed
@@ -329,7 +329,7 @@ Clean one window until it disappears,20,free,clean mindful casual home,seed
 Wash the thing you have only ever wiped,40,free,clean engaging home,seed
 Get the limescale off the shower door for good,50,frugal,clean challenging home,seed
 Clean out the drawer nearest the kettle,25,free,clean casual home,seed
-Beat the rugs outside as though it were 1890,40,free,clean move funny engaging outdoors,seed
+Beat the rugs outside as though it were 1890,40,free,clean move funny engaging outdoors,folk
 Clean the oven with something long on in the background,90,free,clean listen engaging home,seed
 Wash every mug down past the tea line,25,free,clean mindful casual home,seed
 Re-glue the chair that wobbles,45,frugal,repair engaging home,seed
@@ -349,18 +349,18 @@ Learn to sharpen a pencil with a knife,15,free,try learn casual home,seed
 Take up a sport nobody you know plays,120,costly,try play move engaging indoors newpeople friends,seed
 Learn one useful sentence in three languages,30,free,try learn casual anywhere,seed
 Cook the recipe that has always looked too hard,150,frugal,try eat challenging home,seed
-Learn to skim a stone properly,30,free,try play move casual outdoors,seed
+Learn to skim a stone properly,30,free,try play move casual outdoors,folk
 Order the drink you have decided you do not like,20,frugal,try eat funny casual indoors,seed
-Learn to ride with no hands,45,free,try move play challenging outdoors,seed
+Learn to ride with no hands,45,free,try move play challenging outdoors,folk
 Learn one magic trick with a coin,45,free,play try funny engaging home,seed
-Play darts until you can finish on a double,90,frugal,play friends engaging indoors,seed
+Play darts until you can finish on a double,90,frugal,play friends engaging indoors,folk
 Run a tournament of something ridiculous,120,free,play friends funny engaging home,seed
 Finish the game you abandoned years ago,180,free,play nostalgic engaging home,seed
-Do a crossword with somebody else,45,free,play friends casual home,seed
+Do a crossword with somebody else,45,free,play friends casual home,folk
 Throw a ball back and forth until you both get bored,30,free,play move friends casual outdoors,seed
 Beat your own record at something pointless,25,free,play funny move casual anywhere,seed
-Play table football against a stranger,45,frugal,play funny challenging indoors newpeople friends,seed
-Learn to play conkers or marbles again,30,free,play nostalgic funny casual outdoors,seed
+Play table football against a stranger,45,frugal,play funny challenging indoors newpeople friends,folk
+Learn to play conkers or marbles again,30,free,play nostalgic funny casual outdoors,folk
 Teach somebody the game you loved as a child,60,free,play kindness nostalgic casual home,seed
 Walk up every set of stairs between here and there,45,free,move challenging outdoors,seed
 Spend twenty minutes on something you cannot do yet,20,free,move try challenging home,seed
@@ -490,7 +490,7 @@ Dance to something you would never admit to,10,free,create dancing move funny ca
 Learn the dance from the video you have watched fifty times,90,free,create dancing move nostalgic challenging home,seed
 Dance outside where somebody might see you,15,free,create dancing adventurous funny casual outdoors,seed
 Move to a whole side of a record,25,free,create dancing music mindful casual home,seed
-Learn a folk dance from wherever your family is from,90,free,create dancing learn nostalgic engaging home,seed
+Learn a folk dance from wherever your family is from,90,free,create dancing learn nostalgic engaging home,folk
 Put on a dance for one person,30,free,create dancing romantic funny casual home partner,seed
 Film one minute of every day this week,30,free,create film mindful engaging anywhere,seed
 Cut a trailer for your own life,120,free,create film funny challenging home,seed
