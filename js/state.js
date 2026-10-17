@@ -5,8 +5,8 @@
 import { SEEDS, PACKS, TAGS, WHO, WHERE, TIME, DURATIONS, COSTS, durationOf } from './data.js';
 
 const KEY = 'activinator.v1';
-const APP_VERSION = '0.9';
-const DATA_V = 3;
+const APP_VERSION = '0.30';
+const DATA_V = 6;
 
 /* `w` is the taste model: one weight per tag, plus a bias. `seen` is the last
    thing you said about each activity — nothing leaves the pool because of it,
@@ -18,7 +18,11 @@ const fresh = () => ({
   seen: {},                    // id -> {v:'like'|'dislike'|'skip'|'never', at:ISO}
   recent: [],                  // ids, most recent first
   mine: [],                    // activities you wrote yourself
+  edits: {},                   // id -> {t, tags, min, cost}: a pack card, rewritten
   ctx: { who:'', where:'', time:'' },
+  table: { n: 1,                // how many cards the table is laid out for
+           shake: true },       // and whether shaking the phone shuffles it
+
   packs: Object.fromEntries(PACKS.map(p => [p.id, p.on])),
   nerve: 0.3
 });
@@ -89,7 +93,36 @@ const migrate = (o) => {
   o.seen = Object.fromEntries(Object.entries(o.seen || {}).map(([id, s]) =>
     [id, { ...s, v: s.v === 'yes' || s.v === 'now' ? 'like' : s.v === 'no' ? 'dislike' : s.v }]));
   o.mine = (o.mine || []).map(fixMine);
+
+  /* A rewrite is kept beside the activity rather than in it, so anything the
+     vocabulary no longer knows has to be dropped here too — an edit carrying a
+     dead tag would put it back into the pool by the side door. An edit whose
+     activity has since left the packs is left alone: it costs nothing, and
+     throwing it away would lose a rewrite that has not been exported yet. */
+  o.edits = Object.fromEntries(Object.entries(o.edits || {}).map(([id, e]) =>
+    [id, { ...e, tags: (e.tags || []).map(t => RENAMED[t] || t).filter(t => t in TAGS) }]));
   o.recent = [];               // ids changed shape; what you saw last week is not worth keeping
+
+  /* The round is gone. It was bookkeeping for a guarantee — nothing repeats
+     until you have been through everything — that a pile gives you for free by
+     being a pile: cards come off the top and do not come back until you shuffle
+     them back in. Anything saved under it is dropped rather than translated,
+     because there is nothing on this side to translate it into. */
+  delete o.pass;
+
+  /* The table is a place to play with cards rather than part of the deck, so
+     it keeps one number and nothing else: how many it is laid out for, which
+     is what decides how big a card is drawn there. A saved state from before
+     it existed has no opinion and takes the default; anything unrecognised is
+     put back to it, because a nonsense here is a table with no cards on it. */
+  /* The table is the app now rather than a room off it, so `n` means something
+     different from what it meant when it was a sandbox: it is how the deck is
+     laid out on opening. A value saved under the old meaning goes back to one,
+     which is the deck as it has always looked. */
+  const t = o.table || {};
+  const n = from >= 6 ? Math.round(Number(t.n)) : 1;
+  o.table = { n: n >= 1 && n <= 8 ? n : 1,
+              shake: t.shake === undefined ? true : !!t.shake };
 
   /* A filter is ephemeral, and one saved under the old vocabulary means
      nothing under this one. Anything unrecognised goes back to "no filter"
@@ -131,11 +164,30 @@ const save = () => {
    and a new one does not arrive silently disabled. */
 const packOn = (id) => S.packs && id in S.packs ? S.packs[id]
   : (PACKS.find(p => p.id === id) || {}).on !== false;
-const pool = () => SEEDS.filter(a => packOn(a.pack)).concat(S.mine);
+
+/* A rewrite lives beside the activity, never in it. The id still comes from the
+   original title, so everything you have already said about a card survives
+   being rewritten — and the pack stays the source of truth for anyone who has
+   not rewritten it, which is what makes the edit exportable as a change rather
+   than as a new card. */
+const edited = (a) => {
+  const e = S.edits && S.edits[a.id];
+  return e ? { ...a, ...e, edit: true, was: a.t } : a;
+};
+/* `all` is every activity there is, rewritten where you have rewritten it, and
+   `pool` is the part of it the deck may deal. Curating works from `all`: a
+   verdict you gave a card is still a verdict after you switch its pack off. */
+const all = () => SEEDS.concat(S.mine).map(edited);
+const pool = () => all().filter(a => a.src === 'mine' || packOn(a.pack));
 const byId = id => pool().find(c => c.id === id);
 
+/* The activity as its pack has it, for deciding whether a rewrite still says
+   anything different. */
+const baseById = id => SEEDS.find(a => a.id === id) || S.mine.find(a => a.id === id);
+
 /* What you have been shown lately, so it does not come straight back. Nothing
-   is removed from the pool by this — it only sinks for a while. */
+   is removed from the pool by this — it only sinks for a while, and it is what
+   keeps the first cards of a new round from being the last of the old one. */
 const RECENT_N = 40;
 const remember = (id) => {
   S.recent = [id, ...S.recent.filter(x => x !== id)].slice(0, RECENT_N);
@@ -148,8 +200,8 @@ const importJSON = (txt) => {
   S = Object.assign(fresh(), migrate(o)); save(); return S;
 };
 
-export { S, KEY, APP_VERSION, DATA_V, RECENT_N, fresh, load, save, pool, packOn, byId, remember,
-         exportJSON, importJSON };
+export { S, KEY, APP_VERSION, DATA_V, RECENT_N, fresh, load, save, all, pool, packOn, byId,
+         baseById, remember, exportJSON, importJSON };
 export const setUndo = v => { undo = v; };
 export const getUndo = () => undo;
 export const reset = () => { S = fresh(); save(); return S; };

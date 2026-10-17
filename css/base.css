@@ -24,30 +24,50 @@ body{
 input,textarea,.pickme{user-select:text;-webkit-user-select:text}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 
-#frame{ height:100dvh; position:relative; overflow:hidden }
+/* The table: the felt, and the bar the pile sits in. The felt takes whatever
+   the bar leaves, and the layout works the cards out against that box — which
+   is why nothing here needs to know how big a card is. */
+#frame{ height:100dvh; display:flex; flex-direction:column; overflow:hidden;
+        padding-top:var(--top) }
+/* `z-index:0` makes the felt its own stacking context, which is what keeps the
+   cards inside it. Picking a card up puts it on top of the others by bumping
+   its z-index, and that counter only ever climbs — without this it eventually
+   climbs past the menu, and the panel opens behind the card. */
+#deck{ position:relative; z-index:0; flex:1 1 auto; min-height:0; overflow:hidden;
+       touch-action:none; margin:8px 0 }
+#tbar{ flex:0 0 auto }
 
-/* — the dock. One button in each corner of a full-screen card, so that none of
-     them is ever over the middle of it: where you go and what you look for
-     along the top, what you make and what you take back along the bottom.
-     Undo joins them only when there is something to take back, because a dead
-     button is furniture. — */
-.dock{position:absolute; inset:0; z-index:20; pointer-events:none}
-.dock button{
-  position:absolute; pointer-events:auto; width:46px; height:46px; border-radius:50%;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(20,21,28,.62); border:1px solid rgba(255,255,255,.14);
-  color:#e9e6df; backdrop-filter:blur(9px); -webkit-backdrop-filter:blur(9px);
-  box-shadow:0 6px 18px -6px rgba(0,0,0,.6);
+/* — the one button. It lives on the back of the card: the front is for
+     deciding and the back is for understanding, and the menu is neither. Four
+     marks in the corners were four things in front of the one thing you are
+     meant to be looking at, and every one of them but this was a quick link
+     into it.
+
+     It is printed rather than built — a solid silhouette on the paper, the way
+     a suit is printed in the corner of a playing card, with no disc, no rule
+     and no shadow. A gear, because it is the one control in the app and it
+     should say what it is without having to be learned. The drawn marks are
+     the vocabulary; this is not part of it.
+
+     It sits outside #frame rather than in it. The deck carries a `perspective`
+     and the cards are `preserve-3d`, and a 3D rendering context sorts what it
+     contains by depth rather than by the z-index of anything beside it — so
+     the row of emblems at the head of the card took the taps meant for this,
+     whatever z-index it was given. — */
+/* It used to sit on the top-right corner of the card and appear only once you
+   had turned one over, because there was nothing else on the screen for it to
+   belong to. There is a bar now — the table has one, permanently — so it lives
+   in the bar and is always there. Hiding the one control in the app when the
+   screen already has a row of buttons on it would be a puzzle, not restraint. */
+.settings{
+  position:absolute; right:6px; top:12px;
+  width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+  color:var(--dim); opacity:1; pointer-events:auto;
 }
-.dock button:active{transform:scale(.94)}
-.dock svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;
-  stroke-linecap:round;stroke-linejoin:round}
-.dock .menu  {top:calc(var(--top) + 12px); left:14px}
-.dock .browse{top:calc(var(--top) + 12px); right:14px}
-.dock .undo  {bottom:calc(var(--bot) + 14px); left:14px}
-.dock .add   {bottom:calc(var(--bot) + 14px); right:14px}
-.dock .undo{opacity:0;transform:scale(.7);pointer-events:none;transition:opacity .18s,transform .18s}
-.dock .undo.on{opacity:1;transform:scale(1);pointer-events:auto}
+.settings:active{color:#e9e6df}
+.settings:active{transform:scale(.92)}
+.settings svg{width:25px;height:25px;fill:currentColor;overflow:visible}
+/* With no card under it there is no paper for it to be ink on. */
 
 #toast{
   position:fixed; left:50%; bottom:calc(var(--bot) + 74px); transform:translateX(-50%) translateY(8px);

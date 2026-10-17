@@ -1,5 +1,11 @@
 # Activinator — working notes for Claude Code
 
+> **Read [`INTENT.md`](INTENT.md) first.** It records what this project is for
+> and what Timothy wants next, in his own words, dated. Where it disagrees with
+> this file about *direction* it is newer and wins; where it disagrees about
+> *mechanics* — how the code works, what was decided deliberately, the
+> invariants — this file wins.
+
 Activinator is Timothy's deck of things to actually go and do — one activity at
 a time, full screen, swipe right on what you'd probably do. It is a personal
 app, not a product, and design decisions should be made for one user.
@@ -16,6 +22,7 @@ scripts/serve.sh                        # http://localhost:8010
 node scripts/build-activities.mjs       # packs/*.csv → js/activities.js
 node test/smoke.mjs                     # headless check, needs the server running
 node test/upgrade.mjs                   # boots from old saved states
+node test/hour.mjs                      # the clock's rule, no browser needed
 ```
 
 Tests need Playwright (`npm i`). Run the smoke test after any non-trivial
@@ -23,17 +30,34 @@ change and **look at the screenshots** in `test/shots/` — this is a visual app
 and a passing assertion doesn't mean it looks right. Add a case to
 `test/upgrade.mjs` whenever the saved shape changes.
 
-## The three rules easiest to forget
+## The four rules easiest to forget
 
 - After changing anything in `js/`, `css/` or `index.html`, bump `CACHE` in
   `sw.js` **and** `APP_VERSION` in `js/state.js`. A new file must also join
   `SHELL` in `sw.js` or it won't be there offline.
 - `js/activities.js` is **generated** from `packs/*.csv` — never edit it by
-  hand. The packs are the source of truth.
+  hand. The packs are the source of truth. Nothing in the app writes to them
+  either: Menu → Curate exports what has been kept, cut and rewritten, and a
+  session edits the CSVs by it. See "Curating" in the README.
+- The app is **a table with a pile on it**, and `js/table.js` is all of it: the
+  pile, the felt, verdicts, dragging, the flip. There is no round any more —
+  "nothing repeats until you have been through everything" is what a pile *is*,
+  not a rule the app keeps a list for. `S.table.n` is how many are laid out at
+  once, and it changes what a drag means: at one card a drag is the verdict, at
+  more than one it moves the card. See "The table" in the README.
 - `sw.js` reaps only `activinator-` caches. The app shares the
   `starrysidekick.github.io` origin with Bureau, and a cache store belongs to
   the origin, not to a scope — the general filter wiped Bureau's shell once.
   See "Deploying" in the README before touching the service worker.
+
+## The aesthetics studio
+
+Moved out. It is its own repository now — `StarrySidekick/Aesthetics`, live at
+https://starrysidekick.github.io/Aesthetics/ — and nothing in this one depends
+on it. If Timothy names an aesthetic (Victoria, Starful Gothic, Aeros, Golf 97,
+Girando, Stelaine, Carca) while working on the deck, that repository is where
+the style guide lives; read the JSON there rather than looking for a folder
+here.
 
 ## Style
 

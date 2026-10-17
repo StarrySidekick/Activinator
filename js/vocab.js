@@ -11,6 +11,7 @@ const GROUPS = [
   ['Doing',      ['create','organize','clean','repair','try','play','move','learn','kindness']],
   ['Making',     ['writing','visualart','drawing','painting','sculpting','mixedmedia','clothes','music','acting','dancing','film']],
   ['Experience', ['watch','listen','read','travel','eat']],
+  ['Thinking',   ['question']],                                // a card that asks rather than tells
   ['Where',      ['anywhere','indoors','outdoors','home']],
   ['Who',        ['solo','partner','friends','newpeople']],
   ['How hard',   ['casual','engaging','challenging']],          // a scale: exactly one
@@ -28,6 +29,8 @@ const TAGS = {
   acting:'acting', dancing:'dancing', film:'film',
 
   watch:'watch', listen:'listen', read:'read', travel:'travel', eat:'eat',
+
+  question:'question',
 
   anywhere:'anywhere', indoors:'indoors', outdoors:'outdoors', home:'home',
 
@@ -88,6 +91,9 @@ const MARKS = {
   read:'M12 6.2C10 4.4 6.6 3.6 2.6 4v13.8c4-.4 7.4.4 9.4 2.2 2-1.8 5.4-2.6 9.4-2.2V4c-4-.4-7.4.4-9.4 2.2Z M11.2 8.1c-1.8-1.2-4.2-1.8-6.7-1.8v9.4c2.5 0 4.9.5 6.7 1.5Z M12.8 8.1v9.1c1.8-1 4.2-1.5 6.7-1.5V6.3c-2.5 0-4.9.6-6.7 1.8Z',
   travel:'M12 1.2 13.7 10.3 22.8 12 13.7 13.7 12 22.8 10.3 13.7 1.2 12 10.3 10.3Z M17.8 6.2 14.6 9.4 14.6 6.2Z M17.8 17.8 14.6 14.6 17.8 14.6Z M6.2 17.8 9.4 14.6 9.4 17.8Z M6.2 6.2 9.4 9.4 6.2 9.4Z',
   eat:'M11 4.6h2v2.2h-2Z M3.8 7.4h16.4v2.4H3.8Z M5 10.2h14v3.6c0 3.9-3.1 7-7 7s-7-3.1-7-7Z M1.4 11h3.6v2.8H1.4Z M19 11h3.6v2.8H19Z',
+
+  // — thinking: the glyph itself, since that is what the card is doing —
+  question:'M6.1 7.6A5.9 5.9 0 0 1 17.9 7.6C17.9 11.4 13.4 11.8 13.4 15V17.6H10.6V14.4C10.6 11.4 15.3 11 15.3 7.6A3.3 3.3 0 0 0 8.7 7.6Z M12 19.2a1.9 1.9 0 1 0 0 3.8 1.9 1.9 0 0 0 0-3.8Z',
 
   // — where —
   anywhere:'M12 1.9a10.1 10.1 0 1 0 0 20.2 10.1 10.1 0 0 0 0-20.2Zm0 1.6a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17Z M12 3.6c-2.1 0-3.6 3.8-3.6 8.4s1.5 8.4 3.6 8.4 3.6-3.8 3.6-8.4S14.1 3.6 12 3.6Zm0 1.5c.9 0 2.1 2.9 2.1 6.9s-1.2 6.9-2.1 6.9-2.1-2.9-2.1-6.9S11.1 5.1 12 5.1Z M3.8 11.3h16.4v1.5H3.8Z',

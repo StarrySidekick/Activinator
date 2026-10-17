@@ -35,11 +35,15 @@ new filter had no entry for it, and the throw during the first render left a
 blank screen with the buttons still sitting on it. Add a case to it whenever
 the saved shape changes.
 
-The smoke test exercises dealing, the full-bleed card, the four corners, the bare front and its emblems, the
+The smoke test exercises dealing, the shape of the card and the hand squared up under it, the corner index, the bare front and its emblems, the
 flip, a real dragged swipe, undo, that a skip teaches nothing, that nothing
-leaves the pool but "never again" does, the context filter, the dock, search,
-liking from the browser, writing your own, persistence across a reload and an
-offline reload. Screenshots land in `test/shots/` — look
+leaves the pool but "never again" does, the context filter, the one button, search,
+liking from the browser, writing your own, rewriting the card in front of you,
+the curation export, the table — the layout at every count, both sides landing,
+shuffle against gather, the pile in your hand, a tap that turns and a drag that
+does not — that the whole pile deals everything exactly once and then says so,
+that a swipe down puts a card back on the felt, persistence across a reload and
+an offline reload. Screenshots land in `test/shots/` — look
 at them, this is a visual app and a passing assertion doesn't mean it looks
 right.
 
@@ -100,18 +104,34 @@ vocabulary, and must **not** include a duration or cost tag — those two are
 derived, and saying them twice is how they come to disagree. Every row needs
 exactly one place and exactly one how-hard.
 
-An optional fifth column, `parent`, names the broader activity a row sits
-inside, by its title in the same pack: `Paint a self-portrait` inside `Paint`,
-`Watch a movie at the theater` inside `Watch a movie`. One level only — a
-third is where a card stops being an activity and becomes instructions. Leave
-it empty for a top-level activity. The build checks it and the app does not
-read it yet; parent and child already share their tags, which is what the
-model learns from.
+A pack that teaches words adds a fifth column, `definition`: the word is the
+title and the meaning is printed separately, smaller, under it. Newlines
+survive inside a quoted cell, which is how an Italian verb card carries its
+conjugations one tense to a line. A pack may also declare `"lang"` in
+`index.json` (Italian says `"it-IT"`); its cards then get a speak button that
+says the title out loud through the browser's own speech synthesis — no
+network, no dependency, and on an iPhone the Italian voice is already there.
+
+A row may name its `parent`: the broader activity it sits inside, by its title
+in the same pack — `Paint a self-portrait` inside `Paint`, `Watch a movie at the
+theater` inside `Watch a movie`. One level only; a third is where a card stops
+being an activity and becomes instructions. Like `source` it is authoring-only
+and never reaches `js/activities.js`: parent and child already share their
+tags, which is all the model learns from. The build checks the parent exists,
+and leaves a declared parent and child out of the near-repeat report below,
+since that pair was said on purpose.
 
 The build refuses anything else, with the file and the line. That is the point
 of it: a bad row that builds is a card that quietly never gets dealt. It earned
 its keep on the first run by catching an unquoted comma in a title of mine and
 a tag that had been removed from the vocabulary two versions earlier.
+
+Two rows with the same title are refused, because the id comes from the title.
+Two rows that merely say *nearly* the same thing build fine and are the same
+card to a reader — which is what a repeat feels like, whatever the dealer is
+doing — so the build prints them at the end with their files and lines and
+carries on. It is a read-through, not an error: some of those pairs are
+deliberate, and only somebody reading them can tell which.
 
 `node scripts/build-activities.mjs --check` rebuilds and compares instead of
 writing, so a CSV edited without a rebuild fails the tests rather than shipping
@@ -154,12 +174,104 @@ pack a saved state has never heard of takes the default it ships with, which is
 what lets a new pack arrive in an update without being silently disabled — and
 lets one you switched off stay off.
 
-`packs/simple.csv` is the deck that ships switched on: plain activities, a few
-words each, no two the same thing, with the narrower ones nested under their
-parent. `packs/core.csv` is the first deck — longer, more particular cards —
-and ships off. A phone that already has core switched on keeps it on; that is
-the saved-choice rule above, so it is switched off by hand in Menu → Packs.
-`packs/winter.csv` is an example pack, off by default. Delete it or fill it in.
+**A pack says how its own deck is printed.** `mark`, `ink` and `back` in
+`packs/index.json` — the emblem on the card back, the colour it is printed in,
+and which of the eight repeating fields it is printed on. The emblem is one of
+the drawn marks, so the build refuses a pack that names a picture nobody has
+drawn. Menu → Decks lays them out as what they are: eight decks face down on a
+table, tap one to take it off or put it back. A list of names with tickboxes is
+a settings screen, and choosing what to be dealt is not a setting.
+
+**Activities** is `packs/simple.csv`: plain things to do, a few words each, no
+two the same thing, with the narrower ones nested under their parent. It
+replaced `core` as the activities deck on 2026-10-17, when the deck had drifted
+into long, particular cards. `core` is still there as **Old activities** and
+ships switched off; a phone that already had it on keeps it on, by the rule
+above, until it is tapped off in Menu → Decks.
+
+Besides the activities there are content packs where the
+card carries the content itself: **Words** (esoteric words with their
+definitions), **Quotes** (only lines verified as actually said or written by
+the person named — the famous misattributions are deliberately absent),
+**Italian** (strict definitions, verbs with their conjugations, a voice to say
+them), **Tableaus** (a scene in a sentence, to work off — it doesn't have to
+make sense), and **Visualizations** (impossible objects to picture). No poems,
+though — a real poem on a card means reproducing the whole work, and
+public-domain ones would be a separate decision.
+
+### The question packs
+
+The deck is a template as much as an app, and the question packs are the first
+thing built on it that is not an activity: **questions**. They live in two
+packs — one for everything, and one apart for the ones to ask a partner.
+They are ordinary pack rows on purpose, so everything already works: the same
+build checks them, taste learns from them, and Menu → Packs is the toggle
+between things to do, questions, or both — per category, no new machinery.
+
+The columns just read a little differently on a question. `minutes` is how
+long the conversation deserves, so the duration band still means something;
+how-hard is depth — `casual` is small talk with better aim, `engaging` takes a
+real answer, `challenging` is the ones you circle before answering; `who` is
+who it is for (`solo` means ask yourself); the moods mean what they always
+mean. Every question is `free` and `anywhere`, which is true and also means
+the context filter never hides them for the wrong reason.
+
+Every question also carries the `question` tag, which is the whole of the
+*thinking* group: a card that asks rather than tells. It is a tag rather than a
+property of the pack because taste is one weight per tag and nothing else — the
+question packs can be switched off, but "you go for being asked something" is a
+thing the model can only learn if the cards say so.
+
+**A pack is a kind of thing, never a stage of one.** Activities, questions,
+words, quotes, Italian, tableaus, visualizations: switching one off is saying
+"not that sort of card today", which is the only thing the switch should mean.
+There was a `candidates` pack for a while — ten new activities for every label
+in the vocabulary, held apart until they had been judged — and it was a
+misreading of what curating needs. Curating reads every card in every pack, so
+nothing has to be held anywhere to be curated; those 346 activities are in
+`core` with the rest of them, and the ones that do not earn their place get
+swiped left and cut in the next compile.
+
+## Curating
+
+Swiping is how the deck learns about you. **Curating is how the packs learn**,
+and it is a separate act with a separate way out, because a verdict that lives
+only in localStorage is a verdict nobody can act on: the CSVs are the source of
+truth and nothing in the app writes to them.
+
+Menu → Curate is every card you have judged or rewritten, as one file:
+
+    verdict,pack,title,minutes,cost,tags,definition,was
+    keep,core,Draw everybody on the bus,45,free,create visualart drawing engaging indoors,,
+
+`keep` is a swipe right, `cut` a swipe left, `out` is "never again", and `edit`
+is one you rewrote but have not judged yet. A skip is not a verdict and is not
+in there. The middle columns are exactly a pack row — `definition` included, so
+a kept word card keeps its meaning — and a keeper pastes into a CSV unedited; `was` is the title the pack still has, and it is filled in
+only for a rewrite — that is the row the new one replaces, since a rewritten
+title no longer matches anything in the file. Take it to a session, or edit the
+packs by it yourself.
+
+Switching a pack off hides its cards from the deck and changes nothing here.
+
+**Rewriting a card, on the back of it, is part of curating rather than a way of
+writing your own.** A card you would go for if it said something slightly
+different is not a card to swipe left on — left teaches the model something
+untrue about a whole set of tags, and leaves the sentence that was nearly right
+sitting in the pack. Rewrite it, swipe it, and the curation carries the new
+wording back.
+
+The rewrite is kept beside the card, in `S.edits`, under the id the *original*
+title gave it. So everything you have already said about that card survives
+being rewritten, the pack stays the source of truth for anyone who has not
+rewritten it, and the change can be exported as a change rather than as a new
+card. "Put it back as it was" throws the rewrite away; so does rewriting it
+into exactly what the pack already said.
+
+Rewriting does not deal a new hand. The point of an edit is that you were about
+to swipe *this* card, so the hand keeps its place and only the words change —
+odds and reason included, since both were worked out from words that just
+moved.
 
 ## How it works
 
@@ -171,12 +283,19 @@ space: the model learns one weight per tag and nothing else, which is why a tag
 like `screenfree` or `spooky` is worth adding and a tag like `nice` is not.
 
 **The vocabulary is grouped, and the groups mean different things.** `GROUPS`
-in `data.js` — nine of them: *doing* (create, organize, clean, repair, try,
+in `data.js` — ten of them: *doing* (create, organize, clean, repair, try,
 play, move, learn, kindness), *making* if you are (writing, visual art and its
 five kinds, music, acting, dancing, film), *experience* (watch, listen, read,
-travel, eat), *where*, *who*, *how hard* (casual→engaging→challenging, a scale,
-exactly one per activity), *mood* (adventurous, funny, mindful, spooky,
-nostalgic, romantic), *duration* and *cost*.
+travel, eat), *thinking* (question), *where*, *who*, *how hard*
+(casual→engaging→challenging, a scale, exactly one per activity), *mood*
+(adventurous, funny, mindful, spooky, nostalgic, romantic), *duration* and
+*cost*.
+
+**A question is a card that asks rather than tells.** *Thinking* is its own
+group because a prompt to work something out is not a thing to go and do and
+should not be learned as one: liking "decide which ten things you would keep"
+says something about sitting and thinking, not about being indoors on your own.
+It is one tag today and the group has room for more.
 
 Nesting is deliberate: a painting activity carries `create`, `visualart` and
 `painting`, so taste can learn that you like making things, or visual art
@@ -212,8 +331,32 @@ verdict is worth ±0.8 on the ranking — and it can surface again months later
 when you are a different mood. A swipe up is not a soft no at all: it passes
 the card on without saying anything about it, teaches nothing, and carries no
 weight. The only thing that takes an activity out for good is "never again", on
-the back of the card. What keeps a hand from repeating is recency: the last
-forty things you were shown sink by up to 2.6 and then wear off completely.
+the back of the card.
+
+**It builds a pile, once, and deals off the top of it.** That is the whole of
+"nothing repeats until you have been through everything": a card that has come
+off the pile is not in the pile, and the only way it comes back is you gathering
+up and shuffling. When the pile is spent the screen says *that is the whole
+pile* and waits, because a deck that quietly reshuffles is a deck you cannot
+tell you have finished.
+
+There was a round here doing the same job with bookkeeping — `S.pass`, a list of
+what you had said something about, a screen at the end and a "go round again"
+button, plus a rule that every verdict had to mark the round and every undo
+unmark it. It is gone. A pile is the same guarantee with nothing to keep, and it
+is the thing you were already holding.
+
+The pile is stacked rather than jumbled: the top of it is what the model thinks
+you will go for, with wildcards spliced through at the rate the nerve slider
+asks for, and no two neighbours leaning on the same tag — a run of five outdoor
+cards reads as a broken app even when each one is individually right. What you
+have asked for (Menu → Right now) decides what goes into the pile when it is
+built, so changing it rebuilds.
+
+`buildPile()` runs once per card in the pool rather than re-filtering the pool
+per card: cursors into the ranked and the least-known orders, and a window off
+the top of what is left rather than the very top card, or every sitting opens
+the same way. Fifteen hundred cards in about fifty milliseconds.
 
 **A share of every hand is dealt against what it knows.** `S.nerve` (a slider,
 default 30%) is how often the dealer picks from the activities whose tags it
@@ -221,13 +364,135 @@ knows *least* about rather than from the top of the ranking. A wildcard says on
 its face that it is one — except on the first day, when it knows nothing and
 there is nothing to deal against, so nothing is labelled.
 
-**The card is the screen.** Full bleed, no radius, no edge. The two behind it
-sit back rather than beside it and step forward as the one above leaves; an
-offset would show as a misaligned edge against the screen itself. One button
-sits in each corner so that none of them is ever over the middle of it — where
-you go and what you look for along the top, what you make and what you take
-back along the bottom — and undo appears only when there is something to take
-back, because a dead button is furniture.
+**A card is a card, at tarot proportions.** Seven by twelve — a 70 by 120 mm
+tarot card, corners cut to 6 mm — rather than the poker two-and-a-half by
+three-and-a-half it was first drawn at. Both are real cards; only one of them
+is the shape of a phone. At poker proportions a card as wide as the screen is
+only ever about that-and-a-half tall, so a third of a phone stayed empty table
+no matter what; a tarot card is nearly as tall as the screen already is and
+still reads unmistakably as a card. The whole geometry is `--cardw` in
+`css/base.css` and the `aspect-ratio` and `--radius` on `.card`: change the
+proportion in one place and the settings button, which sits on the card's own
+corner, has to move with it — that is what the `1.7143` (12/7) in `.settings`
+is. `.stack` in `css/panels.css` is the same card on the deck table and has to
+change with it, or the table is a picture of a different deck.
+
+**It goes out to both edges of the screen, and the hand behind it is squared
+up.** `--cardw` is `100vw` unless the height cannot take a card that wide. The
+two cards under the top one used to be fanned a degree or so off true, the way
+a real deck never quite squares up — and the cost was that the card stopped
+reading as the full width of the screen: you saw the corners of the ones
+underneath and the whole thing looked inset. They sit exactly under it now, to
+the pixel, so what you see is one card. They still have to be there: the top
+card flies off the moment you let go, and the next one has to already be
+underneath it or the screen goes empty for the length of the throw.
+
+**The radius has to be named on every rounded thing, never inherited.**
+`border-radius: inherit` takes the value from the *parent element*, and
+`.cardin` sits between `.card` and `.face` with no radius of its own — so for a
+while every corner in the app was square while the only rounded element was the
+one that paints nothing. Hence `--radius`, set on `.card` and read by `.cardin`
+and `.face`. It is two percentages with a slash because a corner arc on a box
+that is not square needs one number for the horizontal radius and one for the
+vertical, or the arc comes out an ellipse.
+
+**There is a table above and below it and none at either side.** The card used
+to be full bleed on every edge, which meant it could not have corners, and
+corners are most of what makes a card a card. Seven by twelve at the full width
+of a phone leaves room top and bottom and none at the sides, which is exactly
+the room the corners need.
+
+**The stock has an air-cushion finish.** A real card is embossed with a grid of
+dimples about half a millimetre apart, which is what stops a pile of them
+sticking together. It is a three-pixel `radial-gradient` at 5% opacity — meant
+to be findable and never noticeable, because a texture you can see is worse
+than none.
+
+**A panel opened and closed inside one frame left an invisible layer over
+everything.** `#panelhost` is `pointer-events:none` until it gets `.on`, and
+`openPanel` adds that a frame late so the sheet has something to slide in from.
+Closing removes it synchronously — so a same-tick open-and-shut let the pending
+frame put `.on` back on a host with nothing in it: a full-screen
+`pointer-events:auto` layer, invisible, swallowing every tap on the deck and on
+the table, with nothing on the screen to say why. The callback is guarded on
+`PANEL` still being the panel it was opened for. Anything else that adds a class
+a frame late wants the same guard.
+
+**There is one button in the whole app, and you meet it only once you have
+turned a card over.** It is the app's own mark, top right of the back, and it
+opens the hub — which is where everything is. There were four marks in the
+corners before that, and every one of them but this was a quick link into that
+same hub: four things standing in front of the one thing you are deciding
+about. The front of a card is now the activity and nothing else at all.
+
+**It lives outside `#frame` rather than in it, and that is load-bearing.** The
+card carries a `perspective` and `.cardin` is `preserve-3d` for the turn, and a
+3D rendering context sorts what it contains by depth rather than by the z-index
+of anything beside it — so the row of emblems at the head of the card took the
+taps meant for the button, whatever z-index it was given. That was true the
+first time the flip was in 3D, stopped mattering for the one commit the flip
+was not, and is true again. Leave the button where it is.
+
+**Undo is a swipe down**, the opposite of the way the card left, and the card
+comes back the way it went: down from the top rather than appearing. There is
+no undo button, so nothing has to sit on the card waiting to be needed. Up is
+unchanged — it passes the card on without saying anything about it.
+
+**The flip is one movement, in two halves, and it never turns past 90°.** Out
+to edge-on in 230 ms accelerating, the face swapped there where the card is a
+line and there is nothing to see, then out again from edge-on the other way in
+230 ms decelerating. The jump from -90° to +90° is between two identical
+pictures — a card with no width — so what you see is one sweep, the near edge
+crossing the middle and coming out the far side.
+
+**Never both faces at once, and never `backface-visibility`.** It was a single
+460 ms `rotateY(-180deg)` with both faces on the card and `backface-visibility`
+holding back whichever faced away. That is much the tidier thing to write, and
+it asks the browser to honour `backface-visibility` inside a `preserve-3d`
+subtree. Where it does not — Timothy's phone, and Chromium composes it
+correctly so no test here caught it — both faces paint, they are coplanar, and
+what you get is the *front* showing through the back, mirrored: text backwards.
+It is what the printed card backs were bleeding through as too; removing them
+treated the symptom.
+
+Ninety degrees is the most a face can turn and still only ever be seen from the
+front. One face is in the layout at a time (`display:none` on the other), so
+there is nothing behind anything to show through. The smoke test samples the
+turn frame by frame and asserts the container's `m11` never goes negative and
+exactly one face is displayed throughout — a negative `m11` is a face seen from
+behind, which is the bug.
+
+It turns **negative**, which lifts the right edge up out of the screen towards
+you, the way you turn a card you are holding. Positive pushes that edge away
+and reads as the card going backwards.
+
+The two other things that made earlier versions look wrong are fixed rather
+than avoided. The drop shadow is on `.card`, which does not rotate — a shadow
+swinging round with the card was most of what made it look like a rotating
+picture instead of a turning card; the hairline edge stays on `.face` and does
+turn, because that one belongs to the card. And `body.turning` hides the rest
+of the hand for the length of the turn: the cards behind are dead in line and
+the same cream, so as the card goes edge-on the gap showed another card rather
+than the room, and it read as the card being somehow behind itself.
+
+The version before this one avoided 3D entirely — two 170 ms phases squeezing
+to nothing with `scaleX` and opening out again. It was smooth and it still read
+wrong, because it is the same motion twice, once forwards and once in reverse:
+however it is eased, a card that goes out and comes back looks like it sprang
+back rather than turned over.
+
+`flip()` in `js/deck.js` owns the timing — it has to, because the two halves
+need the transition turned off between them, which a class cannot do.
+`turn()` in `js/table.js` is the same thing for a card on the table.
+`data-turning` stops a second tap landing mid-turn, and `know()` runs at the
+halfway point rather than at either end — at the start the button on the back fades in over a card still showing
+its face, and at the end it arrives after the card has settled, which is late.
+
+`theme-color` is the ink, flat. Safari tints its own toolbars with it, and while
+the card was the screen deck.js had to swap it to the paper colour and back so
+the bands above and below matched the card. The card is on a table now and the
+table is the same dark all the way out, so there is nothing left to keep in
+step.
 
 **An activity's id comes from its title, never from its place in the list.**
 It was `'s' + index`, which meant inserting one activity silently re-pointed
@@ -291,16 +556,16 @@ would disagree about what you think.
 | `vocab.js` | The tag vocabulary: tags, groups, marks, the three context questions. Its own module so the build can validate against it. |
 | `activities.js` | **Generated.** Every pack, built from `packs/*.csv`. Never edit it. |
 | `data.js` | Joins the two, so everything else imports one place for both. |
-| `state.js` | The one localStorage key, the shape, export/import. Nothing else touches storage. |
+| `state.js` | The one localStorage key, the shape, the rewrites, export/import. Nothing else touches storage. |
 | `taste.js` | The model: `scoreOf`, `learn`, `unlearn`, `opinions`, `reasons`. |
-| `deal.js` | What gets dealt next — filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
+| `deal.js` | What goes in the pile and in what order — filtering, ranking, verdict bias, recency, wildcards, and the `why` line. |
 | `cards.js` | How a card is printed: `cardHTML`, the accent colour, the wording of a length. The front is the title and nothing else; the back carries everything the app knows. |
-| `deck.js` | The hand, the verdicts, undo, the stack, the empty deck. |
-| `swipe.js` | Pointer drag, the two stamps, and the tap that flips. Right is like, left is not, up is neither — which is why up has no stamp. |
-| `panels.js` | Every panel: the hub, right now, all activities, taste, write your own, backup. |
+| `panels.js` | Every panel: the hub, right now, all activities, taste, write your own, rewrite this card, curate, backup. |
+| `table.js` | The app: the pile, the felt, dealing, verdicts, undo, dragging, turning a card over, shuffle, gather and shake. |
+| `toast.js` | The one line of feedback, on its own so nothing has to import the table to say something. |
 | `boot.js` | One delegated listener set. To add an action, add a `data-act` and a case in `act()`. |
 
-Three stylesheets: `base.css` (the room), `deck.css` (the card), `panels.css`.
+Four stylesheets: `base.css` (the room, the felt and the frame), `deck.css` (the card), `panels.css`, `table.css` (the bar).
 
 After changing anything in `js/`, `css/` or `index.html`, bump `CACHE` in
 `sw.js` **and** `APP_VERSION` in `js/state.js`. Without the cache bump an
@@ -308,13 +573,161 @@ installed copy keeps serving the old version, and the symptom — "my change
 didn't deploy" — points at the wrong culprit. A new file must also be added to
 `SHELL` in `sw.js` or it won't be there offline.
 
+## The table
+
+**The app is a table with a pile on it.** The felt is `#deck`, the bar under it
+holds the pile and the one button, and `js/table.js` is all of it: the pile, the
+layout, verdicts, dragging, the flip, the shake. It was a room off the side of
+the deck for two commits, a sandbox to try card handling in; it is the app now,
+and `deck.js` and `swipe.js` folded into it.
+
+**Laid out for 1–8** is the one setting, and it decides both how big a card is
+drawn and what a drag means.
+
+- **At one** it is the deck as it has always been: a card the full width of the
+  screen, drag right to like and left to cut, up to pass, down to take the last
+  one back. The felt keeps itself full, so a verdict takes one away and the next
+  is already there.
+- **At more than one** it is a spread. A drag moves the card you are holding —
+  picking one up brings it to the front — and the verdict is on the back of each
+  card instead, named by id, because there is no "the" card any more.
+
+That split is not tidy, and it is the right one: at one card the swipe *is* the
+app, and at four there is a spread to arrange and no sensible way for a drag to
+mean both.
+
+The layout tries every number of columns and keeps whichever gives the widest
+card, so one is the full width of the felt, four is two by two on a phone and
+four in a row on anything wider — worked out rather than chosen. A last row that
+does not fill goes in the middle. Deal past the number and they stack a little
+down and across, clamped so nothing walks off the edge — a card you cannot see is
+a card you have lost. You can hang a card over the edge but not push it off: its
+middle stays on the felt, so there is always something to pick back up.
+
+**The pile.** Tap it to deal one, past what the table is laid out for if you
+like. **Shuffle** is the pile and leaves the felt alone. **Gather** is the felt:
+everything goes back in and the pile is shuffled, which is the only way round
+twice. They were briefly the same function, which made two buttons that did the
+same thing and no way to shuffle what you had not dealt yet.
+
+- **Shake the phone to shuffle**, with a switch in Menu → Shake to shuffle.
+  `devicemotion` is behind a permission prompt on iOS that can only be asked for
+  from inside a gesture, so the switch itself is that gesture: turning it on is
+  what asks. Nothing is listened for while it is off. A shake is *direction
+  changes*, not speed: fast in one direction is a throw, something that keeps
+  reversing is a shake.
+- **Or pick the pile up and shake it in your hand**, which is how a deck is
+  actually shuffled by somebody standing up. Press and hold for 320 ms and it
+  comes off the table, scales up and follows your finger; reverse direction three
+  times and it shuffles; let go and it drops back into its slot. A `.pileslot`
+  holds its place in the bar while it is away, so nothing beside it moves under
+  your finger.
+
+**Two-sided packs.** `"twosided": true` in `packs/index.json` — Words and
+Italian have it. The word is on one side and the meaning on the other, and such
+a card is dealt on a random side, which is what makes it a deck you can test
+yourself with rather than read off. The build refuses a row in a two-sided pack
+with no definition, because there would be nothing on its back. On a verb card
+the meaning is a paragraph — the English first, then the tenses — so the first
+line is the headline and the rest goes under it small; that is what makes "one
+side the Italian, one side the English" true of a card that also has to carry a
+conjugation table.
+
+Everything else is one-sided as far as the *front* goes, and always dealt face
+up. Every card still has a back — it is where the app tells you what it knows,
+and where the verdict buttons are — so a two-sided card leads its back with the
+meaning and puts the tags and odds below.
+
+There were printed card backs for a while, the field of ink and pattern the
+decks on the Decks table are drawn with. They bled through the front. The
+pattern classes are still in `panels.css` where the Decks table uses them.
+
+**`z-index:0` on the felt is load-bearing.** Picking a card up puts it on top by
+bumping its z-index, and that counter only climbs. Without a stacking context on
+`#deck` it eventually climbs past `#panelhost`, and the menu opens *behind* the
+card — which looks like the menu being broken and is the cards being fine.
+
+**Do not put `container-type` on a face that turns over.** The type on a card is
+sized from `--tw`, the card's own width in pixels, written by `table.js` when it
+places the card. It was a container query, which reads far better — until you
+notice that `container-type` computes to `contain: layout style inline-size`, and
+layout containment on the very element carrying the half-turn is exactly the
+thing that can flatten it.
+
+**Wire a host's listeners once, not once per open.** `#frame` outlives what is
+rendered into it, so a listener added on each open accumulates. The named
+handlers dedupe by identity; a click handler written inline is a new function
+every time, and one tap on the pile started dealing two cards.
+
+**A tap on the pile is handled in `pointerup`**, so that a press-and-hold can be
+a press-and-hold. That leaves the keyboard with nothing — Enter or Space on a
+button fires a click and no pointer events at all — so there is a click handler
+for `detail === 0`, which is exactly keyboard activation and never a real tap.
+
+**`setPointerCapture` throws on a pointer that is already gone**, rather than
+doing nothing, and an exception out of a `pointerdown` handler takes the rest of
+the gesture with it. Capture improves a drag; it is not required for one. It is
+in a `try`.
+
+## The aesthetics studio
+
+It used to live here, in `aesthetics/`. It is its own repository now —
+**https://github.com/StarrySidekick/Aesthetics**, live at
+**https://starrysidekick.github.io/Aesthetics/** — carried over with its
+history by `git subtree split`, the same way this app left Bureau. It shared
+nothing with the deck but a folder, and it had outgrown being a folder.
+
+That is where Victoria, Starful Gothic, Aeros, Golf 97, Girando, Stelaine and
+Carca are kept, each as a full style guide in
+`library/<id>.aesthetic.json`. "Build this in Aeros" plus that file is the
+intended workflow, here as anywhere else.
+
 ## Not yet
 
 - Sync between devices. Export/import JSON is the bridge, as in Bureau.
 - Anything that phones home. There is no server and there is not going to be
   one; the whole model is a few dozen numbers in localStorage.
-- Time of day and weather as context. Both are obvious and both need care —
-  a filter you didn't set is a filter you can't understand.
+- Weather as context. Time of day landed (see "The clock offers" below); weather
+  wants a network call and a decision about what a forecast is allowed to say,
+  so it waits.
+
+## The clock offers; it never filters
+
+At half past eleven the table will cheerfully deal you a farmers market. The
+obvious fix — quietly dropping cards that don't suit the hour — is the one thing
+the deferred note above forbade: *a filter you didn't set is a filter you can't
+understand*. You would never see it happen and you could never find the switch.
+
+So `js/hour.js` never filters. It **offers**, once, in the strip between the
+felt and the bar, and what you tap writes ordinary `ctx` — the same three fields
+Right now writes, visible there afterwards and cleared like anything else you
+set. The difference between a filter you did not set and one you set in one tap
+is the whole of that file.
+
+One rule, because one is honestly defensible and a table of them would be a
+horoscope: **late is 22:00 to 06:00**, and it asks for something short, at home.
+It declines to show in three cases, each where offering would presume — the hour
+has nothing to say, you have already set a where or a duration yourself, or you
+dismissed it. Dismissal is per session rather than saved: the hour changes, and
+a "no thanks" at eleven should not still be silencing it next week.
+
+What it does to the table was measured rather than assumed. Every card in every
+deck carries a place tag, so nothing is silently emptied: Activities goes 649 to
+111 — which is the point, those are the things you can actually do at home in a
+short evening — questions trim to 235 and 83, and Words, Italian, Tableaus and
+Visualizations are untouched, being `anywhere` and quick. 869 cards remain on
+the table.
+
+**It is a row, not an overlay, and it is not in the felt.** `addCard` takes
+`felt().lastElementChild` as the card it has just laid down, so anything
+appended to `#deck` becomes a card the moment the next one arrives — hence
+`#suggesthost`, its own element between `#deck` and `#tbar`. An overlay was
+tried first and sat on top of the deck chips and crowded Shuffle and Gather.
+
+Weather would slot in beside it as a second rule of the same shape.
+`node test/hour.mjs` covers it without a browser — it takes an injectable clock,
+because a test that had to run at midnight to check the midnight case would
+never get run.
 
 ## Style
 

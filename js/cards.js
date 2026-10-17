@@ -38,6 +38,16 @@ const markHTML = (g, cls = '') => !MARKS[g] ? '' :
 
 const emblemRow = (c) => `<p class="marks">${emblemsOf(c).map(g => markHTML(g)).join('')}</p>`;
 
+/* The corner index. A playing card carries its rank and suit in two opposite
+   corners, the second one upside down so it reads whichever way up the card is
+   held; ours carry the three most particular of its marks. Three because an
+   index is read at a glance — a column of seven silhouettes is a list, and the
+   whole set is on the back anyway. */
+const indexOf = (c) => {
+  const three = emblemsOf(c).slice(0, 3).map(g => markHTML(g)).join('');
+  return `<span class="idx tl">${three}</span><span class="idx br">${three}</span>`;
+};
+
 /* Minutes as somebody would say them. The duration tag is the band; this is
    the actual figure, and it only appears on the back. */
 const lengthOf = (m) => {
@@ -59,12 +69,29 @@ const cardHTML = (c) => {
     <div class="face front">
       <div class="stamp s-yes">Like</div>
       <div class="stamp s-no">Don’t Like</div>
-      ${emblemRow(c)}
-      <h2 class="t">${esc(c.t)}</h2>
+      ${indexOf(c)}
+      <div class="word">
+        <h2 class="t">${esc(c.t)}</h2>
+        ${c.d ? `<p class="def">${esc(c.d)}</p>` : ''}
+        ${c.lang ? `<button class="speak" data-act="speak" data-say="${esc(c.t)}"
+          data-lang="${esc(c.lang)}" aria-label="say it out loud">${markHTML('listen')}</button>` : ''}
+      </div>
     </div>
     <div class="face back">
-      <p class="kicker">${c.kind === 'wild' ? 'wildcard' : esc(TAGS[c.tags[0]] || 'what this is')}</p>
+      ${/* A two-sided card leads its back with the meaning, set the way the word
+            is set on the front: that is the other side of the card, and it has
+            to be the loudest thing on it. What the app knows follows underneath,
+            because a card still has a back even when both its sides are
+            printed. */ ''}
+      ${c.twoSided ? `<div class="other">
+        <h2 class="t">${esc(String(c.d).split('\n')[0])}</h2>
+        ${String(c.d).split('\n').slice(1).join('\n').trim()
+          ? `<p class="tdef">${esc(String(c.d).split('\n').slice(1).join('\n'))}</p>` : ''}
+      </div>` : ''}
+      <p class="kicker">${c.kind === 'wild' ? 'wildcard' : esc(TAGS[c.tags[0]] || 'what this is')}${
+        c.edit ? `<span class="dot"></span><span class="k2">rewritten</span>` : ''}</p>
       <h3>${esc(c.t)}</h3>
+      ${c.d && !c.twoSided ? `<p class="def">${esc(c.d)}</p>` : ''}
       <p class="pnote" style="color:var(--text-3);margin-top:8px">${esc(lengthOf(c.min))}</p>
       <ul class="taglist">${c.tags.map(g => {
         const w = S.w[g] || 0;
@@ -75,13 +102,22 @@ const cardHTML = (c) => {
       <p class="why">${esc(c.why || '')}</p>
       ${r.length ? `<p class="pnote" style="color:var(--text-3);margin-top:6px">On the strength of
         ${r.map(x => esc(x.label) + (x.up ? '' : ' — against')).join(', ')}.</p>` : ''}
+      ${/* The verdict is on the back as well as under your thumb. With one card
+            out, a swipe is the verdict and these are a second way to it; with a
+            spread out, a drag moves the card you are holding, so this is the
+            only way — every card carries its own, named by id. */ ''}
+      <div class="backrow verdict">
+        <button data-act="like" data-id="${esc(c.id)}" class="yes">Like</button>
+        <button data-act="dislike" data-id="${esc(c.id)}" class="no">Don’t like</button>
+      </div>
       <div class="backrow">
-        <button data-act="more">More like this</button>
-        <button data-act="never" class="never">Never again</button>
+        <button data-act="more" data-id="${esc(c.id)}">More like this</button>
+        <button data-act="edit" data-id="${esc(c.id)}">Rewrite it</button>
+        <button data-act="never" data-id="${esc(c.id)}" class="never">Never again</button>
       </div>
     </div>
    </div>
   </article>`;
 };
 
-export { cardHTML, emblemsOf, emblemRow, markHTML, lengthOf, esc };
+export { cardHTML, emblemsOf, emblemRow, indexOf, markHTML, lengthOf, esc };

@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <title>Activinator</title>
 <link rel="manifest" href="manifest.webmanifest">
+<!-- The card sits on the table rather than being the screen, so the screen's
+     colour is the room's, and Safari's own bars match the table the card is
+     lying on. -->
 <meta name="theme-color" content="#14151c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -17,20 +20,24 @@
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/deck.css">
 <link rel="stylesheet" href="css/panels.css">
+<link rel="stylesheet" href="css/table.css">
 </head>
 <body>
+<!-- The app is a table with a pile on it: the felt, and the bar the pile sits
+     in. The felt keeps the id `deck` because that is what it is — what is
+     dealt out of the pile and onto the table. -->
 <div id="frame">
   <main id="deck"></main>
-  <!-- One button in each corner of a full-screen card, so none of them is ever
-       in the way of the middle of it: where you go and what you look for along
-       the top, what you make and what you take back along the bottom. -->
-  <nav class="dock">
-    <button class="menu" data-act="menu" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-    <button class="browse" data-act="browse" aria-label="All activities"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg></button>
-    <button class="undo" data-act="undo" aria-label="Undo"><svg viewBox="0 0 24 24"><path d="M9 7H6.5A4.5 4.5 0 1 0 6.5 16H12"/><path d="M12 4L8.5 7L12 10"/></svg></button>
-    <button class="add" data-act="add" aria-label="Write your own"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
-  </nav>
+  <!-- The clock's offer, in the strip between the felt and the bar. Its own
+       element, deliberately NOT inside the felt: `addCard` takes
+       `lastElementChild` as the card it has just laid down, so anything
+       appended to #deck is treated as a card. A row rather than an overlay —
+       it takes its own space when it is there and none when it is not, so it
+       never covers the decks or the buttons. -->
+  <div id="suggesthost"></div>
+  <div id="tbar"></div>
 </div>
+
 <div id="panelhost"></div>
 <div id="toast"></div>
 <script type="module" src="js/boot.js"></script>
