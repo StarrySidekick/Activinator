@@ -1,4 +1,5 @@
 [
-  { "id": "core",   "name": "The core deck", "note": "Everything the app shipped with.", "on": true },
+  { "id": "simple", "name": "Simple activities", "note": "One plain activity a card, and the narrower ones inside it.", "on": true },
+  { "id": "core",   "name": "The core deck", "note": "The first deck: longer, more particular cards.", "on": false },
   { "id": "winter", "name": "Winter",        "note": "An example pack — delete it or fill it in.", "on": false }
 ]

@@ -100,6 +100,14 @@ vocabulary, and must **not** include a duration or cost tag — those two are
 derived, and saying them twice is how they come to disagree. Every row needs
 exactly one place and exactly one how-hard.
 
+An optional fifth column, `parent`, names the broader activity a row sits
+inside, by its title in the same pack: `Paint a self-portrait` inside `Paint`,
+`Watch a movie at the theater` inside `Watch a movie`. One level only — a
+third is where a card stops being an activity and becomes instructions. Leave
+it empty for a top-level activity. The build checks it and the app does not
+read it yet; parent and child already share their tags, which is what the
+model learns from.
+
 The build refuses anything else, with the file and the line. That is the point
 of it: a bad row that builds is a card that quietly never gets dealt. It earned
 its keep on the first run by catching an unquoted comma in a title of mine and
@@ -146,6 +154,11 @@ pack a saved state has never heard of takes the default it ships with, which is
 what lets a new pack arrive in an update without being silently disabled — and
 lets one you switched off stay off.
 
+`packs/simple.csv` is the deck that ships switched on: plain activities, a few
+words each, no two the same thing, with the narrower ones nested under their
+parent. `packs/core.csv` is the first deck — longer, more particular cards —
+and ships off. A phone that already has core switched on keeps it on; that is
+the saved-choice rule above, so it is switched off by hand in Menu → Packs.
 `packs/winter.csv` is an example pack, off by default. Delete it or fill it in.
 
 ## How it works

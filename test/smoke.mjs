@@ -127,20 +127,21 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
 
   // — a pack switched off leaves the pool; switched back on it returns, and
   //   what you said about its activities was never touched —
+  // Which packs ship on is a decision about content, so this picks one that
+  // does and one that doesn't rather than naming them.
   const packs = await page.evaluate(() => {
     const { PACKS } = ACT;
-    const core = PACKS.find(p => p.id === 'core');
+    const on = PACKS.find(p => p.on), other = PACKS.find(p => !p.on);
     const before = ACT.pool().length;
-    ACT.S.packs.core = false;
+    ACT.S.packs[on.id] = false;
     const off = ACT.pool().length;
-    ACT.S.packs.core = true;
+    ACT.S.packs[on.id] = true;
     const back = ACT.pool().length;
-    const other = PACKS.find(p => p.id !== 'core');
     ACT.S.packs[other.id] = true;
     const withExtra = ACT.pool().length;
-    ACT.S.packs[other.id] = other.on;
+    ACT.S.packs[other.id] = false;
     ACT.redeal();
-    return { shipsMoreThanOne: PACKS.length > 1, off: off === before - core.items.length,
+    return { shipsMoreThanOne: PACKS.length > 1, off: off === before - on.items.length,
              back: back === before, adds: withExtra === before + other.items.length };
   });
 
@@ -158,7 +159,8 @@ const CHROME = process.env.ACT_CHROME;   // e.g. /opt/pw-browsers/chromium
   // — all activities, searchable, and liking one there is the same act —
   await page.click('[data-act="browse"]'); await page.waitForTimeout(400);
   const allRows = await page.locator('.brow').count();
-  await page.fill('[data-in="q"]', 'graveyard');
+  // A tag rather than a word from one title, so cutting a card can't break it.
+  await page.fill('[data-in="q"]', 'outdoors');
   await page.waitForTimeout(300);
   const searched = await page.locator('.brow').count();
   const keptFocus = await page.evaluate(() => document.activeElement.dataset.in === 'q');

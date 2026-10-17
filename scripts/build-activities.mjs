@@ -6,12 +6,17 @@
 // CSV and the generated file. Nothing fetches anything at runtime: the app has
 // to open on a train.
 //
-// Columns: title, minutes, cost, tags
+// Columns: title, minutes, cost, tags[, parent]
 //   minutes  a whole number. The duration band is worked out from it.
 //   cost     free | frugal | costly (0 | 1 | 2 also accepted)
 //   tags     space-separated, all from the vocabulary, and NOT duration or
 //            cost tags — those two are derived, and saying them twice is how
 //            they come to disagree.
+//   parent   optional: the title of the broader activity this one sits inside,
+//            in the same pack — "Paint a self-portrait" inside "Paint". One
+//            level only, because a third is where a card stops being an
+//            activity and becomes instructions. The app does not read it yet;
+//            it is checked so the shape of a pack stays true while it is edited.
 //
 // Every row must name exactly one place and exactly one how-hard. Anything
 // else is refused with the file and line, because a bad row that builds is a
@@ -53,6 +58,10 @@ const build = (meta) => {
   const want = ['title', 'minutes', 'cost', 'tags'];
   if (want.some((w, i) => head[i] !== w))
     errors.push(`${file}:1  header must be "${want.join(',')}" — found "${head.join(',')}"`);
+  const hasParent = head[4] === 'parent';
+  if (head.length > 4 && !hasParent)
+    errors.push(`${file}:1  the only column allowed after tags is "parent" — found "${head.slice(4).join(',')}"`);
+  const parents = [];
 
   const items = [];
   rows.forEach((r, n) => {
@@ -78,8 +87,19 @@ const build = (meta) => {
     const hard = tags.filter(g => HARD.includes(g));
     if (hard.length !== 1) errors.push(`${at}  needs exactly one of ${HARD.join(' | ')}, found ${hard.length}`);
 
+    const up = hasParent ? (r[4] || '').trim() : '';
+    if (up) parents.push({ at, t, up });
     items.push({ id: idOf(t), t, tags: [...new Set(tags.concat(durationOf(min), COSTS[cost]))], min, cost });
   });
+
+  /* Checked after every row is read, so a child may come before its parent. */
+  const nested = new Set(parents.map(p => p.t));
+  const here = new Set(items.map(a => a.t));
+  for (const p of parents) {
+    if (p.up === p.t) errors.push(`${p.at}  is its own parent`);
+    else if (!here.has(p.up)) errors.push(`${p.at}  parent "${p.up}" is not a title in ${file}`);
+    else if (nested.has(p.up)) errors.push(`${p.at}  parent "${p.up}" has a parent of its own — one level only`);
+  }
   return { ...meta, items };
 };
 

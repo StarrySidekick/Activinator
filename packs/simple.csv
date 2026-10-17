@@ -1,0 +1,311 @@
+title,minutes,cost,tags,parent
+Paint,90,frugal,create visualart painting engaging home
+Paint a self-portrait,120,frugal,create visualart painting challenging home,Paint
+Paint a landscape,120,frugal,create visualart painting engaging outdoors,Paint
+Paint a still life,90,frugal,create visualart painting engaging home,Paint
+Paint with watercolors,60,frugal,create visualart painting mindful casual home,Paint
+Paint something abstract,60,frugal,create visualart painting casual home,Paint
+Do a paint-by-numbers,90,frugal,create visualart painting mindful casual home,Paint
+Draw,45,free,create visualart drawing casual home
+Contour draw,20,free,create visualart drawing mindful casual home,Draw
+Sketch people in public,45,free,create visualart drawing engaging anywhere,Draw
+Draw a comic,90,free,create visualart drawing funny engaging home,Draw
+Go to a life drawing class,120,frugal,create visualart drawing learn challenging indoors,Draw
+Color in a coloring book,45,frugal,create visualart mindful casual home
+Take photos,60,free,create visualart engaging anywhere
+Go on a photo walk,90,free,create visualart move engaging outdoors,Take photos
+Shoot a roll of film,120,frugal,create visualart try nostalgic engaging anywhere,Take photos
+Take someone's portrait,45,free,create visualart engaging anywhere partner friends,Take photos
+Make pottery,120,costly,create visualart sculpting engaging indoors
+Throw a pot on a wheel,120,costly,create visualart sculpting try challenging indoors,Make pottery
+Paint your own pottery,90,frugal,create visualart painting casual indoors,Make pottery
+Take a glassblowing class,120,costly,create visualart sculpting try challenging indoors
+Whittle,60,frugal,create visualart sculpting mindful engaging anywhere
+Fold origami,30,free,create visualart sculpting mindful casual home
+Make a collage,60,free,create visualart mixedmedia casual home
+Make a zine,120,free,create writing mixedmedia engaging home
+Practice calligraphy,45,frugal,create visualart writing mindful engaging home
+Knit,60,frugal,create clothes mindful engaging home
+Knit a scarf,300,frugal,create clothes mindful engaging home,Knit
+Crochet,60,frugal,create clothes mindful engaging home
+Embroider,60,frugal,create clothes mindful casual home
+Sew,90,frugal,create clothes engaging home
+Sew a tote bag,90,frugal,create clothes engaging home,Sew
+Sew a piece of clothing,240,frugal,create clothes challenging home,Sew
+Make a quilt,600,costly,create clothes challenging home,Sew
+Mend your clothes,45,free,repair clothes mindful casual home,Sew
+Tie-dye a shirt,90,frugal,create clothes funny casual home
+Make a costume,180,frugal,create clothes funny engaging home
+Make jewelry,60,frugal,create mixedmedia engaging home
+Make candles,90,frugal,create mixedmedia casual home
+Make a terrarium,60,frugal,create mixedmedia mindful casual home
+Arrange flowers,30,frugal,create mindful casual home
+Carve a pumpkin,60,frugal,create sculpting spooky funny casual home
+Build with LEGO,90,frugal,create play nostalgic casual home
+Build something out of wood,240,frugal,create try challenging home
+Build a birdhouse,180,frugal,create engaging home,Build something out of wood
+Build a piece of furniture,360,costly,create challenging home,Build something out of wood
+Write,45,free,create writing engaging anywhere
+Write a poem,30,free,create writing engaging anywhere,Write
+Write a short story,120,free,create writing challenging anywhere,Write
+Write a letter,40,free,create writing kindness casual home,Write
+Write in a journal,20,free,create writing mindful casual anywhere,Write
+Play an instrument,45,free,create music engaging home
+Play the guitar,45,free,create music engaging home,Play an instrument
+Play the piano,45,free,create music engaging indoors,Play an instrument
+Play the drums,45,frugal,create music engaging indoors,Play an instrument
+Take a music lesson,60,costly,create music learn engaging indoors,Play an instrument
+Jam with friends,120,free,create music funny engaging indoors friends,Play an instrument
+Sing,15,free,create music casual anywhere
+Sing karaoke,120,frugal,create music funny engaging indoors,Sing
+Join a choir,120,free,create music engaging indoors solo newpeople,Sing
+Write a song,90,free,create music writing challenging anywhere
+Listen to music,45,free,listen music casual anywhere
+Listen to an album start to finish,50,free,listen music mindful casual home,Listen to music
+Go to a concert,180,costly,listen music engaging indoors,Listen to music
+Go to the symphony,150,costly,listen music engaging indoors,Listen to music
+Go record shopping,60,frugal,listen music nostalgic casual indoors,Listen to music
+Dance,20,free,create dancing move funny casual home
+Take a dance class,75,frugal,create dancing move learn engaging indoors,Dance
+Go out dancing,180,frugal,create dancing move adventurous engaging indoors,Dance
+Go see a show,150,costly,watch engaging indoors
+See a play,150,costly,watch acting engaging indoors,Go see a show
+See a musical,180,costly,watch acting music engaging indoors,Go see a show
+See a comedy show,120,frugal,watch funny casual indoors,Go see a show
+See a ballet,150,costly,watch dancing engaging indoors,Go see a show
+See an opera,180,costly,watch acting music challenging indoors,Go see a show
+Go to the circus,150,costly,watch funny nostalgic casual indoors,Go see a show
+Go to an open mic,120,free,watch listen casual indoors
+Perform at an open mic,120,free,create adventurous challenging indoors solo newpeople,Go to an open mic
+Take an improv class,120,frugal,create acting learn funny challenging indoors solo newpeople
+Audition for a community play,120,free,create acting try challenging indoors solo newpeople
+Watch a movie,120,free,watch film casual home
+Watch a movie at the theater,150,frugal,watch film casual indoors,Watch a movie
+Go to a drive-in,180,frugal,watch film nostalgic casual outdoors,Watch a movie
+Have a movie marathon,360,free,watch film engaging home,Watch a movie
+Watch a documentary,90,free,watch film learn casual home,Watch a movie
+Watch a classic movie,120,free,watch film nostalgic casual home,Watch a movie
+Watch a scary movie,100,free,watch film spooky casual home,Watch a movie
+Make a short film,240,free,create film challenging anywhere
+Make a stop-motion film,180,free,create film funny engaging home,Make a short film
+Read a book,90,free,read casual anywhere
+Read a classic,120,free,read challenging anywhere,Read a book
+Read poetry,30,free,read mindful casual anywhere,Read a book
+Read aloud to someone,30,free,read kindness casual home partner friends,Read a book
+Join a book club,90,free,read engaging indoors solo newpeople,Read a book
+Go to the library,60,free,read casual indoors,Read a book
+Learn a language,45,free,learn try challenging anywhere
+Learn sign language,45,free,learn try challenging anywhere,Learn a language
+Go to a language exchange,90,free,learn engaging indoors solo newpeople,Learn a language
+Learn to juggle,30,free,learn play move funny engaging anywhere
+Learn a magic trick,30,free,learn play funny engaging home
+Take a first aid class,180,frugal,learn kindness engaging indoors
+Go to a lecture,90,free,learn listen engaging indoors
+Go to a museum,120,frugal,watch learn casual indoors
+Go to an art museum,120,frugal,watch visualart casual indoors,Go to a museum
+Go to a science museum,120,frugal,watch learn engaging indoors,Go to a museum
+Go to a history museum,120,frugal,watch learn engaging indoors,Go to a museum
+Go to a gallery opening,90,free,watch visualart casual indoors,Go to a museum
+Bake,90,frugal,create eat engaging home
+Bake bread,240,frugal,create eat mindful engaging home,Bake
+Bake a pie,150,frugal,create eat engaging home,Bake
+Bake a cake,120,frugal,create eat engaging home,Bake
+Bake cookies,60,frugal,create eat casual home,Bake
+Make a gingerbread house,180,frugal,create eat funny engaging home,Bake
+Cook a meal,60,frugal,create eat engaging home
+Make pasta from scratch,120,frugal,create eat try challenging home,Cook a meal
+Make pizza,90,frugal,create eat casual home,Cook a meal
+Make soup,90,frugal,create eat mindful casual home,Cook a meal
+Make sushi,90,frugal,create eat try engaging home,Cook a meal
+Make dumplings,120,frugal,create eat engaging home,Cook a meal
+Make a big breakfast,60,frugal,create eat casual home,Cook a meal
+Take a cooking class,150,costly,create eat learn engaging indoors,Cook a meal
+Make jam,90,frugal,create eat nostalgic engaging home
+Brew beer,240,frugal,create eat try challenging home
+Mix cocktails,45,frugal,create eat funny casual home
+Do a blind taste test,45,frugal,eat play funny casual home partner friends
+Go out to eat,90,frugal,eat casual indoors
+Try a new restaurant,90,frugal,eat try adventurous casual indoors,Go out to eat
+Go out for brunch,90,frugal,eat casual indoors,Go out to eat
+Eat at a diner,60,frugal,eat nostalgic casual indoors,Go out to eat
+Go out for ice cream,30,frugal,eat nostalgic casual outdoors,Go out to eat
+Go out for a drink,90,frugal,eat casual indoors
+Go wine tasting,150,costly,eat engaging indoors,Go out for a drink
+Visit a brewery,90,frugal,eat casual indoors,Go out for a drink
+Have a picnic,120,frugal,eat mindful casual outdoors
+Go to a farmers market,60,frugal,eat casual outdoors
+Go foraging,120,free,eat learn adventurous engaging outdoors
+Have people over,120,frugal,eat friends casual home
+Host a dinner party,240,costly,create eat friends engaging home,Have people over
+Host a potluck,180,frugal,eat friends casual home,Have people over
+Throw a theme party,240,frugal,play friends funny challenging home,Have people over
+Host a murder mystery party,240,frugal,play acting friends funny spooky challenging home,Have people over
+Have a barbecue,180,frugal,eat friends casual outdoors,Have people over
+Have a bonfire,180,free,mindful casual outdoors
+Go for a walk,45,free,move mindful casual outdoors
+Go for a night walk,45,free,move mindful casual outdoors,Go for a walk
+Take a walking tour,120,frugal,move travel learn casual outdoors,Go for a walk
+Walk in the rain,30,free,move mindful funny casual outdoors,Go for a walk
+Go birdwatching,90,free,watch mindful engaging outdoors
+Put up a bird feeder,30,frugal,create watch mindful casual outdoors,Go birdwatching
+Go for a hike,180,free,move adventurous engaging outdoors
+Hike to a waterfall,180,free,move adventurous engaging outdoors,Go for a hike
+Hike up a mountain,300,free,move adventurous challenging outdoors,Go for a hike
+Go camping,1440,frugal,travel adventurous engaging outdoors
+Go backpacking,2880,frugal,travel move adventurous challenging outdoors,Go camping
+Camp in the backyard,720,free,play nostalgic funny casual outdoors,Go camping
+Rent a cabin,2880,costly,travel mindful casual outdoors,Go camping
+Stargaze,60,free,watch mindful casual outdoors
+Watch a meteor shower,120,free,watch mindful adventurous engaging outdoors,Stargaze
+Learn the constellations,60,free,learn watch engaging outdoors,Stargaze
+Go to a planetarium,60,frugal,watch learn casual indoors,Stargaze
+Watch the sunset,30,free,watch mindful romantic casual outdoors
+Watch a thunderstorm,30,free,watch mindful casual home
+Go to the beach,240,free,travel mindful casual outdoors
+Build a sandcastle,60,free,create sculpting play funny casual outdoors,Go to the beach
+Go tide pooling,90,free,watch learn adventurous engaging outdoors,Go to the beach
+Go beachcombing,60,free,mindful casual outdoors,Go to the beach
+Go swimming,60,frugal,move play casual anywhere
+Swim laps,45,frugal,move engaging indoors,Go swimming
+Swim in a lake,60,free,move adventurous engaging outdoors,Go swimming
+Go snorkeling,90,frugal,move watch adventurous engaging outdoors,Go swimming
+Go to a water park,300,costly,play move funny casual outdoors,Go swimming
+Go to a hot spring,120,frugal,mindful casual outdoors
+Get out on the water,120,frugal,move adventurous casual outdoors
+Go kayaking,120,frugal,move adventurous engaging outdoors,Get out on the water
+Go paddleboarding,90,frugal,move mindful engaging outdoors,Get out on the water
+Go sailing,180,costly,move travel adventurous engaging outdoors,Get out on the water
+Go whitewater rafting,240,costly,move adventurous challenging outdoors,Get out on the water
+Go surfing,120,frugal,move play adventurous challenging outdoors,Get out on the water
+Go tubing,180,frugal,play funny casual outdoors,Get out on the water
+Take a ferry ride,60,frugal,travel mindful casual outdoors,Get out on the water
+Go fishing,180,frugal,play mindful engaging outdoors
+Go whale watching,180,costly,watch travel adventurous casual outdoors
+Go to the zoo,180,frugal,watch casual outdoors
+Go to an aquarium,120,frugal,watch learn casual indoors
+Visit a farm,120,frugal,watch nostalgic casual outdoors
+Go apple picking,120,frugal,eat nostalgic casual outdoors,Visit a farm
+Go berry picking,90,frugal,eat casual outdoors,Visit a farm
+Go to a pumpkin patch,90,frugal,play spooky casual outdoors,Visit a farm
+Go to a corn maze,90,frugal,play funny casual outdoors,Visit a farm
+Go to the park,60,free,mindful casual outdoors
+Visit a botanical garden,90,frugal,watch mindful casual outdoors,Go to the park
+Visit a national park,1440,frugal,travel move adventurous engaging outdoors,Go to the park
+Explore a cave,120,frugal,travel adventurous spooky engaging outdoors
+Go see the fall leaves,120,free,travel watch mindful casual outdoors
+Climb a tree,15,free,move play nostalgic adventurous casual outdoors
+Fly a kite,45,frugal,play nostalgic casual outdoors
+Play in the snow,60,free,play funny nostalgic casual outdoors
+Build a snowman,45,free,create play nostalgic casual outdoors,Play in the snow
+Go sledding,90,free,play move funny casual outdoors,Play in the snow
+Have a snowball fight,20,free,play move funny casual outdoors partner friends,Play in the snow
+Go skiing,360,costly,move play adventurous challenging outdoors
+Go cross-country skiing,180,frugal,move mindful engaging outdoors,Go skiing
+Go snowboarding,360,costly,move play adventurous challenging outdoors
+Go ice skating,90,frugal,move play nostalgic casual indoors
+Go for a run,30,free,move engaging outdoors
+Go trail running,60,free,move adventurous challenging outdoors,Go for a run
+Run a 5K,60,frugal,move challenging outdoors,Go for a run
+Go for a bike ride,60,free,move travel casual outdoors
+Go mountain biking,120,frugal,move adventurous challenging outdoors,Go for a bike ride
+Take a bike tour,180,frugal,move travel engaging outdoors,Go for a bike ride
+Do yoga,45,free,move mindful engaging home
+Take a yoga class,75,frugal,move mindful learn engaging indoors,Do yoga
+Work out,45,free,move engaging indoors
+Lift weights,60,frugal,move challenging indoors,Work out
+Take a spin class,45,frugal,move challenging indoors,Work out
+Take a boxing class,60,frugal,move try challenging indoors,Work out
+Go rock climbing,180,frugal,move adventurous challenging outdoors
+Go bouldering,90,frugal,move play challenging indoors,Go rock climbing
+Try archery,60,frugal,play try engaging outdoors
+Play a sport,90,free,play move engaging outdoors
+Play basketball,60,free,play move engaging outdoors friends newpeople,Play a sport
+Play soccer,90,free,play move engaging outdoors friends newpeople,Play a sport
+Play tennis,60,frugal,play move engaging outdoors partner friends,Play a sport
+Play volleyball,60,free,play move casual outdoors friends newpeople,Play a sport
+Play ping pong,30,free,play funny casual indoors partner friends,Play a sport
+Join a rec league,90,frugal,play move engaging outdoors solo newpeople,Play a sport
+Play golf,240,costly,play mindful engaging outdoors
+Go to a driving range,60,frugal,play casual outdoors,Play golf
+Play mini golf,60,frugal,play funny casual outdoors,Play golf
+Go bowling,90,frugal,play funny casual indoors
+Play pool,60,frugal,play casual indoors
+Throw a frisbee,30,free,play move casual outdoors partner friends
+Play disc golf,120,free,play move engaging outdoors,Throw a frisbee
+Go horseback riding,120,costly,move adventurous engaging outdoors
+Go skateboarding,60,frugal,move play adventurous challenging outdoors
+Go roller skating,90,frugal,move play nostalgic funny casual indoors
+Go zip lining,120,costly,play adventurous casual outdoors
+Go skydiving,240,costly,try adventurous challenging outdoors
+Race go-karts,60,costly,play funny casual outdoors
+Play laser tag,60,frugal,play move funny casual indoors friends
+Go to an amusement park,480,costly,play adventurous funny casual outdoors
+Go to a fair,240,frugal,play eat nostalgic casual outdoors
+Meditate,15,free,mindful casual anywhere
+Take a long bath,45,free,mindful casual home
+Go to a spa,180,costly,mindful casual indoors
+Get a massage,60,costly,mindful casual indoors,Go to a spa
+Sit in a sauna,30,frugal,mindful casual indoors,Go to a spa
+Spend a day offline,720,free,mindful challenging anywhere
+Play a board game,90,frugal,play engaging home partner friends
+Play chess,45,free,play challenging anywhere partner friends newpeople,Play a board game
+Learn a new board game,90,frugal,play learn engaging home partner friends,Play a board game
+Go to a board game café,150,frugal,play funny casual indoors partner friends,Play a board game
+Play cards,60,free,play casual home partner friends
+Play poker,120,frugal,play engaging home friends,Play cards
+Do a puzzle,60,frugal,play mindful casual home
+Do a jigsaw puzzle,180,frugal,play mindful casual home,Do a puzzle
+Do a crossword,30,free,play learn engaging anywhere,Do a puzzle
+Do an escape room,60,frugal,play challenging indoors partner friends,Do a puzzle
+Play a video game,90,free,play casual home
+Go to an arcade,90,frugal,play nostalgic funny casual indoors,Play a video game
+Play Dungeons & Dragons,240,free,play acting funny challenging home friends
+Play charades,45,free,play acting funny casual home friends
+Go to trivia night,120,frugal,play learn funny engaging indoors friends
+Do a scavenger hunt,90,free,play travel funny engaging outdoors friends
+Build a fort,60,free,create play nostalgic funny casual home
+Play lawn games,60,free,play casual outdoors partner friends
+Play croquet,60,free,play casual outdoors partner friends,Play lawn games
+Go to a festival,240,frugal,watch listen adventurous casual outdoors
+Go to a music festival,480,costly,listen music adventurous engaging outdoors,Go to a festival
+Go to a food festival,180,frugal,eat casual outdoors,Go to a festival
+Go to a film festival,240,frugal,watch film engaging indoors,Go to a festival
+Go to a parade,90,free,watch funny casual outdoors
+Watch fireworks,45,free,watch nostalgic romantic casual outdoors
+Go look at holiday lights,60,free,watch nostalgic casual outdoors
+Go to a sports game,180,costly,watch casual outdoors
+Go to a baseball game,180,frugal,watch nostalgic casual outdoors,Go to a sports game
+Go thrifting,90,frugal,try casual indoors
+Go to a flea market,120,frugal,try nostalgic casual outdoors,Go thrifting
+Go antiquing,120,frugal,nostalgic casual indoors,Go thrifting
+Visit a historic site,120,frugal,travel learn casual outdoors
+Tour a historic house,90,frugal,travel learn nostalgic casual indoors,Visit a historic site
+Walk through an old cemetery,60,free,move mindful spooky casual outdoors,Visit a historic site
+Go on a ghost tour,90,frugal,travel spooky funny casual outdoors,Visit a historic site
+Go to a haunted house,60,frugal,play spooky funny casual indoors
+Go people-watching,45,free,watch mindful casual anywhere
+Be a tourist in your own town,240,frugal,travel adventurous funny casual outdoors
+Take a day trip,480,frugal,travel adventurous casual anywhere
+Take a train somewhere,300,frugal,travel mindful casual anywhere,Take a day trip
+Go for a scenic drive,120,frugal,travel mindful casual anywhere,Take a day trip
+Visit a small town,360,frugal,travel casual outdoors,Take a day trip
+Go on a road trip,2880,costly,travel adventurous engaging anywhere
+Go to a meetup,120,free,try engaging indoors solo newpeople
+Volunteer,180,free,kindness engaging anywhere
+Volunteer at an animal shelter,120,free,kindness casual indoors,Volunteer
+Volunteer at a food bank,180,free,kindness engaging indoors,Volunteer
+Clean up a park,90,free,kindness clean move casual outdoors,Volunteer
+Give blood,60,free,kindness casual indoors
+Call an old friend,45,free,kindness nostalgic casual anywhere
+Make someone a gift,120,frugal,create kindness engaging home
+Teach someone a skill,60,free,kindness learn engaging anywhere partner friends
+Rearrange a room,120,free,organize create engaging home
+Declutter,90,free,organize clean engaging home
+Fix something,60,frugal,repair engaging home
+Tune up your bike,60,frugal,repair learn engaging home,Fix something
+Make a time capsule,60,free,create nostalgic engaging home
+Garden,90,free,create move mindful engaging outdoors
+Grow vegetables,120,frugal,create eat mindful engaging outdoors,Garden
+Plant flowers,60,frugal,create mindful casual outdoors,Garden
+Plant a tree,60,frugal,create kindness mindful engaging outdoors,Garden
+Grow herbs,30,frugal,create eat casual home,Garden
